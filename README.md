@@ -31,7 +31,7 @@ pip install torch scipy matplotlib
 bash data/download_data.sh                 # cylinder_nektar_wake.mat (24 MB) indirir
 python src/00_explore_data.py
 python src/01_burgers_forward.py           # ~6 dk CPU
-python src/02_navier_stokes_inverse.py --adam 10000 --lbfgs 5000   # ~1 saat CPU
+python src/02_navier_stokes_inverse.py --adam 1000 --lbfgs 15000   # ~1 saat CPU (GPU'da dakikalar)
 python src/02_navier_stokes_inverse.py --noise 0.01 --tag noisy     # gürültülü veri deneyi
 python src/03_plot_results.py
 ```
@@ -92,7 +92,21 @@ v_t + λ1(u v_x + v v_y) = −p_y + λ2(v_xx + v_yy)      gerçek: λ1 = 1, λ2 
 2. **Eğitilebilir fizik**: `λ1`, `λ2` birer `nn.Parameter`, ağırlıklarla birlikte öğrenilir.
 3. **Gizli basınç**: `p` için hiç veri yok; yalnızca momentum denklemi onu belirler (bir sabite kadar).
 
-%%NSRESULTS%%
+**Bu çalıştırmanın sonuçları** (CPU, 1 000 Adam + ~16 000 L-BFGS, 57 dk):
+
+| Büyüklük | Gerçek | PINN | Hata | Makale |
+|---|---|---|---|---|
+| λ1 | 1.000 | 0.9990 | %0.097 | %0.078 |
+| λ2 | 0.01000 | 0.01041 | %4.08 | %4.67 |
+| u alanı (t=10) | | | %0.33 | |
+| v alanı (t=10) | | | %1.24 | |
+| p alanı (veri yok!) | | | %1.67 (sabit kaydırılmış; ham %1039) | |
+
+> **Plato dersi:** Yalnız Adam (lr=1e-3) ile ilk denemede veri kaybı ~450'de takıldı (ağ sadece ortalama akışı öğrendi).
+> 1 000 Adam adımından sonra L-BFGS'e geçince plato ~2 500. adımda kırıldı. Bkz. `figures/02_ns_plateau.png`,
+> log: `results/ns_adam_only_attempt.log`.
+
+![Plato](figures/02_ns_plateau.png)
 
 ![λ yakınsaması](figures/02_ns_lambdas_clean.png)
 ![Alanlar](figures/02_ns_fields_clean.png)

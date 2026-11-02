@@ -37,6 +37,7 @@ code{font-family:var(--f-mono);font-size:.86em;background:color-mix(in srgb,var(
 .stack{display:flex;flex-direction:column;gap:18px}
 
 header.hero{display:grid;grid-template-columns:1.1fr 1fr;gap:32px;align-items:center;padding-block:48px 28px}
+header.hero > *{min-width:0}
 header.hero .lede{font-size:1.15rem;color:var(--muted)}
 .hero figure{margin:0}
 .hero img{border-radius:10px;width:100%;display:block;border:1px solid var(--line)}
@@ -130,7 +131,7 @@ footer{padding-block:32px;color:var(--muted);font-size:.9rem}
       <p>Sonra bu türevleri denkleme koyarız. Ağ denklemi tam sağlıyorsa sonuç sıfırdır; sıfır değilse bu <b>kalıntı (residual)</b> bir ceza olur. Eğitim, ölçüm hatası ile kalıntıyı birlikte küçültür.</p>
     </div>
     <div class="diagram" role="img" aria-label="PINN mimarisi: koordinatlar ağdan geçer, autograd ile türevler alınır, kalıntı ve veri kaybı toplanır">
-      <svg viewBox="0 0 900 340">
+      <svg viewBox="0 0 905 340">
         <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--muted)"/></marker></defs>
         <!-- inputs -->
         <text x="18" y="22" class="sm">GİRDİ</text>
@@ -146,7 +147,7 @@ footer{padding-block:32px;color:var(--muted);font-size:.9rem}
           <circle cx="200" cy="110" r="9" class="node"/><circle cx="200" cy="160" r="9" class="node"/><circle cx="200" cy="210" r="9" class="node"/>
           <text x="232" y="165" class="lbl">· · ·</text>
           <circle cx="280" cy="110" r="9" class="node"/><circle cx="280" cy="160" r="9" class="node"/><circle cx="280" cy="210" r="9" class="node"/>
-          <text x="215" y="272" text-anchor="middle" class="sm">8 gizli katman × 20 nöron, tanh</text>
+          <text x="215" y="240" text-anchor="middle" class="sm">8 gizli katman × 20 nöron, tanh</text>
           <text x="215" y="60" text-anchor="middle" class="sm">[-1,1]'e ölçekleme</text>
         </g>
         <!-- outputs -->
@@ -170,10 +171,10 @@ footer{padding-block:32px;color:var(--muted);font-size:.9rem}
         <rect x="690" y="84" width="190" height="62" rx="8" class="boxr"/><text x="785" y="108" text-anchor="middle" class="lbl">f_u, f_v</text><text x="785" y="128" text-anchor="middle" class="sm">NS momentum kalıntısı</text>
         <line x1="650" y1="160" x2="685" y2="205" class="arr" marker-end="url(#ah)"/>
         <rect x="690" y="175" width="190" height="62" rx="8" class="boxb"/><text x="785" y="199" text-anchor="middle" class="lbl">u − u_ölç, v − v_ölç</text><text x="785" y="219" text-anchor="middle" class="sm">5000 ölçüm noktası</text>
-        <line x1="785" y1="146" x2="785" y2="275" class="arr" style="stroke-dasharray:3 3"/><line x1="785" y1="237" x2="785" y2="275" class="arr" marker-end="url(#ah)"/>
+        <path d="M880 115 L893 115 L893 302 L884 302" class="arr" marker-end="url(#ah)"/><line x1="785" y1="237" x2="785" y2="275" class="arr" marker-end="url(#ah)"/>
         <rect x="610" y="280" width="270" height="44" rx="8" class="box"/><text x="745" y="307" text-anchor="middle" class="lbl">L = Σ veri² + Σ f²</text>
-        <path d="M610 302 C 300 330, 220 320, 215 252" class="arr" marker-end="url(#ah)" style="stroke-dasharray:5 4"/>
-        <text x="380" y="318" text-anchor="middle" class="sm">∂L/∂(W, b, λ) → Adam, sonra L-BFGS</text>
+        <path d="M610 302 L215 302 L215 256" class="arr" marker-end="url(#ah)" style="stroke-dasharray:5 4"/>
+        <text x="410" y="322" text-anchor="middle" class="sm">∂L/∂(W, b, λ) → Adam, sonra L-BFGS</text>
       </svg>
     </div>
     <div class="grid3">
@@ -306,18 +307,18 @@ loss = Σ(u_ölç-u)² + Σ(v_ölç-v)² + Σf_u² + Σf_v²     <span class="c"
     <div class="tablewrap"><table class="res">
       <thead><tr><th>Büyüklük</th><th>Gerçek</th><th>PINN</th><th>Hata</th><th>Makale (200k Adam + L-BFGS)</th></tr></thead>
       <tbody>
-        <tr><td>λ1 konveksiyon</td><td>1.000</td><td>%%L1%%</td><td>%%E1%%</td><td>%0.078</td></tr>
-        <tr><td>λ2 viskozite (1/Re)</td><td>0.01000</td><td>%%L2%%</td><td>%%E2%%</td><td>%4.67</td></tr>
-        <tr><td>u alanı, t = 10</td><td colspan="2">göreli L2</td><td>%%EU%%</td><td>—</td></tr>
-        <tr><td>v alanı, t = 10</td><td colspan="2">göreli L2</td><td>%%EV%%</td><td>—</td></tr>
-        <tr><td>p alanı (veri yok!)</td><td colspan="2">göreli L2, sabit kaydırma sonrası</td><td>%%EP%%</td><td>—</td></tr>
+        <tr><td>λ1 konveksiyon</td><td>1.000</td><td>0.9990</td><td>%0.097</td><td>%0.078</td></tr>
+        <tr><td>λ2 viskozite (1/Re)</td><td>0.01000</td><td>0.01041</td><td>%4.08</td><td>%4.67</td></tr>
+        <tr><td>u alanı, t = 10</td><td colspan="2">göreli L2</td><td>%0.33</td><td>—</td></tr>
+        <tr><td>v alanı, t = 10</td><td colspan="2">göreli L2</td><td>%1.24</td><td>—</td></tr>
+        <tr><td>p alanı (veri yok!)</td><td colspan="2">göreli L2, sabit kaydırma sonrası</td><td>%1.67 <span class="pill">ham: %1039</span></td><td>—</td></tr>
       </tbody>
     </table></div>
-    <p class="prose" style="font-size:.92rem;color:var(--muted)">Bütçe: CPU'da %%ITERS%%, toplam %%TIME%%. Makale 200 000 Adam + 50 000 L-BFGS adımı kullanıyor; daha uzun eğitimle λ2 hatası belirgin şekilde düşer. Makale tablosu: λ1 %0.078, λ2 %4.67 (temiz veri).</p>
+    <p class="prose" style="font-size:.92rem;color:var(--muted)">Bütçe: CPU'da 1 000 Adam + ~16 000 L-BFGS değerlendirmesi, toplam 57 dakika (4 çekirdek). Makale 200 000 Adam + 50 000 L-BFGS adımı kullanıyor; biz CPU bütçesi için kısa Adam ve uzun L-BFGS kullandık ve λ2 için makaleyle aynı düzeyde (hatta biraz daha iyi) bir sonuç aldık.</p>
     <figure class="plot"><img src="figures/02_ns_lambdas_clean.png" alt="λ1 ve λ2'nin eğitim boyunca gerçek değerlere yakınsaması ve kayıp eğrileri"><figcaption>λ1 hızla 1'e oturur: konveksiyon terimi hız alanının büyük ölçekli yapısını belirler, kolay görünür. λ2 = 0.01 küçük ve ikinci türevlerle çarpılıyor, sinyali zayıf, bu yüzden geç ve yavaş yakınsar. Dikey nokta çizgi: Adam → L-BFGS.</figcaption></figure>
     <div class="callout prose"><b>Bu oturumda yaşanan gerçek bir PINN dersi:</b> İlk denemede yalnız Adam ile 4000 adım eğittik ve veri kaybı ~450'de takıldı. Ağ sadece <i>ortalama akışı</i> öğrenmişti, girdaplar yoktu ve λ'lar sıfır civarında dolaşıyordu. Aynı ağı 1000 Adam adımından sonra L-BFGS'e verince plato ~2500. adımda kırıldı ve λ1 birden 0.8'e sıçradı. Orijinal makale bu platoyu 200 000 Adam adımıyla (GPU'da) aşıyor.</div>
     <figure class="plot"><img src="figures/02_ns_plateau.png" alt="Yalnız Adam ile Adam sonrası L-BFGS eğitiminin veri kaybı ve λ1 karşılaştırması"><figcaption>Sol: veri kaybı. Mavi eğri 450 civarında yatay kalıyor; turuncu eğri L-BFGS'te hızla düşüyor. Sağ: λ1'in aynı anda gerçek değere doğru sıçraması.</figcaption></figure>
-    <figure class="plot"><img src="figures/02_ns_fields_clean.png" alt="t=10 anında gerçek ve PINN u, v, p alanları ile hata haritaları"><figcaption>Sol: DNS, orta: PINN, sağ: mutlak hata. Alt satırdaki basınç ağın <b>hiç görmediği</b> bir alan; yapısı yalnızca Navier–Stokes'tan çıkarıldı. Karşılaştırmadan önce ortalamaları eşitledik çünkü p + C de denklemi sağlar.</figcaption></figure>
+    <figure class="plot"><img src="figures/02_ns_fields_clean.png" alt="t=10 anında gerçek ve PINN u, v, p alanları ile hata haritaları"><figcaption>Sol: DNS, orta: PINN, sağ: mutlak hata. Alt satırdaki basınç ağın <b>hiç görmediği</b> bir alan; yapısı yalnızca Navier–Stokes'tan çıkarıldı. Karşılaştırmadan önce ortalamaları eşitledik çünkü p + C de denklemi sağlar. Ağın seçtiği sabit gerçek basınçtan 1.38 kadar kaymıştı; kaydırmadan hesaplanan hata bu yüzden %1039 çıkıyor, kaydırınca %1.67.</figcaption></figure>
   </div>
 </section>
 
@@ -348,7 +349,7 @@ loss = Σ(u_ölç-u)² + Σ(v_ölç-v)² + Σf_u² + Σf_v²     <span class="c"
 bash data/download_data.sh                       <span class="c"># silindir verisi (24 MB)</span>
 python src/00_explore_data.py                    <span class="c"># figures/00_*</span>
 python src/01_burgers_forward.py                 <span class="c"># ~6 dk CPU</span>
-python src/02_navier_stokes_inverse.py --adam 10000 --lbfgs 5000   <span class="c"># ~1 saat CPU, GPU'da dakikalar</span>
+python src/02_navier_stokes_inverse.py --adam 1000 --lbfgs 15000   <span class="c"># ~1 saat CPU, GPU'da dakikalar</span>
 python src/02_navier_stokes_inverse.py --noise 0.01 --tag noisy     <span class="c"># %1 gürültülü veri</span>
 python src/03_plot_results.py</pre>
     <h3>Alıştırmalar (sırayla zorlaşır)</h3>

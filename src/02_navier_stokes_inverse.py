@@ -16,7 +16,7 @@ Veri: Nektar++ spektral/hp DNS çözümünden 5000 rastgele (x, y, t, u, v) öl�
      Bu yüzden p ancak bir sabit farkla (p + C) belirlenebilir.
 
 Orijinal: main/continuous_time_identification (Navier-Stokes)/NavierStokes.py
-Kullanım:  python src/02_navier_stokes_inverse.py [--adam N] [--lbfgs M] [--noise 0.01]
+Kullanım:  python src/02_navier_stokes_inverse.py [--adam 1000] [--lbfgs 15000] [--noise 0.01 --tag noisy]
 """
 import argparse, json, os, sys, time
 import numpy as np
@@ -27,8 +27,8 @@ sys.path.insert(0, os.path.dirname(__file__))
 from pinn_core import MLP, grad, grads, as_tensor
 
 ap = argparse.ArgumentParser()
-ap.add_argument("--adam", type=int, default=20000)   # orijinal: 200000 Adam (GPU)
-ap.add_argument("--lbfgs", type=int, default=10000)  # orijinal: 50000 L-BFGS
+ap.add_argument("--adam", type=int, default=1000)    # orijinal: 200000 Adam (GPU). CPU için kısa tutuldu
+ap.add_argument("--lbfgs", type=int, default=15000)  # orijinal: 50000 L-BFGS. Platoyu L-BFGS kırar
 ap.add_argument("--noise", type=float, default=0.0)  # orijinal 2. deney: 0.01 (%1)
 ap.add_argument("--tag", default="clean")
 args = ap.parse_args()
