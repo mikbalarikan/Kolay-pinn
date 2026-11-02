@@ -1,0 +1,373 @@
+<title>Kolay PINN Atölyesi</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: tek sütunlu "laboratuvar defteri"; sol kenarda ders numarası, geniş görseller sütundan taşabilir */
+:root{
+  --bg:#f3f6f8; --paper:#ffffff; --ink:#122230; --muted:#5a6b78; --line:#d6dee5;
+  --vort-r:#b8322f; --vort-b:#1f5f9e; --accent:#1f5f9e; --code-bg:#0f1b26; --code-fg:#dbe7f0;
+  --code-dim:#7f95a8; --code-key:#7cc4ff; --code-str:#ffb38a; --hl:#fff4d6;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0c141b; --paper:#121d27; --ink:#e3ecf2; --muted:#93a6b5; --line:#24333f;
+  --vort-r:#ef7a6f; --vort-b:#6fb1ef; --accent:#6fb1ef; --code-bg:#08111a; --code-fg:#dbe7f0;
+  --code-dim:#7f95a8; --code-key:#7cc4ff; --code-str:#ffb38a; --hl:#2b2a1c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0c141b; --paper:#121d27; --ink:#e3ecf2; --muted:#93a6b5; --line:#24333f;
+  --vort-r:#ef7a6f; --vort-b:#6fb1ef; --accent:#6fb1ef; --code-bg:#08111a; --code-fg:#dbe7f0;
+  --code-dim:#7f95a8; --code-key:#7cc4ff; --code-str:#ffb38a; --hl:#2b2a1c; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.62;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 64px}
+.wrap{max-width:980px;margin:0 auto}
+.prose{max-width:68ch}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.12;margin:0}
+h1{font-size:clamp(2.2rem,6vw,3.6rem);font-weight:800;letter-spacing:-.02em}
+h2{font-size:clamp(1.6rem,3.6vw,2.2rem);font-weight:700;letter-spacing:-.01em}
+h3{font-size:1.18rem;font-weight:700}
+p{margin:0}
+a{color:var(--accent)}
+code{font-family:var(--f-mono);font-size:.86em;background:color-mix(in srgb,var(--accent) 10%,transparent);padding:.08em .35em;border-radius:4px}
+.eyebrow{font-family:var(--f-mono);font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.stack{display:flex;flex-direction:column;gap:18px}
+
+header.hero{display:grid;grid-template-columns:1.1fr 1fr;gap:32px;align-items:center;padding-block:48px 28px}
+header.hero .lede{font-size:1.15rem;color:var(--muted)}
+.hero figure{margin:0}
+.hero img{border-radius:10px;width:100%;display:block;border:1px solid var(--line)}
+.hero figcaption{font-size:.8rem;color:var(--muted);margin-top:6px;font-family:var(--f-mono)}
+.eq{font-family:var(--f-mono);font-size:.92rem;background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow-x:auto;white-space:pre;line-height:1.5}
+.eq .r{color:var(--vort-r);font-weight:600}.eq .b{color:var(--vort-b);font-weight:600}
+
+nav.toc{display:flex;flex-wrap:wrap;gap:8px;padding-block:8px 24px;border-bottom:1px solid var(--line)}
+nav.toc a{font-family:var(--f-mono);font-size:.8rem;text-decoration:none;color:var(--ink);border:1px solid var(--line);padding:5px 10px;border-radius:999px;background:var(--paper)}
+nav.toc a:hover,nav.toc a:focus-visible{border-color:var(--accent);outline:none}
+
+section.lesson{display:grid;grid-template-columns:88px minmax(0,1fr);gap:24px;padding-block:52px;border-bottom:1px solid var(--line)}
+.num{font-family:var(--f-display);font-weight:800;font-size:3.4rem;line-height:1;color:transparent;-webkit-text-stroke:1.5px var(--vort-b)}
+.lesson .body{display:flex;flex-direction:column;gap:20px;min-width:0}
+
+figure.plot{margin:0;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px;overflow-x:auto}
+figure.plot img{display:block;width:100%;min-width:560px;border-radius:4px;background:#fff}
+figure.plot figcaption{font-size:.86rem;color:var(--muted);padding:8px 4px 2px}
+
+pre.code{margin:0;background:var(--code-bg);color:var(--code-fg);font-family:var(--f-mono);font-size:.82rem;line-height:1.6;padding:16px 18px;border-radius:10px;overflow-x:auto}
+pre.code .c{color:var(--code-dim)} pre.code .k{color:var(--code-key)} pre.code .s{color:var(--code-str)}
+pre.code .mark{background:color-mix(in srgb,var(--code-str) 22%,transparent);border-radius:3px}
+.codehead{font-family:var(--f-mono);font-size:.75rem;color:var(--muted);margin-bottom:-12px}
+
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.note{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:16px 18px;display:flex;flex-direction:column;gap:6px}
+.note h3{font-size:1.02rem}
+.note p{font-size:.95rem;color:var(--muted)}
+.callout{background:var(--hl);border-left:4px solid var(--vort-r);padding:14px 18px;border-radius:0 8px 8px 0}
+
+.tree{font-family:var(--f-mono);font-size:.82rem;line-height:1.7;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:16px 18px;overflow-x:auto;white-space:pre}
+.tree .d{color:var(--vort-b);font-weight:600}.tree .h{color:var(--vort-r);font-weight:600}.tree .m{color:var(--muted)}
+
+table.res{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:.95rem}
+.tablewrap{overflow-x:auto;background:var(--paper);border:1px solid var(--line);border-radius:10px}
+table.res th,table.res td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--line)}
+table.res th{font-family:var(--f-mono);font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+table.res tr:last-child td{border-bottom:0}
+.pill{font-family:var(--f-mono);font-size:.75rem;padding:2px 8px;border-radius:999px;background:color-mix(in srgb,var(--vort-b) 15%,transparent);color:var(--vort-b)}
+
+.diagram{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto}
+.diagram svg{display:block;min-width:720px;width:100%;height:auto}
+.diagram text{font-family:var(--f-mono);fill:var(--ink)}
+.diagram .lbl{font-size:13px}.diagram .sm{font-size:11px;fill:var(--muted)}
+.diagram .box{fill:var(--bg);stroke:var(--line);stroke-width:1.5}
+.diagram .boxb{fill:color-mix(in srgb,var(--vort-b) 12%,var(--paper));stroke:var(--vort-b);stroke-width:1.5}
+.diagram .boxr{fill:color-mix(in srgb,var(--vort-r) 12%,var(--paper));stroke:var(--vort-r);stroke-width:1.5}
+.diagram .arr{stroke:var(--muted);stroke-width:1.5;fill:none}
+.diagram .node{fill:var(--paper);stroke:var(--vort-b);stroke-width:1.5}
+.diagram .edge{stroke:var(--line);stroke-width:1}
+ol.steps{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:8px}
+footer{padding-block:32px;color:var(--muted);font-size:.9rem}
+
+@media (max-width:760px){
+  header.hero{grid-template-columns:1fr;padding-block:28px 12px}
+  section.lesson{grid-template-columns:1fr;gap:8px;padding-block:36px}
+  .num{font-size:2.4rem}
+  .grid2,.grid3{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+</style>
+
+<div class="wrap">
+<header class="hero">
+  <div class="stack">
+    <span class="eyebrow">Atölye · PINN × CFD · PyTorch</span>
+    <h1>Kolay PINN Atölyesi</h1>
+    <p class="lede">Fizik-bilgili sinir ağlarını (PINN) en çok yıldız alan ve en çok atıf yapılan PINN deposu üzerinden adım adım öğreniyoruz: <a href="https://github.com/maziarraissi/PINNs">maziarraissi/PINNs</a>. Kodlar bu bulut oturumunda PyTorch'a taşındı, eğitildi ve aşağıdaki tüm grafikler bu çalıştırmalardan geliyor.</p>
+    <div class="eq">Kayıp = <span class="b">‖veri − ağ‖²</span>  +  <span class="r">‖PDE kalıntısı‖²</span></div>
+  </div>
+  <figure>
+    <img src="figures/00_vorticity.gif" alt="Silindir arkasında periyodik olarak kopan girdapların animasyonu">
+    <figcaption>Re = 100, silindir arkası girdaplık ω(x, y, t). Ders 2'de bu akışın fiziğini veriden geri çıkaracağız.</figcaption>
+  </figure>
+</header>
+
+<nav class="toc" aria-label="İçindekiler">
+  <a href="#fikir">1 · Fikir</a><a href="#repo">2 · Depo yapısı</a><a href="#veri">3 · Veri</a>
+  <a href="#burgers">4 · Burgers</a><a href="#ns">5 · Navier–Stokes</a><a href="#mantik">6 · Kod mantığı</a>
+  <a href="#calistir">7 · Çalıştır & alıştırmalar</a>
+</nav>
+
+<!-- ============ 1 ============ -->
+<section class="lesson" id="fikir">
+  <div class="num">1</div>
+  <div class="body">
+    <h2>PINN fikri: ağ hem veriye hem denkleme uysun</h2>
+    <div class="prose stack">
+      <p>Klasik CFD'de (sonlu hacim, sonlu eleman) alanı ağlara böler, denklemi ayrıklaştırır, büyük bir lineer sistem çözersiniz. PINN'de çözüm doğrudan bir sinir ağıdır: koordinatları alır, alanı verir. <code>(x, y, t) → (u, v, p)</code>. Ağ sürekli ve türevlenebilir olduğu için <code>∂u/∂x</code>, <code>∂²u/∂y²</code> gibi türevleri <b>otomatik türev (autograd)</b> ile tam olarak hesaplarız. Mesh yok, sonlu fark yok.</p>
+      <p>Sonra bu türevleri denkleme koyarız. Ağ denklemi tam sağlıyorsa sonuç sıfırdır; sıfır değilse bu <b>kalıntı (residual)</b> bir ceza olur. Eğitim, ölçüm hatası ile kalıntıyı birlikte küçültür.</p>
+    </div>
+    <div class="diagram" role="img" aria-label="PINN mimarisi: koordinatlar ağdan geçer, autograd ile türevler alınır, kalıntı ve veri kaybı toplanır">
+      <svg viewBox="0 0 900 340">
+        <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--muted)"/></marker></defs>
+        <!-- inputs -->
+        <text x="18" y="22" class="sm">GİRDİ</text>
+        <g class="lbl"><circle cx="45" cy="95" r="20" class="node"/><text x="45" y="100" text-anchor="middle" class="lbl">x</text>
+        <circle cx="45" cy="160" r="20" class="node"/><text x="45" y="165" text-anchor="middle" class="lbl">y</text>
+        <circle cx="45" cy="225" r="20" class="node"/><text x="45" y="230" text-anchor="middle" class="lbl">t</text></g>
+        <!-- hidden layers -->
+        <g>
+          <line x1="65" y1="95" x2="140" y2="110" class="edge"/><line x1="65" y1="160" x2="140" y2="160" class="edge"/><line x1="65" y1="225" x2="140" y2="210" class="edge"/>
+          <line x1="65" y1="95" x2="140" y2="210" class="edge"/><line x1="65" y1="225" x2="140" y2="110" class="edge"/>
+          <rect x="120" y="70" width="190" height="180" rx="10" class="box"/>
+          <circle cx="150" cy="110" r="9" class="node"/><circle cx="150" cy="160" r="9" class="node"/><circle cx="150" cy="210" r="9" class="node"/>
+          <circle cx="200" cy="110" r="9" class="node"/><circle cx="200" cy="160" r="9" class="node"/><circle cx="200" cy="210" r="9" class="node"/>
+          <text x="232" y="165" class="lbl">· · ·</text>
+          <circle cx="280" cy="110" r="9" class="node"/><circle cx="280" cy="160" r="9" class="node"/><circle cx="280" cy="210" r="9" class="node"/>
+          <text x="215" y="272" text-anchor="middle" class="sm">8 gizli katman × 20 nöron, tanh</text>
+          <text x="215" y="60" text-anchor="middle" class="sm">[-1,1]'e ölçekleme</text>
+        </g>
+        <!-- outputs -->
+        <line x1="310" y1="160" x2="345" y2="125" class="arr" marker-end="url(#ah)"/><line x1="310" y1="160" x2="345" y2="200" class="arr" marker-end="url(#ah)"/>
+        <rect x="350" y="105" width="64" height="38" rx="8" class="boxb"/><text x="382" y="129" text-anchor="middle" class="lbl">ψ</text>
+        <rect x="350" y="180" width="64" height="38" rx="8" class="boxb"/><text x="382" y="204" text-anchor="middle" class="lbl">p</text>
+        <text x="382" y="92" text-anchor="middle" class="sm">AĞ ÇIKTISI</text>
+        <!-- autograd -->
+        <line x1="414" y1="124" x2="455" y2="124" class="arr" marker-end="url(#ah)"/><line x1="414" y1="199" x2="455" y2="199" class="arr" marker-end="url(#ah)"/>
+        <rect x="460" y="70" width="190" height="180" rx="10" class="box"/>
+        <text x="555" y="60" text-anchor="middle" class="sm">AUTOGRAD (tam türev)</text>
+        <text x="475" y="100" class="lbl">u = ∂ψ/∂y</text><text x="475" y="122" class="lbl">v = −∂ψ/∂x</text>
+        <text x="475" y="150" class="lbl">u_t u_x u_y</text><text x="475" y="172" class="lbl">u_xx u_yy</text>
+        <text x="475" y="194" class="lbl">v_t … v_yy</text><text x="475" y="216" class="lbl">p_x p_y</text>
+        <text x="475" y="238" class="sm">∇·u = 0 kendiliğinden</text>
+        <!-- lambdas -->
+        <rect x="690" y="10" width="190" height="44" rx="8" class="boxr"/><text x="785" y="30" text-anchor="middle" class="lbl">λ1, λ2</text><text x="785" y="46" text-anchor="middle" class="sm">öğrenilen fizik</text>
+        <line x1="785" y1="54" x2="785" y2="80" class="arr" marker-end="url(#ah)"/>
+        <!-- residual + data -->
+        <line x1="650" y1="160" x2="685" y2="115" class="arr" marker-end="url(#ah)"/>
+        <rect x="690" y="84" width="190" height="62" rx="8" class="boxr"/><text x="785" y="108" text-anchor="middle" class="lbl">f_u, f_v</text><text x="785" y="128" text-anchor="middle" class="sm">NS momentum kalıntısı</text>
+        <line x1="650" y1="160" x2="685" y2="205" class="arr" marker-end="url(#ah)"/>
+        <rect x="690" y="175" width="190" height="62" rx="8" class="boxb"/><text x="785" y="199" text-anchor="middle" class="lbl">u − u_ölç, v − v_ölç</text><text x="785" y="219" text-anchor="middle" class="sm">5000 ölçüm noktası</text>
+        <line x1="785" y1="146" x2="785" y2="275" class="arr" style="stroke-dasharray:3 3"/><line x1="785" y1="237" x2="785" y2="275" class="arr" marker-end="url(#ah)"/>
+        <rect x="610" y="280" width="270" height="44" rx="8" class="box"/><text x="745" y="307" text-anchor="middle" class="lbl">L = Σ veri² + Σ f²</text>
+        <path d="M610 302 C 300 330, 220 320, 215 252" class="arr" marker-end="url(#ah)" style="stroke-dasharray:5 4"/>
+        <text x="380" y="318" text-anchor="middle" class="sm">∂L/∂(W, b, λ) → Adam, sonra L-BFGS</text>
+      </svg>
+    </div>
+    <div class="grid3">
+      <div class="note"><h3>İleri problem</h3><p>Denklem ve sınır/başlangıç koşulları biliniyor, alan bilinmiyor. Ders 4: Burgers.</p></div>
+      <div class="note"><h3>Ters problem</h3><p>Dağınık ölçümler var, denklemdeki katsayılar bilinmiyor. Ders 5: Navier–Stokes.</p></div>
+      <div class="note"><h3>Gizli alan</h3><p>Hiç ölçülmeyen bir büyüklüğü (basınç) yalnızca fizikten çıkarmak. Ders 5'in sürprizi.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2 ============ -->
+<section class="lesson" id="repo">
+  <div class="num">2</div>
+  <div class="body">
+    <h2>Depo yapısı: nereye bakmalı?</h2>
+    <p class="prose">Orijinal depo, <i>Journal of Computational Physics</i> 2019 makalesinin (Raissi, Perdikaris, Karniadakis) resmi kodudur. Her örnek tek, kendi kendine yeten bir betiktir: veri yükle → ağ kur → kayıp tanımla → eğit → çiz. Dört klasör adı iki eksenden gelir: <b>continuous / discrete time</b> (zamanı ağa girdi olarak mı veriyoruz, yoksa Runge–Kutta adımlarıyla mı ilerliyoruz) ve <b>inference / identification</b> (ileri / ters problem).</p>
+    <div class="grid2">
+<div class="tree"><span class="m"># maziarraissi/PINNs (orijinal, TF 1.x)</span>
+<span class="d">main/</span>
+ ├─ <span class="d">Data/</span>  <span class="m">.mat veri dosyaları</span>
+ │   └─ <span class="h">cylinder_nektar_wake.mat</span> <span class="m">24 MB</span>
+ ├─ <span class="d">continuous_time_identification (Navier-Stokes)/</span>
+ │   └─ <span class="h">NavierStokes.py</span>  <span class="m">★ CFD kalbi</span>
+ ├─ continuous_time_inference (Schrodinger)/
+ ├─ discrete_time_identification (KdV)/
+ └─ discrete_time_inference (AC)/
+<span class="d">appendix/</span>
+ ├─ Data/burgers_shock.mat
+ ├─ <span class="d">continuous_time_inference (Burgers)/</span>
+ │   └─ <span class="h">Burgers.py</span>  <span class="m">★ ilk okunacak</span>
+ └─ … (Burgers'in diğer 3 varyantı)
+<span class="d">Utilities/</span>
+ ├─ plotting.py  <span class="m">LaTeX şekil ayarları</span>
+ └─ IRK_weights/ <span class="m">discrete-time için Butcher tabloları</span></div>
+<div class="tree"><span class="m"># Kolay-pinn (bu repo, PyTorch)</span>
+<span class="d">src/</span>
+ ├─ <span class="h">pinn_core.py</span>   <span class="m">MLP + grad yardımcıları</span>
+ ├─ 00_explore_data.py   <span class="m">veriyi tanı</span>
+ ├─ <span class="h">01_burgers_forward.py</span>
+ ├─ <span class="h">02_navier_stokes_inverse.py</span>
+ └─ 03_plot_results.py
+<span class="d">data/</span>
+ ├─ burgers_shock.mat
+ └─ download_data.sh  <span class="m">silindir verisini indirir</span>
+<span class="d">figures/</span>  <span class="m">bu sayfadaki görseller</span>
+<span class="d">results/</span>  <span class="m">eğitim logları (.json, .log)</span>
+README.md · ders.html
+
+<span class="m">Orijinaldeki her betikte tekrarlanan
+xavier_init / initialize_NN / neural_net
+→ pinn_core.MLP içinde tek yerde.</span></div>
+    </div>
+    <div class="callout prose"><b>Neden PyTorch'a taşıdık?</b> Orijinal kod <code>tf.placeholder</code>, <code>tf.Session</code> ve <code>tf.contrib.opt.ScipyOptimizerInterface</code> kullanır; bunlar TensorFlow 2'de yoktur ve Python 3.13'te kurulamaz. Matematik ve mimari birebir korundu, satır satır karşılıkları kod yorumlarında yazıyor.</div>
+  </div>
+</section>
+
+<!-- ============ 3 ============ -->
+<section class="lesson" id="veri">
+  <div class="num">3</div>
+  <div class="body">
+    <h2>Veriyi tanı: silindir arkası akış</h2>
+    <p class="prose">D = 1 çaplı bir silindire U∞ = 1 hızla akış çarpıyor, Re = 100. Bu Reynolds sayısında silindirin arkasında girdaplar sırayla bir üstten bir alttan kopar: <b>Kármán girdap caddesi</b>. Veri, Nektar++ spektral/hp çözücüsüyle elde edilmiş yüksek doğruluklu bir DNS. PINN için silindirin arkasındaki <code>[1, 8] × [−2, 2]</code> dikdörtgeni alınmış: 5000 uzay noktası × 200 zaman adımı (Δt = 0.1) = <b>1 milyon</b> nokta.</p>
+    <figure class="plot"><img src="figures/00_geometry.png" alt="Silindir, giriş akışı ve kesilen eğitim bölgesi"><figcaption>Kesik çizgili kutu PINN'in gördüğü bölge. Siyah noktalar ölçüm konumlarından örnekler. Silindirin kendisi bölgenin dışında kalıyor, yani sınır koşulu da yok.</figcaption></figure>
+    <figure class="plot"><img src="figures/00_wake_fields.png" alt="t=10 anında u, v, p ve girdaplık alanları"><figcaption><code>.mat</code> içeriği: <code>X_star</code> (5000×2), <code>t</code> (200×1), <code>U_star</code> (5000×2×200), <code>p_star</code> (5000×200). Basınç dosyada var ama <b>eğitimde hiç kullanılmıyor</b>, yalnızca sonunda karşılaştırma için.</figcaption></figure>
+    <figure class="plot"><img src="figures/00_timeseries.png" alt="Tek bir noktada u, v, p zaman serisi"><figcaption>Tek bir noktadaki sinyal periyodik: akış kararlı bir limit döngüsünde. Bu düzenlilik, küçük bir ağın tüm uzay-zamanı öğrenebilmesinin bir sebebi.</figcaption></figure>
+  </div>
+</section>
+
+<!-- ============ 4 ============ -->
+<section class="lesson" id="burgers">
+  <div class="num">4</div>
+  <div class="body">
+    <h2>Isınma: Burgers denklemi (ileri problem)</h2>
+    <div class="eq">u_t + u·u_x − ν·u_xx = 0,   ν = 0.01/π,   x∈[−1,1], t∈[0,1]
+u(0,x) = −sin(πx),   u(t,±1) = 0</div>
+    <p class="prose">Burgers, Navier–Stokes'un tek boyutlu küçük kardeşidir: <span style="color:var(--vort-b);font-weight:700">u·u_x</span> taşınım (konveksiyon), <span style="color:var(--vort-r);font-weight:700">ν·u_xx</span> viskoz difüzyon. Viskozite çok küçük olduğundan t ≈ 0.4'ten sonra x = 0'da neredeyse süreksiz bir <b>şok</b> oluşur. Ağa yalnızca <b>100</b> sınır/başlangıç noktası veriyoruz; geri kalan her şeyi 10 000 etiketsiz <b>kollokasyon noktası</b> üzerindeki fizik kaybı öğretiyor.</p>
+    <p class="codehead">src/01_burgers_forward.py · kalbi 10 satır</p>
+<pre class="code"><span class="k">def</span> net_f(x, t):
+    <span class="c">"""PDE kalıntısı. Ağ denklemi tam sağlıyorsa f = 0."""</span>
+    u    = net_u(x, t)
+    u_t  = grad(u, t)          <span class="c"># autograd: ∂u/∂t</span>
+    u_x  = grad(u, x)
+    u_xx = grad(u_x, x)        <span class="c"># türevin türevi → create_graph=True şart</span>
+    <span class="k">return</span> <span class="mark">u_t + u * u_x - nu * u_xx</span>
+
+<span class="k">def</span> loss_fn():
+    mse_u = mean((u_train - net_u(x_u, t_u))**2)   <span class="c"># 100 IC/BC noktası</span>
+    mse_f = mean(net_f(x_f, t_f)**2)               <span class="c"># 10 000 fizik noktası (etiketsiz)</span>
+    <span class="k">return</span> mse_u + mse_f</pre>
+    <figure class="plot"><img src="figures/01_burgers_result.png" alt="Burgers PINN sonucu: tahmin ısı haritası, üç zaman kesiti, hata haritası ve kayıp eğrisi"><figcaption>Üstte: PINN tahmini; × işaretleri yalnızca kenarlarda. Ortada: şok anlarında tam çözüm ile PINN üst üste biniyor. Altta: hata şok çizgisinde toplanıyor (tanh ağları keskin süreksizlikleri zor temsil eder). Sağ altta: Adam'dan L-BFGS'e geçince kaybın nasıl dik düştüğüne bakın. Bu çalıştırma: <b>göreli L2 hata %1.05</b>, CPU'da 5.6 dk.</figcaption></figure>
+  </div>
+</section>
+
+<!-- ============ 5 ============ -->
+<section class="lesson" id="ns">
+  <div class="num">5</div>
+  <div class="body">
+    <h2>Asıl iş: Navier–Stokes'u veriden keşfet</h2>
+    <div class="eq">u_t + <span class="r">λ1</span>(u·u_x + v·u_y) = −p_x + <span class="r">λ2</span>(u_xx + u_yy)
+v_t + <span class="r">λ1</span>(u·v_x + v·v_y) = −p_y + <span class="r">λ2</span>(v_xx + v_yy)
+gerçek:  λ1 = 1,   λ2 = 1/Re = 0.01</div>
+    <p class="prose">Senaryo: elimizde 1 milyon noktanın yalnızca <b>%0.5'i</b> kadar (5000) dağınık hız ölçümü var, PIV deneyi gibi düşünün. Denklemin biçimini biliyoruz ama katsayılarını bilmiyoruz. Basınç hiç ölçülmemiş. PINN'den hem λ1, λ2'yi hem de tüm basınç alanını istiyoruz. Bunu mümkün kılan üç fikir var:</p>
+    <div class="grid3">
+      <div class="note"><h3>① Akım fonksiyonu ψ</h3><p>Ağ u, v yerine ψ üretir. u = ψ_y, v = −ψ_x tanımıyla u_x + v_y = ψ_yx − ψ_xy = 0 olur. Süreklilik (kütle korunumu) kayba hiç girmeden <b>tam</b> sağlanır.</p></div>
+      <div class="note"><h3>② Eğitilebilir fizik</h3><p>λ1, λ2 sıfırdan başlayan iki <code>nn.Parameter</code>. Ağ ağırlıklarıyla aynı optimizasyona girerler. Veriye uyan ve denklemi sağlayan tek tutarlı ikili gerçek değerlerdir.</p></div>
+      <div class="note"><h3>③ Gizli basınç</h3><p>p'nin kayıpta tek göründüğü yer p_x, p_y. Momentum dengesini kapatmak için ağ p'yi kendisi bulmak zorunda. Yalnız gradyanı belirlendiği için p <b>bir sabite kadar</b> bilinir.</p></div>
+    </div>
+    <p class="codehead">src/02_navier_stokes_inverse.py · net_NS</p>
+<pre class="code">lambda_1 = nn.Parameter(torch.zeros(1))      <span class="c"># bilinmeyen fizik, 0'dan başlar</span>
+lambda_2 = nn.Parameter(torch.zeros(1))
+
+<span class="k">def</span> net_NS(x, y, t):
+    psi, p = net(cat([x, y, t], 1)).split(1, dim=1)
+    psi_x, psi_y = grads(psi, x, y)
+    <span class="mark">u, v = psi_y, -psi_x</span>                     <span class="c"># ∇·u = 0 bedava</span>
+
+    u_x, u_y, u_t = grads(u, x, y, t)
+    v_x, v_y, v_t = grads(v, x, y, t)
+    u_xx, u_yy = grad(u_x, x), grad(u_y, y)
+    v_xx, v_yy = grad(v_x, x), grad(v_y, y)
+    p_x, p_y   = grads(p, x, y)
+
+    f_u = u_t + <span class="mark">lambda_1</span>*(u*u_x + v*u_y) + p_x - <span class="mark">lambda_2</span>*(u_xx + u_yy)
+    f_v = v_t + <span class="mark">lambda_1</span>*(u*v_x + v*v_y) + p_y - <span class="mark">lambda_2</span>*(v_xx + v_yy)
+    <span class="k">return</span> u, v, p, f_u, f_v
+
+loss = Σ(u_ölç-u)² + Σ(v_ölç-v)² + Σf_u² + Σf_v²     <span class="c"># orijinal: reduce_sum</span></pre>
+
+    <h3>Sonuçlar (bu oturumdaki çalıştırma)</h3>
+    <div class="tablewrap"><table class="res">
+      <thead><tr><th>Büyüklük</th><th>Gerçek</th><th>PINN</th><th>Hata</th><th>Makale (200k Adam + L-BFGS)</th></tr></thead>
+      <tbody>
+        <tr><td>λ1 konveksiyon</td><td>1.000</td><td>%%L1%%</td><td>%%E1%%</td><td>%0.078</td></tr>
+        <tr><td>λ2 viskozite (1/Re)</td><td>0.01000</td><td>%%L2%%</td><td>%%E2%%</td><td>%4.67</td></tr>
+        <tr><td>u alanı, t = 10</td><td colspan="2">göreli L2</td><td>%%EU%%</td><td>—</td></tr>
+        <tr><td>v alanı, t = 10</td><td colspan="2">göreli L2</td><td>%%EV%%</td><td>—</td></tr>
+        <tr><td>p alanı (veri yok!)</td><td colspan="2">göreli L2, sabit kaydırma sonrası</td><td>%%EP%%</td><td>—</td></tr>
+      </tbody>
+    </table></div>
+    <p class="prose" style="font-size:.92rem;color:var(--muted)">Bütçe: CPU'da %%ITERS%%, toplam %%TIME%%. Makale 200 000 Adam + 50 000 L-BFGS adımı kullanıyor; daha uzun eğitimle λ2 hatası belirgin şekilde düşer. Makale tablosu: λ1 %0.078, λ2 %4.67 (temiz veri).</p>
+    <figure class="plot"><img src="figures/02_ns_lambdas_clean.png" alt="λ1 ve λ2'nin eğitim boyunca gerçek değerlere yakınsaması ve kayıp eğrileri"><figcaption>λ1 hızla 1'e oturur: konveksiyon terimi hız alanının büyük ölçekli yapısını belirler, kolay görünür. λ2 = 0.01 küçük ve ikinci türevlerle çarpılıyor, sinyali zayıf, bu yüzden geç ve yavaş yakınsar. Dikey nokta çizgi: Adam → L-BFGS.</figcaption></figure>
+    <div class="callout prose"><b>Bu oturumda yaşanan gerçek bir PINN dersi:</b> İlk denemede yalnız Adam ile 4000 adım eğittik ve veri kaybı ~450'de takıldı. Ağ sadece <i>ortalama akışı</i> öğrenmişti, girdaplar yoktu ve λ'lar sıfır civarında dolaşıyordu. Aynı ağı 1000 Adam adımından sonra L-BFGS'e verince plato ~2500. adımda kırıldı ve λ1 birden 0.8'e sıçradı. Orijinal makale bu platoyu 200 000 Adam adımıyla (GPU'da) aşıyor.</div>
+    <figure class="plot"><img src="figures/02_ns_plateau.png" alt="Yalnız Adam ile Adam sonrası L-BFGS eğitiminin veri kaybı ve λ1 karşılaştırması"><figcaption>Sol: veri kaybı. Mavi eğri 450 civarında yatay kalıyor; turuncu eğri L-BFGS'te hızla düşüyor. Sağ: λ1'in aynı anda gerçek değere doğru sıçraması.</figcaption></figure>
+    <figure class="plot"><img src="figures/02_ns_fields_clean.png" alt="t=10 anında gerçek ve PINN u, v, p alanları ile hata haritaları"><figcaption>Sol: DNS, orta: PINN, sağ: mutlak hata. Alt satırdaki basınç ağın <b>hiç görmediği</b> bir alan; yapısı yalnızca Navier–Stokes'tan çıkarıldı. Karşılaştırmadan önce ortalamaları eşitledik çünkü p + C de denklemi sağlar.</figcaption></figure>
+  </div>
+</section>
+
+<!-- ============ 6 ============ -->
+<section class="lesson" id="mantik">
+  <div class="num">6</div>
+  <div class="body">
+    <h2>Kodlama mantığı: bilmen gereken 8 detay</h2>
+    <div class="grid2">
+      <div class="note"><h3>Giriş normalizasyonu</h3><p><code>H = 2(X − lb)/(ub − lb) − 1</code>. NS'de x ∈ [1,8], t ∈ [0,20]; ölçeklemeden tanh doyar ve gradyan kaybolur. İlk satır, en önemli satır.</p></div>
+      <div class="note"><h3>tanh, ReLU değil</h3><p>ReLU'nun ikinci türevi her yerde 0'dır, u_xx hep sıfır çıkar. PINN aktivasyonu en az PDE mertebesi kadar türevlenebilir olmalı.</p></div>
+      <div class="note"><h3>create_graph=True</h3><p>Türevin türevini almak ve sonra kaybın ağırlıklara göre gradyanını hesaplamak için grafı korur. TF1'de <code>tf.gradients</code> bunu otomatik yapıyordu.</p></div>
+      <div class="note"><h3>Kollokasyon noktaları</h3><p>Fizik kaybı etiket istemez, alanın herhangi bir yerine serpiştirilir. Burgers'te 10 000 nokta. Orijinal Latin Hypercube (<code>pyDOE.lhs</code>) kullanır.</p></div>
+      <div class="note"><h3>Adam → L-BFGS</h3><p>Adam kaba bölgeyi bulur, L-BFGS (yarı-Newton) ince ayar yapar. Tam-yığın (full-batch) ve deterministik kayıp gerektirir. Kayıp eğrilerindeki kırılma buradan.</p></div>
+      <div class="note"><h3>sum ile mean farkı</h3><p>NS kodu <code>reduce_sum</code>, Burgers <code>reduce_mean</code> kullanır. Sum, kaybı 5000 kat büyütür; Adam ölçekten büyük ölçüde etkilenmez ama L-BFGS toleransları etkilenir.</p></div>
+      <div class="note"><h3>Kayıp dengesi</h3><p>Veri ve fizik terimleri eşit ağırlıklı toplanıyor. Zor problemlerde bir terim diğerini bastırır; modern çözüm: uyarlanabilir ağırlıklar (NTK, GradNorm, SA-PINN).</p></div>
+      <div class="note"><h3>Basınç ayarı</h3><p>Hiçbir yerde p'ye referans değer verilmediği için ağ rastgele bir sabit seçer. Değerlendirmede ortalamayı eşitlemek bu yüzden meşru.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 7 ============ -->
+<section class="lesson" id="calistir">
+  <div class="num">7</div>
+  <div class="body">
+    <h2>Kendin çalıştır, sonra boz</h2>
+<pre class="code">pip install torch scipy matplotlib
+bash data/download_data.sh                       <span class="c"># silindir verisi (24 MB)</span>
+python src/00_explore_data.py                    <span class="c"># figures/00_*</span>
+python src/01_burgers_forward.py                 <span class="c"># ~6 dk CPU</span>
+python src/02_navier_stokes_inverse.py --adam 10000 --lbfgs 5000   <span class="c"># ~1 saat CPU, GPU'da dakikalar</span>
+python src/02_navier_stokes_inverse.py --noise 0.01 --tag noisy     <span class="c"># %1 gürültülü veri</span>
+python src/03_plot_results.py</pre>
+    <h3>Alıştırmalar (sırayla zorlaşır)</h3>
+    <ol class="steps prose">
+      <li>Burgers'te <code>torch.tanh</code> yerine <code>torch.relu</code> kullan. Kalıntı neden sıfıra gitmiyor?</li>
+      <li>Burgers'te kollokasyon sayısını 10 000'den 500'e indir. Hata haritası nerede bozuluyor?</li>
+      <li>NS'de giriş normalizasyon satırını sil ve λ eğrilerini karşılaştır.</li>
+      <li>NS'de <code>N_train</code>'i 1000'e indir. λ2 hala bulunuyor mu?</li>
+      <li>ψ hilesini kaldır: ağ doğrudan (u, v, p) üretsin ve kayba <code>(u_x + v_y)²</code> ekle. Hangisi daha iyi?</li>
+      <li><code>--noise 0.01</code> ile çalıştır; makalede λ2 hatası %4.67 → %5.70 oluyor.</li>
+    </ol>
+    <h3>Sonraki duraklar</h3>
+    <div class="grid3">
+      <div class="note"><h3>DeepXDE</h3><p>PINN kütüphanesi; geometri, sınır koşulu ve örnekleme hazır. <a href="https://github.com/lululxvi/deepxde">lululxvi/deepxde</a></p></div>
+      <div class="note"><h3>NVIDIA PhysicsNeMo</h3><p>Endüstriyel ölçek, 3B CFD, türbülans, çoklu GPU. <a href="https://github.com/NVIDIA/physicsnemo">NVIDIA/physicsnemo</a></p></div>
+      <div class="note"><h3>pinns-torch</h3><p>Orijinal yazarın önerdiği modern PyTorch sürümü. <a href="https://github.com/rezaakb/pinns-torch">rezaakb/pinns-torch</a></p></div>
+    </div>
+  </div>
+</section>
+
+<footer>Kaynak: Raissi, M., Perdikaris, P., Karniadakis, G. E. (2019). Physics-informed neural networks. <i>Journal of Computational Physics</i> 378, 686–707. Veri ve orijinal kod MIT lisanslı.</footer>
+</div>
