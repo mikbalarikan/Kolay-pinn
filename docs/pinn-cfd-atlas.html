@@ -1,0 +1,692 @@
+<title>PINN × CFD Atlası</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Serif:wght@500;600&display=swap">
+<style>
+/* Layout: mühendislik raporu — tek sütun okuma alanı, CFD kontur paletinden (soğuk mavi ↔ sıcak kırmızı) türetilmiş vurgu */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --fg:#17212b; --muted:#56636f; --line:#d5dce3;
+  --cold:#2b5d9b; --hot:#c0412f; --accent:#2b5d9b; --soft:#e7edf3;
+  --cat-pinn:#2b5d9b; --cat-op:#7a4fb0; --cat-hyb:#1f7a63; --cat-bench:#a2621a;
+  --display:"IBM Plex Serif",Georgia,"Times New Roman",serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f151b; --surface:#16202a; --fg:#e4eaf0; --muted:#97a5b2; --line:#2a3744;
+  --cold:#6fa3e6; --hot:#f07a63; --accent:#6fa3e6; --soft:#1c2834;
+  --cat-pinn:#6fa3e6; --cat-op:#b393e6; --cat-hyb:#5cc2a3; --cat-bench:#e0a35a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f151b; --surface:#16202a; --fg:#e4eaf0; --muted:#97a5b2; --line:#2a3744;
+  --cold:#6fa3e6; --hot:#f07a63; --accent:#6fa3e6; --soft:#1c2834;
+  --cat-pinn:#6fa3e6; --cat-op:#b393e6; --cat-hyb:#5cc2a3; --cat-bench:#e0a35a; color-scheme:dark}
+
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:980px;margin:0 auto;padding-block:32px 80px;display:flex;flex-direction:column;gap:56px}
+h1,h2,h3{font-family:var(--display);font-weight:600;text-wrap:balance;line-height:1.2;margin:0}
+h1{font-size:clamp(2rem,5vw,3.1rem)}
+h2{font-size:clamp(1.45rem,3vw,1.9rem)}
+h3{font-size:1.3rem}
+p{margin:0}
+.prose{max-width:68ch;display:flex;flex-direction:column;gap:14px}
+.eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+a{color:var(--accent)}
+a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+code,.mono{font-family:var(--mono);font-size:.88em}
+section{display:flex;flex-direction:column;gap:20px}
+.muted{color:var(--muted)}
+
+/* hero */
+.hero{display:flex;flex-direction:column;gap:18px}
+.flow{position:relative;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--surface)}
+.flow canvas{display:block;width:100%;height:auto;aspect-ratio:5/2}
+.flow-cap{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;padding:10px 14px;border-top:1px solid var(--line);font-size:.85rem}
+.toggles{display:flex;flex-wrap:wrap;gap:6px}
+.tg{font:inherit;font-size:.8rem;border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:999px;padding:4px 12px;cursor:pointer}
+.tg[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.legend{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:.74rem;color:var(--muted)}
+.cbar{width:110px;height:8px;border-radius:2px;background:linear-gradient(90deg,var(--cold),var(--bg),var(--hot));border:1px solid var(--line)}
+
+/* equations */
+.eq{font-family:var(--mono);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:16px 18px;display:grid;gap:6px;font-size:.95rem;overflow-x:auto}
+.eq .tag{color:var(--muted);font-size:.78rem}
+
+/* diagrams */
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.diagram{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px}
+.diagram svg{display:block;width:100%;min-width:660px;height:auto}
+svg text{font-family:var(--body);fill:var(--fg)}
+svg .sm{font-size:12px;fill:var(--muted)}
+svg .mn{font-family:var(--mono);font-size:12px}
+svg .box{fill:var(--bg);stroke:var(--line);stroke-width:1.2}
+svg .boxc{fill:var(--soft);stroke:var(--cold);stroke-width:1.2}
+svg .boxh{fill:var(--soft);stroke:var(--hot);stroke-width:1.2}
+svg .edge{stroke:var(--muted);stroke-width:1.2;fill:none}
+svg .faint{stroke:var(--line);stroke-width:.8;fill:none}
+svg .node{fill:var(--surface);stroke:var(--fg);stroke-width:1.2}
+svg .nodec{fill:var(--cold);stroke:none}
+svg .nodeh{fill:var(--hot);stroke:none}
+.cap{font-size:.85rem;color:var(--muted);max-width:75ch}
+
+/* stars */
+.stars{display:grid;gap:8px}
+.srow{display:grid;grid-template-columns:minmax(0,15rem) minmax(0,1fr) 3.6rem;gap:12px;align-items:center;font-size:.88rem}
+.srow .nm{font-family:var(--mono);font-size:.78rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.track{height:14px;background:var(--soft);border-radius:2px;overflow:hidden}
+.bar{height:100%;border-radius:2px}
+.srow .v{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:.8rem}
+.keys{display:flex;flex-wrap:wrap;gap:14px;font-size:.82rem;color:var(--muted)}
+.keys span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:10px;height:10px;border-radius:2px;display:inline-block}
+@media (max-width:560px){.srow{grid-template-columns:minmax(0,1fr) 3.4rem}.srow .track{grid-column:1/-1;order:3}}
+
+/* filter */
+.filters{display:flex;flex-wrap:wrap;gap:6px}
+
+/* project cards */
+.projects{display:flex;flex-direction:column;gap:22px}
+.proj{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px;display:flex;flex-direction:column;gap:16px}
+.ph{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline;justify-content:space-between}
+.ph h3 a{color:var(--fg);text-decoration:none}
+.ph h3 a:hover{text-decoration:underline}
+.meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:.8rem}
+.chip{font-family:var(--mono);font-size:.72rem;padding:2px 8px;border-radius:3px;border:1px solid currentColor}
+.c-pinn{color:var(--cat-pinn)} .c-op{color:var(--cat-op)} .c-hyb{color:var(--cat-hyb)} .c-bench{color:var(--cat-bench)}
+.star{font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--muted)}
+.who{font-size:.9rem;color:var(--muted)}
+.pipe{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.pipe>div{padding:10px 12px;font-size:.86rem;min-width:0;position:relative}
+.pipe>div+div{border-left:1px solid var(--line)}
+.pipe b{display:block;font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;font-weight:500;color:var(--muted);margin-bottom:2px}
+.pipe .d{background:linear-gradient(90deg,color-mix(in srgb,var(--cold) 12%,transparent),transparent)}
+.pipe .o{background:linear-gradient(270deg,color-mix(in srgb,var(--hot) 12%,transparent),transparent)}
+@media (max-width:640px){.pipe{grid-template-columns:1fr}.pipe>div+div{border-left:0;border-top:1px solid var(--line)}}
+.facts{display:grid;grid-template-columns:8.5rem minmax(0,1fr);gap:8px 16px;font-size:.93rem}
+.facts dt{font-family:var(--mono);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding-top:3px}
+.facts dd{margin:0;min-width:0}
+@media (max-width:560px){.facts{grid-template-columns:1fr;gap:2px}.facts dd{margin-bottom:10px}}
+pre{margin:0;background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:12px 14px;overflow-x:auto;font-family:var(--mono);font-size:.8rem;line-height:1.5}
+.tip{font-size:.88rem;border-top:1px dashed var(--line);padding-top:12px}
+.tip strong{font-weight:600}
+
+/* table */
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:760px;font-size:.84rem}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500;background:var(--bg)}
+tr:last-child td{border-bottom:0}
+
+/* two-col compare */
+.duo{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:14px}
+.duo>div{border:1px solid var(--line);border-radius:6px;padding:16px;background:var(--surface);display:flex;flex-direction:column;gap:8px;font-size:.92rem;min-width:0}
+.duo h3{font-size:1.05rem}
+.duo ul{margin:0;padding-left:18px;display:grid;gap:4px}
+
+/* roadmap */
+.road{list-style:none;margin:0;padding:0;display:grid;gap:0;counter-reset:s}
+.road li{counter-increment:s;display:grid;grid-template-columns:2.4rem minmax(0,1fr);gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.road li::before{content:counter(s);font-family:var(--mono);font-size:.85rem;width:1.9rem;height:1.9rem;border-radius:50%;border:1px solid var(--accent);color:var(--accent);display:grid;place-items:center}
+.road li div{min-width:0}
+.road b{font-weight:600}
+.mentions{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:8px 20px;font-size:.88rem}
+.mentions div{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line);padding:6px 0;min-width:0}
+.mentions a{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--mono);font-size:.8rem}
+footer{font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);padding-top:16px}
+</style>
+
+<div class="wrap">
+
+<header class="hero">
+  <span class="eyebrow">Genel kültür rehberi · Yıldız verisi 2 Kasım 2026</span>
+  <h1>PINN × CFD Atlası</h1>
+  <div class="prose">
+    <p>Fizik-bilgili sinir ağları (Physics-Informed Neural Networks, PINN), Navier–Stokes gibi denklemleri doğrudan kayıp fonksiyonuna yazar. Ağ yalnızca veriye uymaya değil, fiziği sağlamaya da zorlanır. Bu sayfa GitHub'da en çok yıldız almış 10 akışkanlar dinamiği odaklı projeyi tek tek inceliyor: kim yaptı, hangi veriyi kullandı, nasıl eğitti, ne çıktı üretti.</p>
+  </div>
+  <figure class="flow" style="margin:0">
+    <canvas id="flow" width="1000" height="400" aria-label="Silindir arkasında Kármán girdap caddesinin animasyonlu girdaplılık alanı"></canvas>
+    <figcaption class="flow-cap">
+      <div class="toggles" role="group" aria-label="Katmanlar">
+        <button class="tg" id="tg-data" aria-pressed="false">Ölçüm noktaları (veri kaybı)</button>
+        <button class="tg" id="tg-col" aria-pressed="false">Collocation noktaları (fizik kaybı)</button>
+        <button class="tg" id="tg-play" aria-pressed="true">Oynat</button>
+      </div>
+      <span class="legend">ω &lt; 0 <span class="cbar"></span> ω &gt; 0</span>
+    </figcaption>
+  </figure>
+  <p class="cap">Silindir arkası akış (Re ≈ 100), PINN literatürünün “Hello World”üdür. Raissi'nin orijinal makalesinde ağ, bu akıştan seçilmiş az sayıda (u, v) ölçümünü görür ve basıncı hiç görmeden yeniden kurar. Düğmelerle iki tür eğitim noktasını açıp kapatın. Kareler gerçek ölçüm, küçük noktalar ise yalnızca denklem artığının hesaplandığı etiketsiz noktalardır. Görsel temsilidir, analitik bir girdap modeliyle çizildi.</p>
+</header>
+
+<section id="nasil">
+  <span class="eyebrow">Temel</span>
+  <h2>PINN nasıl çalışır?</h2>
+  <div class="prose">
+    <p>Klasik CFD alanı bir ağa (mesh) böler ve denklemleri her hücrede ayrık olarak çözer. PINN'de mesh yoktur. Çok katmanlı bir ağ (MLP) koordinatları alır, (x, y, t) → (u, v, p), ve sürekli bir fonksiyon gibi davranır. Türevler otomatik türev alma (autodiff) ile tam olarak hesaplanır, sonra denklemin ne kadar sağlanmadığı (artık, residual) kayba eklenir.</p>
+  </div>
+  <div class="eq" aria-label="Sıkıştırılamaz Navier–Stokes denklemleri">
+    <span class="tag">Sıkıştırılamaz Navier–Stokes (boyutsuz)</span>
+    <span>∂u/∂t + (u·∇)u = −∇p + (1/Re) ∇²u</span>
+    <span>∇·u = 0</span>
+    <span class="tag">PINN kaybı</span>
+    <span>𝓛 = λ<sub>r</sub>·‖NS artığı‖² + λ<sub>b</sub>·‖sınır/başlangıç hatası‖² + λ<sub>d</sub>·‖u<sub>ağ</sub> − u<sub>ölçüm</sub>‖²</span>
+  </div>
+
+  <div class="diagram scroll">
+  <svg viewBox="0 0 940 380" role="img" aria-label="PINN mimarisi: koordinat girdileri, MLP, çıktılar, otomatik türev, artık terimleri ve toplam kayıp">
+    <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--muted)"/></marker></defs>
+    <!-- MLP connections -->
+    <g class="faint" id="mlp-lines"></g>
+    <!-- inputs -->
+    <text x="40" y="40" class="sm" text-anchor="middle">Girdi</text>
+    <g id="mlp-nodes"></g>
+    <text x="40" y="113" text-anchor="middle" class="mn">x</text>
+    <text x="40" y="173" text-anchor="middle" class="mn">y</text>
+    <text x="40" y="233" text-anchor="middle" class="mn">t</text>
+    <text x="175" y="40" class="sm" text-anchor="middle">Gizli katmanlar (tanh)</text>
+    <text x="310" y="40" class="sm" text-anchor="middle">Çıktı</text>
+    <text x="336" y="113" class="mn">u</text>
+    <text x="336" y="173" class="mn">v</text>
+    <text x="336" y="233" class="mn">p</text>
+    <!-- autodiff -->
+    <rect x="370" y="120" width="140" height="74" rx="4" class="box"/>
+    <text x="440" y="148" text-anchor="middle" font-weight="600">Otomatik türev</text>
+    <text x="440" y="170" text-anchor="middle" class="mn">∂/∂t ∂/∂x ∇²</text>
+    <path d="M352 168 H368" class="edge" marker-end="url(#ar)"/>
+    <!-- residuals -->
+    <rect x="550" y="60" width="200" height="44" rx="4" class="boxc"/>
+    <text x="650" y="80" text-anchor="middle" font-size="13">Süreklilik artığı</text>
+    <text x="650" y="96" text-anchor="middle" class="mn">u_x + v_y</text>
+    <rect x="550" y="114" width="200" height="44" rx="4" class="boxc"/>
+    <text x="650" y="134" text-anchor="middle" font-size="13">Momentum-x artığı</text>
+    <text x="650" y="150" text-anchor="middle" class="mn">u_t+uu_x+vu_y+p_x−ν∇²u</text>
+    <rect x="550" y="168" width="200" height="44" rx="4" class="boxc"/>
+    <text x="650" y="188" text-anchor="middle" font-size="13">Momentum-y artığı</text>
+    <text x="650" y="204" text-anchor="middle" class="mn">v_t+uv_x+vv_y+p_y−ν∇²v</text>
+    <rect x="550" y="232" width="200" height="40" rx="4" class="box"/>
+    <text x="650" y="257" text-anchor="middle" font-size="13">Sınır / başlangıç koşulu</text>
+    <rect x="550" y="282" width="200" height="40" rx="4" class="boxh"/>
+    <text x="650" y="307" text-anchor="middle" font-size="13">Veri: ölçüm uyumu</text>
+    <path d="M510 150 C530 150 530 82 548 82" class="edge" marker-end="url(#ar)"/>
+    <path d="M510 157 H548" class="edge" marker-end="url(#ar)"/>
+    <path d="M510 165 C530 165 530 190 548 190" class="edge" marker-end="url(#ar)"/>
+    <path d="M352 233 C460 233 460 252 548 252" class="edge" marker-end="url(#ar)"/>
+    <path d="M352 238 C440 300 470 302 548 302" class="edge" marker-end="url(#ar)"/>
+    <!-- loss -->
+    <rect x="790" y="150" width="130" height="64" rx="4" class="box" style="stroke:var(--fg)"/>
+    <text x="855" y="176" text-anchor="middle" font-weight="600">Toplam kayıp 𝓛</text>
+    <text x="855" y="196" text-anchor="middle" class="sm">Σ λᵢ · 𝓛ᵢ</text>
+    <path d="M750 82 C775 82 770 170 788 175" class="edge" marker-end="url(#ar)"/>
+    <path d="M750 136 C770 136 770 178 788 180" class="edge" marker-end="url(#ar)"/>
+    <path d="M750 190 H788" class="edge" marker-end="url(#ar)"/>
+    <path d="M750 252 C772 252 770 200 788 198" class="edge" marker-end="url(#ar)"/>
+    <path d="M750 302 C778 302 772 206 788 205" class="edge" marker-end="url(#ar)"/>
+    <!-- feedback -->
+    <path d="M855 216 V355 H175 V285" class="edge" stroke-dasharray="5 4" marker-end="url(#ar)"/>
+    <text x="520" y="348" text-anchor="middle" class="sm">Geri yayılım: önce Adam, sonra ince ayar için L-BFGS · ağırlıklar θ güncellenir</text>
+  </svg>
+  </div>
+  <p class="cap">Mavi kutular fizik kaybıdır ve etiket gerektirmez, alanın her yerinden rastgele nokta çekilebilir. Kırmızı kutu veri kaybıdır ve ölçüm ister. İleri problemde (veri yok) yalnızca mavi ve gri kutular kullanılır. Ters problemde (bilinmeyen ν, basınç ya da sınır koşulu) kırmızı kutu devreye girer. PINN'lerin asıl güçlü olduğu yer de burasıdır.</p>
+
+  <div class="duo">
+    <div>
+      <h3>PINN'in iyi olduğu işler</h3>
+      <ul>
+        <li>Ters problemler: seyrek ölçümden viskozite, basınç ya da sınır koşulu çıkarmak</li>
+        <li>Veri asimilasyonu: PIV ya da MRI ölçümlerini fiziğe uygun hâle getirmek</li>
+        <li>Mesh üretmenin zor olduğu karmaşık geometriler</li>
+        <li>Türevlenebilir, sürekli bir çözüm (her noktada sorgulanabilir)</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Zorlandığı işler</h3>
+      <ul>
+        <li>Yüksek Re ve türbülans: spektral eğilim nedeniyle ağ küçük ölçekleri geç öğrenir</li>
+        <li>Kayıp terimlerinin dengesizliği: λ seçimi sonucu belirler</li>
+        <li>Uzun zaman aralıkları: nedensellik bozulabilir</li>
+        <li>Saf ileri çözümde çoğu zaman klasik çözücüden yavaştır</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="harita">
+  <span class="eyebrow">Bağlam</span>
+  <h2>Üç aile, tek harita</h2>
+  <div class="prose">
+    <p>“PINN” etiketiyle aranan depoların çoğu üç farklı yaklaşımdan birine girer. <strong>PINN</strong> tek bir problemi çözer, her yeni sınır koşulu için baştan eğitilir. <strong>Nöral operatörler</strong> (FNO, DeepONet) binlerce çözüm örneğinden “girdi fonksiyonu → çözüm fonksiyonu” eşlemesini öğrenir, eğitildikten sonra milisaniyede tahmin yapar. <strong>Hibrit</strong> yöntemler klasik çözücüyü korur ve ağı çözücünün içine yerleştirir. Aşağıdaki yerleşim nitelikseldir, ölçülmüş bir değer değildir.</p>
+  </div>
+  <div class="diagram scroll">
+  <svg viewBox="0 0 760 400" role="img" aria-label="Projelerin fizik-veri ve tek problem-çok problem eksenlerinde yerleşimi">
+    <rect x="70" y="30" width="660" height="320" class="box" style="fill:var(--surface)"/>
+    <line x1="400" y1="30" x2="400" y2="350" class="faint" stroke-dasharray="3 4"/>
+    <line x1="70" y1="190" x2="730" y2="190" class="faint" stroke-dasharray="3 4"/>
+    <text x="70" y="378" class="sm">← Fizik ağırlıklı (denklem kaybı)</text>
+    <text x="730" y="378" class="sm" text-anchor="end">Veri ağırlıklı (simülasyon veri seti) →</text>
+    <text x="22" y="190" class="sm" text-anchor="middle" transform="rotate(-90 22 190)">Tek problem  ↔  Çok problem / genelleme</text>
+    <text x="80" y="50" class="sm">Tek problem, az veri</text>
+    <text x="720" y="342" class="sm" text-anchor="end">Genelleyen, çok veri</text>
+    <g id="mapdots"></g>
+  </svg>
+  </div>
+  <div class="keys">
+    <span><i class="sw" style="background:var(--cat-pinn)"></i>PINN</span>
+    <span><i class="sw" style="background:var(--cat-op)"></i>Nöral operatör</span>
+    <span><i class="sw" style="background:var(--cat-hyb)"></i>Hibrit / türevlenebilir çözücü</span>
+    <span><i class="sw" style="background:var(--cat-bench)"></i>Benchmark / veri seti</span>
+  </div>
+</section>
+
+<section id="yildiz">
+  <span class="eyebrow">GitHub · 2 Kasım 2026</span>
+  <h2>Seçilen 10 proje ve yıldızları</h2>
+  <p class="prose muted">Seçim ölçütleri: yıldız sayısı, CFD ile doğrudan ilgi ve öğretici değer. Liste PINN çekirdeğiyle başlar, sonra PINN'i bağlama oturtan operatör, hibrit ve benchmark projelerine geçer.</p>
+  <div class="stars" id="stars"></div>
+</section>
+
+<section id="projeler">
+  <span class="eyebrow">Derinlemesine</span>
+  <h2>Projeler tek tek</h2>
+  <div class="filters" role="group" aria-label="Aileye göre filtrele">
+    <button class="tg" data-f="all" aria-pressed="true">Tümü</button>
+    <button class="tg" data-f="pinn" aria-pressed="false">PINN</button>
+    <button class="tg" data-f="op" aria-pressed="false">Nöral operatör</button>
+    <button class="tg" data-f="hyb" aria-pressed="false">Hibrit</button>
+    <button class="tg" data-f="bench" aria-pressed="false">Benchmark</button>
+  </div>
+  <div class="projects" id="projects">
+
+  <!-- 1 -->
+  <article class="proj" data-cat="pinn">
+    <div class="ph"><h3><a href="https://github.com/maziarraissi/PINNs">1 · maziarraissi/PINNs</a></h3>
+      <div class="meta"><span class="chip c-pinn">PINN</span><span class="star">★ 6.234</span></div></div>
+    <p class="who">Maziar Raissi, Paris Perdikaris, George Em Karniadakis · Brown Üniversitesi · <em>Journal of Computational Physics</em> 378 (2019). Alanı başlatan makale.</p>
+    <div class="pipe">
+      <div class="d"><b>Veri</b>Spektral/hp eleman çözücüsüyle (NekTar) üretilmiş silindir arkası DNS'i, Re = 100. Alandan rastgele seçilmiş yaklaşık 5.000 (u, v) noktası, toplam verinin %1'i civarı.</div>
+      <div><b>Model</b>9 katman × 20 nöron, tanh. Çıktı akım fonksiyonu ψ ve basınç p. u = ψ<sub>y</sub>, v = −ψ<sub>x</sub> olduğundan süreklilik kendiliğinden sağlanır.</div>
+      <div class="o"><b>Çıktı</b>Tam hız ve basınç alanı, ayrıca bilinmeyen katsayılar λ₁ ≈ 1.0 ve λ₂ ≈ 0.01. Basınç, hiç basınç verisi verilmeden bulunur.</div>
+    </div>
+    <dl class="facts">
+      <dt>Ne yaptılar</dt><dd>“Sürekli zaman” ve “ayrık zaman” (Runge–Kutta) olmak üzere iki PINN türü tanımladılar. Burgers, Schrödinger, Allen–Cahn, KdV ve Navier–Stokes üzerinde hem ileri çözümü hem de denklem keşfini gösterdiler.</dd>
+      <dt>Eğitim</dt><dd>TensorFlow 1.x. Kayıp, veri MSE'si ile NS artıklarının MSE'sinin toplamıdır. Optimizasyon L-BFGS-B ile yapılır. λ₁ ve λ₂ ağ ağırlıklarıyla birlikte öğrenilen değişkenlerdir.</dd>
+      <dt>Teknik öz</dt><dd>Ters problem kurgusu: NS denklemindeki katsayılar bilinmiyor, ağ hem alanı hem katsayıları birlikte buluyor. %1 gürültüde bile katsayılar küçük hatayla bulunuyor.</dd>
+    </dl>
+    <p class="tip"><strong>Senin için:</strong> Kod eski (TF1), ama <code>main/continuous_time_identification (Navier-Stokes)</code> klasörü kavramı anlamak için en iyi yer. Modern PyTorch portlarını <a href="https://github.com/rezaakb/pinns-torch">pinns-torch</a> ya da <a href="https://github.com/jayroxis/PINNs">jayroxis/PINNs</a> deposunda bulabilirsin.</p>
+  </article>
+
+  <!-- 2 -->
+  <article class="proj" data-cat="pinn">
+    <div class="ph"><h3><a href="https://github.com/lululxvi/deepxde">2 · lululxvi/deepxde</a></h3>
+      <div class="meta"><span class="chip c-pinn">PINN kütüphanesi</span><span class="star">★ 4.494</span></div></div>
+    <p class="who">Lu Lu (bugün Yale), Xuhui Meng, Zhiping Mao, George Karniadakis · <em>SIAM Review</em> 63 (2021). En yaygın kullanılan PINN kütüphanesi ve hâlâ aktif geliştiriliyor.</p>
+    <div class="pipe">
+      <div class="d"><b>Veri</b>Çoğu örnekte veri yok, yalnızca geometri ve sınır koşulu var. Ters problem örneklerinde Raissi'nin silindir verisi ya da kullanıcının kendi ölçümleri kullanılır.</div>
+      <div><b>Model</b>FNN, ResNet, çok ölçekli Fourier ağları, DeepONet ve MIONet. Arka uç olarak TensorFlow, PyTorch, JAX ya da PaddlePaddle seçilebilir.</div>
+      <div class="o"><b>Çıktı</b>Çözüm alanı (ör. Kovasznay akışında u, v, p), bilinmeyen parametreler ve kayıp ve hata geçmişi.</div>
+    </div>
+    <dl class="facts">
+      <dt>Ne yaptılar</dt><dd>PINN'i birkaç satıra indiren bir API yazdılar. Geometriler CSG ile kurulur (dikdörtgen eksi daire gibi). Sınır koşulu, PDE ve örnekleme stratejisi ayrı nesnelerdir.</dd>
+      <dt>Eğitim</dt><dd>Tipik akış Adam ile 10–50 bin adım, ardından L-BFGS'tir. Kütüphanenin katkısı <strong>RAR</strong>'dır (artık tabanlı uyarlamalı iyileştirme): artığın büyük olduğu bölgelere yeni collocation noktaları eklenir. Ayrıca gPINN, hPINN (kısıtlı) ve fPINN (kesirli) varyantları vardır.</dd>
+      <dt>CFD örnekleri</dt><dd>Kovasznay akışı (Re = 20), Beltrami akışı (3B, NSFnets'ten), NS ters problemi, kanal ve boşluk akışı.</dd>
+    </dl>
+<pre><code>import deepxde as dde
+geom = dde.geometry.Rectangle([-0.5, -0.5], [1.0, 1.5])
+def pde(x, y):            # y = [u, v, p]
+    u, v = y[:, 0:1], y[:, 1:2]
+    u_x = dde.grad.jacobian(y, x, i=0, j=0)
+    u_y = dde.grad.jacobian(y, x, i=0, j=1)
+    p_x = dde.grad.jacobian(y, x, i=2, j=0)
+    u_xx = dde.grad.hessian(y, x, component=0, i=0, j=0)
+    ...                   # momentum-x, momentum-y, süreklilik
+    return [mom_x, mom_y, cont]
+data = dde.data.PDE(geom, pde, bcs, num_domain=2601, num_boundary=400)
+net = dde.nn.FNN([2] + [50] * 4 + [3], "tanh", "Glorot normal")
+model = dde.Model(data, net)
+model.compile("adam", lr=1e-3); model.train(iterations=30000)
+model.compile("L-BFGS");        model.train()</code></pre>
+    <p class="tip"><strong>Senin için:</strong> PINN'e ilk el koyacağın yer burası. <code>examples/pinn_forward/Kovasznay_flow.py</code> ile başla, sonra <code>pinn_inverse/Navier_Stokes_inverse.py</code>'ye geç. Lu Lu'nun YouTube'daki ders kayıtları da iyi bir eşlikçi.</p>
+  </article>
+
+  <!-- 3 -->
+  <article class="proj" data-cat="pinn">
+    <div class="ph"><h3><a href="https://github.com/maziarraissi/HFM">3 · maziarraissi/HFM — Hidden Fluid Mechanics</a></h3>
+      <div class="meta"><span class="chip c-pinn">PINN · ters problem</span><span class="star">★ 372</span></div></div>
+    <p class="who">Maziar Raissi, Alireza Yazdani, George Karniadakis · <em>Science</em> 367 (2020). PINN'i ana akım bilime taşıyan çalışma.</p>
+    <div class="pipe">
+      <div class="d"><b>Veri</b>Hız da basınç da yok, yalnızca <strong>pasif skaler konsantrasyonu c(t, x, y, z)</strong> var. Yani boya ya da duman görüntüsü. Makalede bu veri 2B/3B silindir, beyin anevrizması ve 3B akış simülasyonlarından alınıyor.</div>
+      <div><b>Model</b>(t, x, y, z) → (c, u, v, w, p) veren derin ve geniş bir MLP. Kayıp, c verisi + taşınım-difüzyon artığı (Pe) + NS artıkları (Re).</div>
+      <div class="o"><b>Çıktı</b>Gizli hız ve basınç alanları, duvar kayma gerilmesi, sürükleme ve kaldırma kuvvetleri. Sınır koşulu vermeden, keyfi geometride.</div>
+    </div>
+    <dl class="facts">
+      <dt>Ne yaptılar</dt><dd>“Görüntüden akış” fikrini kurdular. Taşınım denklemi c ile hızı bağlar, NS de hızı basınçla. Fizik bu iki köprüyü kurduğu için tek bir gözlemlenebilir büyüklük yetiyor.</dd>
+      <dt>Eğitim</dt><dd>TensorFlow, Adam, büyük mini-batch'ler. Boyutsuzlaştırma (Re ve Pe) kritik. Eğitim alanı keyfi bir kutu seçilebiliyor, sınır koşulu gerekmiyor.</dd>
+      <dt>Neden önemli</dt><dd>Biyomedikal (anevrizmada duvar kayma gerilmesi) ve deneysel akışkanlar (PIV yerine boya görüntüsü) için yeni bir yol açtı. Bugünkü “veri asimilasyonu için PINN” çalışmalarının atasıdır.</dd>
+    </dl>
+    <p class="tip"><strong>Senin için:</strong> Önce Raissi'nin 1 numaralı deposunu anla, sonra buraya gel. PyTorch portu: <a href="https://github.com/mcekwonu/Hidden-Fluid-Mechanics-Pytorch">mcekwonu/Hidden-Fluid-Mechanics-Pytorch</a>.</p>
+  </article>
+
+  <!-- 4 -->
+  <article class="proj" data-cat="pinn">
+    <div class="ph"><h3><a href="https://github.com/Raocp/PINN-laminar-flow">4 · Raocp/PINN-laminar-flow</a></h3>
+      <div class="meta"><span class="chip c-pinn">PINN · veri yok</span><span class="star">★ 294</span></div></div>
+    <p class="who">Chengping Rao, Hao Sun, Yang Liu · Northeastern Üniversitesi · <em>Theoretical &amp; Applied Mechanics Letters</em> 10 (2020).</p>
+    <div class="pipe">
+      <div class="d"><b>Veri</b>Etiketli veri yok. Yalnızca geometri (kanal içinde silindir), giriş hız profili, duvarlarda kaymama koşulu ve çıkış basıncı. Karşılaştırma için ANSYS Fluent çözümü.</div>
+      <div><b>Model</b><strong>Karma değişkenli</strong> PINN. Çıktılar ψ, p ve gerilme tensörü σ₁₁, σ₁₂, σ₂₂. Böylece ikinci türevler birinci türevlere iner.</div>
+      <div class="o"><b>Çıktı</b>Durağan (Re ≈ 20) ve zamana bağlı laminer akışta u, v, p alanları. Fluent ile görsel ve sayısal karşılaştırma.</div>
+    </div>
+    <dl class="facts">
+      <dt>Ne yaptılar</dt><dd>Saf ileri problemi, yani “mesh'siz CFD”yi incelediler. Klasik (u, v, p) formülasyonunun eğitiminin zor olduğunu gösterip türev mertebesini düşüren bir formülasyon önerdiler.</dd>
+      <dt>Eğitim</dt><dd>TensorFlow 1.x, Adam + L-BFGS. Collocation noktaları silindir çevresinde sıklaştırılıyor (mesh inceltmeye benzer bir fikir).</dd>
+      <dt>Teknik öz</dt><dd>Formülasyon seçimi (hangi değişkenlerin çıktı olduğu) PINN başarısını en az ağ mimarisi kadar etkiliyor.</dd>
+    </dl>
+    <p class="tip"><strong>Senin için:</strong> Küçük, okunaklı, tamamen CFD'ye odaklı bir depo. Fluent ya da OpenFOAM bilgin varsa, PINN'i bildiğin bir çözücüyle kıyaslamanın en kolay yolu.</p>
+  </article>
+
+  <!-- 5 -->
+  <article class="proj" data-cat="pinn">
+    <div class="ph"><h3><a href="https://github.com/PredictiveIntelligenceLab/jaxpi">5 · PredictiveIntelligenceLab/jaxpi</a></h3>
+      <div class="meta"><span class="chip c-pinn">PINN · eğitim teknikleri</span><span class="star">★ 446</span></div></div>
+    <p class="who">Sifan Wang, Shyam Sankaran, Hanwen Wang, Paris Perdikaris · University of Pennsylvania · “An Expert's Guide to Training PINNs” (arXiv 2023) ve PirateNets (2024).</p>
+    <div class="pipe">
+      <div class="d"><b>Veri</b>İleri problemler, etiket yok. Başlangıç ve sınır koşulları var. Doğrulama için yüksek doğruluklu spektral ya da sonlu eleman referans çözümleri kullanılıyor.</div>
+      <div><b>Model</b>Modified MLP ve PirateNet. Fourier özellik gömme, periyodik sınır gömme ve rastgele ağırlık çarpanlarına ayırma (RWF).</div>
+      <div class="o"><b>Çıktı</b>Klasik PINN'in başarısız olduğu problemlerde 10⁻³–10⁻⁴ mertebesinde bağıl L² hata. Kapak tahrikli boşluk (Re = 3200), periyodik NS ve silindir arkası akış bunlar arasında.</div>
+    </div>
+    <dl class="facts">
+      <dt>Ne yaptılar</dt><dd>“PINN neden eğitilemiyor?” sorusuna toplu bir cevap verdiler. Yıllar içinde biriken hileleri tek bir JAX kod tabanında topladılar ve birbiriyle tutarlı bir tarif hâline getirdiler.</dd>
+      <dt>Eğitim tarifi</dt><dd>① Boyutsuzlaştır. ② Fourier özellikleriyle spektral eğilimi kır. ③ Kayıp ağırlıklarını gradyan normuna ya da NTK'ya göre otomatik dengele. ④ <strong>Nedensel eğitim</strong> uygula: geç zamanlara ait artıkları, erken zamanlar öğrenilene kadar bastır. ⑤ Re için müfredat uygula (Re = 100 → 400 → 1000 → 3200). ⑥ Zaman pencereleriyle (sequence-to-sequence) ilerle.</dd>
+      <dt>Neden önemli</dt><dd>Kendi CFD probleminde PINN yakınsamıyorsa ilk bakacağın kaynak bu.</dd>
+    </dl>
+    <p class="tip"><strong>Senin için:</strong> DeepXDE ile temel PINN'i kurduktan sonra oku. Kod JAX/Flax tabanlı, GPU'da çok hızlı. Ayar dosyaları (<code>configs/</code>) hangi hilenin ne yaptığını açıkça gösteriyor.</p>
+  </article>
+
+  <!-- 6 -->
+  <article class="proj" data-cat="hyb">
+    <div class="ph"><h3><a href="https://github.com/NVIDIA/physicsnemo">6 · NVIDIA/physicsnemo (eski adıyla Modulus)</a></h3>
+      <div class="meta"><span class="chip c-hyb">Endüstriyel çerçeve</span><span class="star">★ 3.411</span></div></div>
+    <p class="who">NVIDIA · Apache-2.0 · 2020'de SimNet olarak başladı, 2021–2024 arası Modulus adını taşıdı, şimdi PhysicsNeMo. PINN kısmı <code>physicsnemo-sym</code> paketinde.</p>
+    <div class="pipe">
+      <div class="d"><b>Veri</b>İki dünya var. PINN tarafında yalnızca STL geometri ve parametreler. Veri tarafında büyük CFD veri setleri: DrivAerML (yüzlerce parametrik araç geometrisi, yüksek doğruluklu hibrit RANS-LES), AhmedML, OpenFOAM çıktıları.</div>
+      <div><b>Model</b>PINN, FNO, AFNO, MeshGraphNet, Transolver, DoMINO ve difüzyon modelleri. Çok GPU'lu dağıtık eğitim.</div>
+      <div class="o"><b>Çıktı</b>Yüzey basıncı, duvar kayma gerilmesi, hacim alanları, sürükleme katsayısı. Saatler süren CFD yerine saniyeler içinde tahmin.</div>
+    </div>
+    <dl class="facts">
+      <dt>Ne yaptılar</dt><dd>Araştırma fikirlerini üretime taşıyan bir çerçeve kurdular: veri yükleyiciler, mesh ve nokta bulutu araçları, eğitim betikleri ve hazır eğitilmiş modeller.</dd>
+      <dt>Eğitim</dt><dd>PINN örneklerinde parametrik geometri üzerinde nokta örneklenir (ör. ısı alıcı kanat aralığı). Bu sayede tek eğitimle bir tasarım ailesi taranabilir. Veri tabanlı modellerde, yüzlerce CFD koşusu üzerinde denetimli eğitim yapılır.</dd>
+      <dt>CFD örnekleri</dt><dd>Kapak tahrikli boşluk, 3B ısı alıcı (eşlenik ısı transferi), anevrizma akışı, silindir arkası girdap kopması (MeshGraphNet), araç dış aerodinamiği.</dd>
+    </dl>
+    <p class="tip"><strong>Senin için:</strong> Kurulumu ağır (Docker ve NVIDIA GPU tavsiye edilir). Temeller oturduktan sonra endüstride işin nasıl yapıldığını görmek için incele. <code>examples/cfd/</code> klasörü doğrudan senin alanın.</p>
+  </article>
+
+  <!-- 7 -->
+  <article class="proj" data-cat="op">
+    <div class="ph"><h3><a href="https://github.com/neuraloperator/neuraloperator">7 · neuraloperator/neuraloperator — FNO ve PINO</a></h3>
+      <div class="meta"><span class="chip c-op">Nöral operatör</span><span class="star">★ 3.980</span></div></div>
+    <p class="who">Zongyi Li, Nikola Kovachki, Kamyar Azizzadenesheli, Andrew Stuart, Anima Anandkumar ve ekip · Caltech ve NVIDIA · FNO: ICLR 2021. PINO kodu ayrıca <a href="https://github.com/neuraloperator/physics_informed">neuraloperator/physics_informed</a> deposunda (★ 559).</p>
+    <div class="pipe">
+      <div class="d"><b>Veri</b>Torus üzerinde 2B NS girdaplılık denklemi. Viskozite ν = 10⁻³, 10⁻⁴ ve 10⁻⁵. Psödo-spektral çözücüyle 64×64 çözünürlükte üretilmiş 1.000–10.000 yörünge.</div>
+      <div><b>Model</b>Fourier katmanları: FFT ile frekans uzayına geç, düşük modları tut, öğrenilebilir bir matrisle çarp, ters FFT al, yerel bir lineer yol ekle.</div>
+      <div class="o"><b>Çıktı</b>İlk 10 zaman adımının girdaplılığından sonraki adımları tahmin eder. Klasik çözücüden kat kat hızlıdır ve eğitildiğinden daha yüksek çözünürlükte de tahmin verebilir (sıfır-atış süper çözünürlük).</div>
+    </div>
+    <div class="diagram scroll">
+      <svg viewBox="0 0 760 150" role="img" aria-label="Fourier Neural Operator katman yapısı">
+        <defs><marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--muted)"/></marker></defs>
+        <text x="40" y="80" text-anchor="middle" class="mn">a(x)</text>
+        <rect x="80" y="55" width="60" height="40" rx="4" class="box"/><text x="110" y="80" text-anchor="middle">P</text>
+        <rect x="170" y="20" width="390" height="110" rx="6" class="box" style="fill:var(--soft)"/>
+        <text x="365" y="40" text-anchor="middle" class="sm">Fourier katmanı × 4</text>
+        <rect x="190" y="55" width="60" height="30" rx="3" class="boxc"/><text x="220" y="75" text-anchor="middle" class="mn">FFT</text>
+        <rect x="270" y="55" width="130" height="30" rx="3" class="boxc"/><text x="335" y="75" text-anchor="middle" class="mn">R · ilk k mod</text>
+        <rect x="420" y="55" width="60" height="30" rx="3" class="boxc"/><text x="450" y="75" text-anchor="middle" class="mn">iFFT</text>
+        <rect x="300" y="98" width="70" height="24" rx="3" class="box"/><text x="335" y="115" text-anchor="middle" class="mn">W (yerel)</text>
+        <circle cx="510" cy="70" r="12" class="box"/><text x="510" y="75" text-anchor="middle">+</text>
+        <text x="540" y="75" class="mn">σ</text>
+        <rect x="590" y="55" width="60" height="40" rx="4" class="box"/><text x="620" y="80" text-anchor="middle">Q</text>
+        <text x="710" y="80" text-anchor="middle" class="mn">u(x)</text>
+        <path d="M58 76 H78" class="edge" marker-end="url(#ar2)"/><path d="M140 76 H188" class="edge" marker-end="url(#ar2)"/>
+        <path d="M250 70 H268" class="edge" marker-end="url(#ar2)"/><path d="M400 70 H418" class="edge" marker-end="url(#ar2)"/>
+        <path d="M480 70 H496" class="edge" marker-end="url(#ar2)"/><path d="M175 76 C180 110 290 110 298 110" class="edge" marker-end="url(#ar2)"/>
+        <path d="M370 110 C480 110 505 100 508 84" class="edge" marker-end="url(#ar2)"/>
+        <path d="M555 76 H588" class="edge" marker-end="url(#ar2)"/><path d="M650 76 H685" class="edge" marker-end="url(#ar2)"/>
+      </svg>
+    </div>
+    <dl class="facts">
+      <dt>Ne yaptılar</dt><dd>Ağı noktadan noktaya bir fonksiyon olarak değil, fonksiyondan fonksiyona bir eşleme (operatör) olarak kurdular. Bu sayede sonuç mesh çözünürlüğünden bağımsız oluyor.</dd>
+      <dt>Eğitim</dt><dd>Denetimli öğrenme, bağıl L² kaybı, Adam. PINO aynı mimariye PDE artık kaybını ekliyor. Kolmogorov akışında (Re = 500) az veriyle bile çalışıyor ve test anında tek bir örnek için ince ayar yapılabiliyor.</dd>
+      <dt>PINN'den farkı</dt><dd>PINN tek bir akışı çözer. FNO ise binlerce akıştan genellemeyi öğrenir ama simülasyon verisine ihtiyaç duyar. PINO ikisinin ortasında durur.</dd>
+    </dl>
+    <p class="tip"><strong>Senin için:</strong> <code>pip install neuraloperator</code> ile kurulur. Darcy ve NS örnek veri setleri kütüphaneyle birlikte geliyor, küçük bir FNO'yu dizüstünde bile eğitebilirsin.</p>
+  </article>
+
+  <!-- 8 -->
+  <article class="proj" data-cat="hyb">
+    <div class="ph"><h3><a href="https://github.com/google/jax-cfd">8 · google/jax-cfd</a></h3>
+      <div class="meta"><span class="chip c-hyb">Hibrit · öğrenilmiş çözücü</span><span class="star">★ 967</span></div></div>
+    <p class="who">Dmitrii Kochkov, Jamie Smith, Ayya Alieva, Qing Wang, Michael Brenner, Stephan Hoyer · Google Research · <em>PNAS</em> 118 (2021), “Machine learning–accelerated computational fluid dynamics”.</p>
+    <div class="pipe">
+      <div class="d"><b>Veri</b>2B Kolmogorov akışının (zorlanmış türbülans, Re = 1000) yüksek çözünürlüklü DNS'i, kaba ızgaraya indirgenmiş hâliyle. Veriyi JAX ile yazılmış kendi çözücüleri üretiyor.</div>
+      <div><b>Model</b>Sonlu hacim çözücüsünün içine yerleştirilmiş bir CNN. Hücre yüzeyindeki akıların enterpolasyon katsayılarını öğreniyor (<em>learned interpolation</em>).</div>
+      <div class="o"><b>Çıktı</b>8–10 kat daha kaba ızgarada DNS doğruluğu, yaklaşık 40–80 kat hızlanma. Daha büyük alanlara, sönümlenen türbülansa ve daha yüksek Re'ye genelleme.</div>
+    </div>
+    <dl class="facts">
+      <dt>Ne yaptılar</dt><dd>Fiziği kayba yazmak yerine çözücünün kendisini korudular. Ağ yalnızca kaba ızgarada kaybolan alt-ızgara bilgisini telafi ediyor, korunum yasaları ise yapı gereği sağlanıyor.</dd>
+      <dt>Eğitim</dt><dd><strong>Unrolled training</strong>: çözücü birçok adım ileri koşturuluyor, sonra yörünge boyunca hata hesaplanıp gradyan tüm çözücü adımları boyunca geri yayılıyor. Bu ancak çözücü türevlenebilir (JAX) olduğu için mümkün.</dd>
+      <dt>Neden önemli</dt><dd>Türbülans için, saf PINN'lerin zorlandığı yerde, ML ile CFD'nin nasıl birleşebileceğini gösteren referans çalışma. LES/RANS kapatma modellemesi ile doğrudan akraba.</dd>
+    </dl>
+    <p class="tip"><strong>Senin için:</strong> <code>notebooks/</code> klasöründe JAX ile spektral ve sonlu hacim çözücülerinin nasıl yazıldığını görmek bile değerli. Türevlenebilir CFD kavramının temeli burada.</p>
+  </article>
+
+  <!-- 9 -->
+  <article class="proj" data-cat="hyb">
+    <div class="ph"><h3><a href="https://github.com/tum-pbs/PhiFlow">9 · tum-pbs/PhiFlow (ΦFlow)</a></h3>
+      <div class="meta"><span class="chip c-hyb">Türevlenebilir çözücü</span><span class="star">★ 1.951</span></div></div>
+    <p class="who">Philipp Holl, Nils Thuerey ve TU Münih Physics-based Simulation grubu · Ücretsiz kitap: <a href="https://physicsbaseddeeplearning.org">physicsbaseddeeplearning.org</a>.</p>
+    <div class="pipe">
+      <div class="d"><b>Veri</b>Veriyi çerçevenin kendi çözücüsü anında üretiyor: duman tüyü, Kármán girdap caddesi, Burgers, NS. Hazır bir veri setine bağımlı değil.</div>
+      <div><b>Model</b>Çözücü adımlarının arasına yerleştirilmiş CNN ya da U-Net. Arka uç NumPy, PyTorch, TensorFlow ya da JAX olabilir.</div>
+      <div class="o"><b>Çıktı</b>Düzeltilmiş kaba simülasyonlar (<em>Solver-in-the-Loop</em>), akış kontrol kuvvetleri, ters problem çözümleri.</div>
+    </div>
+    <dl class="facts">
+      <dt>Ne yaptılar</dt><dd>Her işlemi türevlenebilir bir akışkan simülatörü yazdılar. “Learning to Control PDEs” (ICLR 2020) ve “Solver-in-the-Loop” (NeurIPS 2020) makalelerinin altyapısı bu çerçeve.</dd>
+      <dt>Eğitim</dt><dd>Ağ, simülatörle birlikte çok adım boyunca koşturuluyor. Kayıp yörünge üzerinden hesaplanıp gradyan simülatörün içinden geri akıyor (jax-cfd ile aynı fikir, daha genel bir araç).</dd>
+      <dt>Kitap</dt><dd>PINN'i, türevlenebilir fiziği ve difüzyon modellerini aynı problem üzerinde karşılaştırıyor. Hangi yöntemin ne zaman işe yaradığına dair genel kültür için çok iyi bir kaynak.</dd>
+    </dl>
+    <p class="tip"><strong>Senin için:</strong> Kitabın “Physical Loss Terms” (PINN) ve “Differentiable Physics” bölümlerini art arda okumak, iki yaklaşımın farkını kavramanın en hızlı yolu. Her bölümün bir Colab defteri var.</p>
+  </article>
+
+  <!-- 10 -->
+  <article class="proj" data-cat="bench">
+    <div class="ph"><h3><a href="https://github.com/pdebench/PDEBench">10 · pdebench/PDEBench</a></h3>
+      <div class="meta"><span class="chip c-bench">Benchmark · veri seti</span><span class="star">★ 1.223</span></div></div>
+    <p class="who">Makoto Takamoto, Timothy Praditia, Raphael Leiteritz, Dan MacKinlay, Francesco Alesiani, Dirk Pflüger, Mathias Niepert · NEC Labs Europe ve Stuttgart Üniversitesi · NeurIPS 2022 Datasets &amp; Benchmarks.</p>
+    <div class="pipe">
+      <div class="d"><b>Veri</b>Klasik sayısal çözücülerle üretilmiş büyük HDF5 setleri. 1B/2B/3B sıkıştırılabilir NS, 2B sıkıştırılamaz NS, sığ su, Darcy, Burgers, difüzyon-reaksiyon ve advection. Veri, DaRUS deposundan indiriliyor.</div>
+      <div><b>Model</b>Ortak koşullarda karşılaştırılan referans modeller: FNO, U-Net ve PINN (DeepXDE ile).</div>
+      <div class="o"><b>Çıktı</b>Hata tabloları: RMSE, normalize RMSE, sınırda hata, korunan büyüklük hatası ve frekans bandına göre hata. Ayrıca ters problem görevleri.</div>
+    </div>
+    <dl class="facts">
+      <dt>Ne yaptılar</dt><dd>Herkesin kendi problemini seçtiği bir alanda adil karşılaştırma zemini kurdular. Veri üretme betikleri de açık, böylece yeni parametrelerle kendi verini üretebilirsin.</dd>
+      <dt>Bulgu</dt><dd>Bu görevlerin çoğunda saf PINN, veriyle eğitilmiş FNO'nun gerisinde kalıyor. Bunun bir nedeni PINN'in genelleme için tasarlanmamış olması. Benzer bir PINN odaklı karşılaştırma için <a href="https://github.com/i207M/PINNacle">PINNacle</a> (NeurIPS 2024) deposuna bak.</dd>
+      <dt>Neden önemli</dt><dd>Bir makalede “bizim yöntem daha iyi” iddiasını okurken neye bakılacağını öğretir: hangi metrik, hangi Re, hangi çözünürlük.</dd>
+    </dl>
+    <p class="tip"><strong>Senin için:</strong> Kendi PINN ya da FNO deneyini yaptığında sonucunu burada yayımlanmış referans sayılarla kıyasla. Sonucun anlamlı mı, bunu ancak böyle anlarsın.</p>
+  </article>
+
+  </div>
+</section>
+
+<section id="ozet">
+  <span class="eyebrow">Karşılaştırma</span>
+  <h2>Bir bakışta</h2>
+  <div class="tbl">
+  <table>
+    <thead><tr><th>Proje</th><th>Aile</th><th>Eğitim verisi</th><th>Fizik nereden giriyor</th><th>Çıktı</th><th>Çerçeve</th></tr></thead>
+    <tbody>
+      <tr><td>PINNs</td><td>PINN</td><td>Seyrek DNS hız noktaları</td><td>Kayıptaki NS artığı</td><td>u, v, p, Re katsayıları</td><td>TF1</td></tr>
+      <tr><td>DeepXDE</td><td>PINN</td><td>Yok ya da seyrek ölçüm</td><td>Kayıptaki artık, RAR örnekleme</td><td>Alan ve parametreler</td><td>TF, PyTorch, JAX, Paddle</td></tr>
+      <tr><td>HFM</td><td>PINN</td><td>Boya/duman konsantrasyonu</td><td>Taşınım ve NS artıkları</td><td>Gizli u, v, w, p ve WSS</td><td>TF</td></tr>
+      <tr><td>PINN-laminar-flow</td><td>PINN</td><td>Yok (yalnızca sınır koşulları)</td><td>Karma değişkenli NS artığı</td><td>Laminer u, v, p</td><td>TF1</td></tr>
+      <tr><td>jaxpi</td><td>PINN</td><td>Yok</td><td>Artık, nedensel ağırlıklar</td><td>Yüksek doğruluklu alan</td><td>JAX</td></tr>
+      <tr><td>PhysicsNeMo</td><td>Hepsi</td><td>STL veya büyük CFD setleri</td><td>Artık ya da veri</td><td>Yüzey ve hacim alanları, C<sub>d</sub></td><td>PyTorch</td></tr>
+      <tr><td>neuraloperator</td><td>Operatör</td><td>Binlerce çözücü yörüngesi</td><td>Mimari (+ PINO'da artık)</td><td>Hızlı alan tahmini</td><td>PyTorch</td></tr>
+      <tr><td>jax-cfd</td><td>Hibrit</td><td>İndirgenmiş DNS</td><td>Çözücünün kendisi</td><td>Hızlandırılmış simülasyon</td><td>JAX</td></tr>
+      <tr><td>PhiFlow</td><td>Hibrit</td><td>Anında üretilen simülasyon</td><td>Türevlenebilir çözücü</td><td>Düzeltme ve kontrol</td><td>PyTorch, TF, JAX</td></tr>
+      <tr><td>PDEBench</td><td>Benchmark</td><td>Büyük HDF5 setleri</td><td>(karşılaştırma zemini)</td><td>Metrik tabloları</td><td>PyTorch, JAX</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section id="yol">
+  <span class="eyebrow">Sonraki adım</span>
+  <h2>Önerilen öğrenme sırası</h2>
+  <ol class="road">
+    <li><div><b>Sezgi.</b> Ben Moseley'in <a href="https://github.com/benmoseley/harmonic-oscillator-pinn">harmonic-oscillator-pinn</a> defteri (★ 679). Tek boyutlu bir yay problemi üzerinden PINN'in ne olduğunu 30 dakikada gösteriyor.</div></li>
+    <li><div><b>İlk akış.</b> DeepXDE ile 1B Burgers, sonra Kovasznay akışı. Kayıp terimlerini tek tek açıp kapatarak ne değiştiğini gözle.</div></li>
+    <li><div><b>Ters problem.</b> Raissi'nin silindir verisiyle ν'yu ve basıncı bul. PINN'in gerçekten parladığı yer burası.</div></li>
+    <li><div><b>Klasik CFD ile kıyas.</b> PINN-laminar-flow ya da kapak tahrikli boşluk. Aynı problemi OpenFOAM ile de çöz ve iki sonucu karşılaştır.</div></li>
+    <li><div><b>Zorlaştır.</b> Re'yi artır, eğitimin bozulduğunu gör. Sonra jaxpi'deki nedensel eğitim, Fourier özellikleri ve müfredat ile düzelt.</div></li>
+    <li><div><b>Operatörlere geç.</b> neuraloperator ile küçük bir FNO eğit, PDEBench verisiyle karşılaştır, PINO'ya göz at.</div></li>
+    <li><div><b>Hibrit ve endüstri.</b> PhiFlow kitabı ve jax-cfd ile türevlenebilir çözücüler, ardından PhysicsNeMo'nun <code>examples/cfd</code> klasörü.</div></li>
+  </ol>
+</section>
+
+<section id="diger">
+  <span class="eyebrow">Ek liste</span>
+  <h2>Göz atmaya değer diğer depolar</h2>
+  <div class="mentions">
+    <div><a href="https://github.com/idrl-lab/PINNpapers">idrl-lab/PINNpapers</a><span class="star">★ 1.558</span></div>
+    <div><a href="https://github.com/SciML/NeuralPDE.jl">SciML/NeuralPDE.jl</a><span class="star">★ 1.237</span></div>
+    <div><a href="https://github.com/rezaakb/pinns-torch">rezaakb/pinns-torch</a><span class="star">★ 962</span></div>
+    <div><a href="https://github.com/PINA-org/PINA">PINA-org/PINA</a><span class="star">★ 801</span></div>
+    <div><a href="https://github.com/jdtoscano94/NABLA-SciML">jdtoscano94/NABLA-SciML</a><span class="star">★ 686</span></div>
+    <div><a href="https://github.com/benmoseley/FBPINNs">benmoseley/FBPINNs</a><span class="star">★ 581</span></div>
+    <div><a href="https://github.com/i207M/PINNacle">i207M/PINNacle</a><span class="star">★ 459</span></div>
+    <div><a href="https://github.com/PaddlePaddle/PaddleScience">PaddlePaddle/PaddleScience</a><span class="star">★ 453</span></div>
+    <div><a href="https://github.com/luo-yining/CFDBench">luo-yining/CFDBench</a><span class="star">★ 304</span></div>
+    <div><a href="https://github.com/okada39/pinn_cavity">okada39/pinn_cavity</a><span class="star">★ 165</span></div>
+    <div><a href="https://github.com/Alexzihaohu/NSFnets">Alexzihaohu/NSFnets</a><span class="star">★ 137</span></div>
+    <div><a href="https://github.com/chen-yingfa/pinn-torch">chen-yingfa/pinn-torch</a><span class="star">★ 147</span></div>
+  </div>
+</section>
+
+<footer>Yıldız sayıları 2 Kasım 2026'da GitHub arama API'sinden alındı. Makale ayrıntıları (katman sayıları, Re değerleri, hızlanma oranları) yayımlanmış makalelerden özetlendi. Kesin değerler için ilgili makaleye bakın.</footer>
+</div>
+
+<script>
+(function(){
+  // ---------- star chart ----------
+  var P=[
+    ["maziarraissi/PINNs",6234,"pinn"],["lululxvi/deepxde",4494,"pinn"],["neuraloperator/neuraloperator",3980,"op"],
+    ["NVIDIA/physicsnemo",3411,"hyb"],["tum-pbs/PhiFlow",1951,"hyb"],["pdebench/PDEBench",1223,"bench"],
+    ["google/jax-cfd",967,"hyb"],["PredictiveIntelligenceLab/jaxpi",446,"pinn"],["maziarraissi/HFM",372,"pinn"],
+    ["Raocp/PINN-laminar-flow",294,"pinn"]];
+  var sc=document.getElementById("stars"), max=7000;
+  P.forEach(function(p){
+    var r=document.createElement("div"); r.className="srow";
+    r.innerHTML='<span class="nm" title="'+p[0]+'">'+p[0]+'</span><div class="track"><div class="bar" style="width:'+(p[1]/max*100).toFixed(1)+'%;background:var(--cat-'+p[2]+')"></div></div><span class="v">'+p[1].toLocaleString("tr-TR")+'</span>';
+    sc.appendChild(r);
+  });
+  var k=document.createElement("div"); k.className="keys";
+  k.innerHTML='<span><i class="sw" style="background:var(--cat-pinn)"></i>PINN</span><span><i class="sw" style="background:var(--cat-op)"></i>Nöral operatör</span><span><i class="sw" style="background:var(--cat-hyb)"></i>Hibrit</span><span><i class="sw" style="background:var(--cat-bench)"></i>Benchmark</span><span>Ölçek: 0–7.000 ★</span>';
+  sc.appendChild(k);
+
+  // ---------- MLP drawing ----------
+  var NS="http://www.w3.org/2000/svg";
+  var cols=[{x:40,ys:[108,168,228],c:"node"},{x:120,ys:[78,118,158,198,238,278],c:"node"},{x:175,ys:[78,118,158,198,238,278],c:"node"},{x:230,ys:[78,118,158,198,238,278],c:"node"},{x:310,ys:[108,168,228],c:"nodec"}];
+  var gl=document.getElementById("mlp-lines"), gn=document.getElementById("mlp-nodes");
+  for(var i=0;i<cols.length-1;i++) cols[i].ys.forEach(function(y1){cols[i+1].ys.forEach(function(y2){
+    var l=document.createElementNS(NS,"line"); l.setAttribute("x1",cols[i].x);l.setAttribute("y1",y1);l.setAttribute("x2",cols[i+1].x);l.setAttribute("y2",y2);gl.appendChild(l);});});
+  cols.forEach(function(c,ci){c.ys.forEach(function(y){var e=document.createElementNS(NS,"circle");e.setAttribute("cx",c.x);e.setAttribute("cy",y);e.setAttribute("r",ci===0||ci===4?13:9);e.setAttribute("class",ci===0?"node":c.c);gn.appendChild(e);});});
+
+  // ---------- concept map ----------
+  var M=[["PINNs",150,95,"pinn"],["HFM",205,135,"pinn"],["PINN-laminar",110,150,"pinn"],["jaxpi",120,70,"pinn"],["DeepXDE",250,110,"pinn"],
+    ["PINO",420,235,"op"],["FNO (neuraloperator)",600,300,"op"],["jax-cfd",470,175,"hyb"],["PhiFlow",360,200,"hyb"],["PhysicsNeMo",520,265,"hyb"],["PDEBench",650,325,"bench"]];
+  var gm=document.getElementById("mapdots");
+  M.forEach(function(m){
+    var c=document.createElementNS(NS,"circle");c.setAttribute("cx",m[1]);c.setAttribute("cy",m[2]);c.setAttribute("r",7);c.style.fill="var(--cat-"+m[3]+")";gm.appendChild(c);
+    var t=document.createElementNS(NS,"text");var right=m[1]>560;t.setAttribute("x",m[1]+(right?-12:12));t.setAttribute("y",m[2]+4);t.setAttribute("font-size","13");if(right)t.setAttribute("text-anchor","end");t.textContent=m[0];gm.appendChild(t);
+  });
+
+  // ---------- filters ----------
+  var fb=document.querySelectorAll("[data-f]"), cards=document.querySelectorAll(".proj");
+  fb.forEach(function(b){b.addEventListener("click",function(){
+    fb.forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false")});
+    var f=b.getAttribute("data-f");
+    cards.forEach(function(c){c.hidden=!(f==="all"||c.getAttribute("data-cat")===f)});
+  })});
+
+  // ---------- vortex street canvas ----------
+  var cv=document.getElementById("flow"), ctx=cv.getContext("2d");
+  var GW=250,GH=100, off=document.createElement("canvas"); off.width=GW; off.height=GH;
+  var octx=off.getContext("2d"), img=octx.createImageData(GW,GH);
+  var X0=-2.5,X1=17.5,Y0=-4,Y1=4, R=0.5;
+  function hex(h){h=h.trim();if(h[0]==="#")h=h.slice(1);if(h.length===3)h=h.split("").map(function(c){return c+c}).join("");var n=parseInt(h,16);return[(n>>16)&255,(n>>8)&255,n&255];}
+  var col={};
+  function readCols(){var s=getComputedStyle(document.documentElement);col.bg=hex(s.getPropertyValue("--surface"));col.c=hex(s.getPropertyValue("--cold"));col.h=hex(s.getPropertyValue("--hot"));col.fg=s.getPropertyValue("--fg").trim();col.mu=s.getPropertyValue("--muted").trim();}
+  readCols();
+  try{matchMedia("(prefers-color-scheme: dark)").addEventListener("change",function(){readCols();draw(T)});}catch(e){}
+  new MutationObserver(function(){readCols();draw(T)}).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+
+  // seeded random points
+  var seed=7; function rnd(){seed=(seed*16807)%2147483647;return (seed-1)/2147483646;}
+  var dataPts=[],colPts=[];
+  for(var i=0;i<46;i++){dataPts.push([1+rnd()*15,-2+rnd()*4]);}
+  for(var j=0;j<520;j++){var x=X0+rnd()*(X1-X0),y=Y0+rnd()*(Y1-Y0);if(x*x+y*y>R*R*1.05)colPts.push([x,y]);}
+  var showData=false, showCol=false, playing=!matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var a=2.1, Uc=0.85, L=a*9, T=0;
+
+  function omega(x,y,t){
+    var w=0;
+    // attached shear layers
+    if(x>-0.1){var f=Math.exp(-Math.pow(Math.max(0,x-0.2)/1.1,2));
+      w+=-1.2*f*Math.exp(-Math.pow((y-0.5)/0.16,2))*Math.min(1,(x+0.1)*3);
+      w+= 1.2*f*Math.exp(-Math.pow((y+0.5)/0.16,2))*Math.min(1,(x+0.1)*3);}
+    var ph=(t*Uc)%a;
+    for(var k=-1;k<10;k++){
+      for(var s=0;s<2;s++){
+        var xk=1.0+k*a+ph+(s?a/2:0); if(xk<0.8||xk>X1+1.5)continue;
+        var yk=(s?-0.42:0.42)*(1+0.03*xk) + (s?-1:1)*0.0;
+        var sg=s?1:-1, sig=0.34+0.035*xk, amp=1.25*Math.min(1,(xk-0.8)/1.4)/(1+0.05*xk);
+        var dx=x-xk,dy=y-yk; w+=sg*amp*Math.exp(-(dx*dx+dy*dy)/(sig*sig));
+      }
+    }
+    return w;
+  }
+  function field(t){
+    var d=img.data,bg=col.bg,c=col.c,h=col.h;
+    for(var j=0;j<GH;j++){var y=Y1-(j+.5)/GH*(Y1-Y0);
+      for(var i=0;i<GW;i++){var x=X0+(i+.5)/GW*(X1-X0), p=(j*GW+i)*4;
+        if(x*x+y*y<R*R){d[p]=bg[0];d[p+1]=bg[1];d[p+2]=bg[2];d[p+3]=255;continue;}
+        var w=omega(x,y,t), m=Math.min(1,Math.abs(w)), tg=w<0?c:h; m=Math.pow(m,0.8);
+        d[p]=bg[0]+(tg[0]-bg[0])*m; d[p+1]=bg[1]+(tg[1]-bg[1])*m; d[p+2]=bg[2]+(tg[2]-bg[2])*m; d[p+3]=255;}}
+    octx.putImageData(img,0,0);
+  }
+  function sx(x){return (x-X0)/(X1-X0)*cv.width} function sy(y){return (Y1-y)/(Y1-Y0)*cv.height}
+  function draw(t){
+    field(t);
+    ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality="high";
+    ctx.drawImage(off,0,0,cv.width,cv.height);
+    var sc=cv.width/1000;
+    // cylinder
+    ctx.beginPath();ctx.arc(sx(0),sy(0),R/(X1-X0)*cv.width,0,Math.PI*2);ctx.fillStyle=col.fg;ctx.fill();
+    // inflow arrows
+    ctx.strokeStyle=col.mu;ctx.fillStyle=col.mu;ctx.lineWidth=1.4*sc;
+    for(var q=-3;q<=3;q+=1.5){var yy=sy(q);ctx.beginPath();ctx.moveTo(14*sc,yy);ctx.lineTo(44*sc,yy);ctx.stroke();ctx.beginPath();ctx.moveTo(48*sc,yy);ctx.lineTo(40*sc,yy-4*sc);ctx.lineTo(40*sc,yy+4*sc);ctx.fill();}
+    ctx.font=(13*sc)+"px 'IBM Plex Mono', monospace";ctx.fillText("U∞",14*sc,sy(3.6)+4*sc);
+    if(showCol){ctx.fillStyle=col.fg;ctx.globalAlpha=.55;colPts.forEach(function(p){ctx.beginPath();ctx.arc(sx(p[0]),sy(p[1]),1.7*sc,0,7);ctx.fill();});ctx.globalAlpha=1;}
+    if(showData){dataPts.forEach(function(p){var s=7*sc;ctx.fillStyle=col.fg;ctx.fillRect(sx(p[0])-s/2,sy(p[1])-s/2,s,s);ctx.strokeStyle="rgb("+col.bg.join(",")+")";ctx.lineWidth=1.5*sc;ctx.strokeRect(sx(p[0])-s/2,sy(p[1])-s/2,s,s);});}
+  }
+  function size(){var r=cv.getBoundingClientRect(),dpr=Math.min(2,window.devicePixelRatio||1);var w=Math.max(300,Math.round(r.width*dpr));cv.width=w;cv.height=Math.round(w*0.4);draw(T);}
+  window.addEventListener("resize",size); size();
+  var last=null;
+  function loop(ts){if(last!==null&&playing)T+=Math.min(0.05,(ts-last)/1000)*1.4;last=ts;if(playing)draw(T);requestAnimationFrame(loop);}
+  requestAnimationFrame(loop);
+  function tg(id,fn){var b=document.getElementById(id);b.addEventListener("click",function(){var v=b.getAttribute("aria-pressed")!=="true";b.setAttribute("aria-pressed",v?"true":"false");fn(v);draw(T);});}
+  tg("tg-data",function(v){showData=v});tg("tg-col",function(v){showCol=v});
+  var pb=document.getElementById("tg-play"); pb.setAttribute("aria-pressed",playing?"true":"false"); pb.textContent=playing?"Duraklat":"Oynat";
+  pb.addEventListener("click",function(){playing=!playing;pb.setAttribute("aria-pressed",playing?"true":"false");pb.textContent=playing?"Duraklat":"Oynat";});
+  // tg() above also toggles aria on play; remove duplicate handling by not registering play via tg
+})();
+</script>
