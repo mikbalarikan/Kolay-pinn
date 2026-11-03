@@ -1,0 +1,152 @@
+{
+ "nd_problem": {
+  "png": "nd_problem.png",
+  "omml": null,
+  "w": 2.4232,
+  "h": 1.1157,
+  "size": 10.5,
+  "color": "0D161F",
+  "tex": "\\begin{aligned} &\\frac{\\partial^2\\theta}{\\partial\\xi^2} + \\frac{\\partial^2\\theta}{\\partial\\eta^2} = 0, && (\\xi,\\eta) \\in [0,1]^2 \\\\[4pt] &\\theta = 1, && \\xi = 0,\\ \\xi = 1,\\ \\eta = 1 \\\\[4pt] &\\frac{\\partial\\theta}{\\partial\\eta} = \\mathrm{Bi}\\,\\theta, && \\eta = 0 \\end{aligned}",
+  "hash": "deb48a6e666c"
+ },
+ "rob1": {
+  "png": "rob1.png",
+  "omml": null,
+  "w": 1.2986,
+  "h": 0.3686,
+  "size": 10.5,
+  "color": "0D161F",
+  "tex": "k\\,\\frac{\\partial T}{\\partial y} = h\\,\\left(T - T_\\infty\\right)",
+  "hash": "fb27be6d306a"
+ },
+ "rob3": {
+  "png": "rob3.png",
+  "omml": null,
+  "w": 1.1767,
+  "h": 0.3686,
+  "size": 10.5,
+  "color": "0D161F",
+  "tex": "\\frac{\\partial \\theta}{\\partial \\eta} = \\frac{h L}{k}\\,\\theta = \\mathrm{Bi}\\,\\theta",
+  "hash": "da52aa28cec3"
+ },
+ "qprime": {
+  "png": "qprime.png",
+  "omml": null,
+  "w": 2.1128,
+  "h": 0.3859,
+  "size": 10.5,
+  "color": "0D161F",
+  "tex": "Q' = \\bar h\\,L\\,(T_w - T_\\infty)\\int_0^1 \\theta(\\xi, 0)\\,d\\xi",
+  "hash": "1ab78dc31a8e"
+ },
+ "st_in": {
+  "png": "st_in.png",
+  "omml": null,
+  "w": 2.7301,
+  "h": 0.184,
+  "size": 10.5,
+  "color": "0D161F",
+  "tex": "\\theta_{i+1,j} + \\theta_{i-1,j} + \\theta_{i,j+1} + \\theta_{i,j-1} - 4\\,\\theta_{i,j} = 0",
+  "hash": "07f27ee2e4c6"
+ },
+ "st_ghost": {
+  "png": "st_ghost.png",
+  "omml": null,
+  "w": 1.515,
+  "h": 0.1871,
+  "size": 10.5,
+  "color": "0D161F",
+  "tex": "\\theta_{i,-1} = \\theta_{i,1} - 2\\Delta\\,\\mathrm{Bi}\\,\\theta_{i,0}",
+  "hash": "f0a57cca3503"
+ },
+ "st_bot": {
+  "png": "st_bot.png",
+  "omml": null,
+  "w": 2.8165,
+  "h": 0.192,
+  "size": 10.5,
+  "color": "0D161F",
+  "tex": "\\theta_{i-1,0} + \\theta_{i+1,0} + 2\\,\\theta_{i,1} - \\left(4 + 2\\Delta\\,\\mathrm{Bi}\\right)\\theta_{i,0} = 0",
+  "hash": "ec35027453d3"
+ },
+ "series": {
+  "png": "series.png",
+  "omml": null,
+  "w": 3.0107,
+  "h": 0.3699,
+  "size": 10.5,
+  "color": "0D161F",
+  "tex": "\\theta(\\xi,\\eta) = 1 - \\sum_{n\\ \\mathrm{tek}} A_n\\,\\sin(n\\pi\\xi)\\,\\sinh\\!\\big(n\\pi(1-\\eta)\\big)",
+  "hash": "a3675b259a43"
+ },
+ "an": {
+  "png": "an.png",
+  "omml": null,
+  "w": 2.1378,
+  "h": 0.3848,
+  "size": 10.5,
+  "color": "0D161F",
+  "tex": "A_n = \\frac{4\\,\\mathrm{Bi}/(n\\pi)}{n\\pi\\cosh(n\\pi) + \\mathrm{Bi}\\,\\sinh(n\\pi)}",
+  "hash": "15777e171b9c"
+ },
+ "re_t": {
+  "png": "re_t.png",
+  "omml": null,
+  "w": 0.6324,
+  "h": 0.2777,
+  "size": 8.5,
+  "color": "0D161F",
+  "tex": "\\mathrm{Re}_L = \\frac{U L}{\\nu}",
+  "hash": "b272e91ffd1c"
+ },
+ "nu_t": {
+  "png": "nu_t.png",
+  "omml": null,
+  "w": 1.3457,
+  "h": 0.2022,
+  "size": 8.5,
+  "color": "0D161F",
+  "tex": "\\overline{\\mathrm{Nu}}_L = 0.664\\,\\mathrm{Re}_L^{1/2}\\,\\mathrm{Pr}^{1/3}",
+  "hash": "07ffbeaf3f83"
+ },
+ "h_t": {
+  "png": "h_t.png",
+  "omml": null,
+  "w": 0.6893,
+  "h": 0.3114,
+  "size": 8.5,
+  "color": "0D161F",
+  "tex": "\\bar h = \\frac{\\overline{\\mathrm{Nu}}_L\\, k_f}{L}",
+  "hash": "cb5a422a9550"
+ },
+ "g_biot_t": {
+  "png": "g_biot_t.png",
+  "omml": null,
+  "w": 0.5272,
+  "h": 0.279,
+  "size": 8.5,
+  "color": "0D161F",
+  "tex": "\\mathrm{Bi} = \\frac{h\\,L}{k}",
+  "hash": "62520c53e8ea"
+ },
+ "g_nondim_t": {
+  "png": "g_nondim_t.png",
+  "omml": null,
+  "w": 0.7748,
+  "h": 0.2908,
+  "size": 8.5,
+  "color": "0D161F",
+  "tex": "\\theta = \\frac{T - T_\\infty}{T_w - T_\\infty}",
+  "hash": "581c4c0fd0bb"
+ },
+ "scales_inline": {
+  "png": "scales_inline.png",
+  "omml": null,
+  "w": 2.414,
+  "h": 0.3605,
+  "size": 10.5,
+  "color": "0D161F",
+  "tex": "\\theta = \\frac{T - T_\\infty}{T_w - T_\\infty}, \\qquad \\xi = \\frac{x}{L}, \\qquad \\eta = \\frac{y}{L}",
+  "hash": "d539faa1a317"
+ }
+}

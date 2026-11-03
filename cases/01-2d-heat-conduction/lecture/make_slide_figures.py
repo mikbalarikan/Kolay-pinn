@@ -119,7 +119,7 @@ for s in ("top", "right"):
     ax.spines[s].set_visible(True)
 cb = fig.colorbar(cf, ax=ax, ticks=[40, 50, 60, 70], fraction=0.046, pad=0.04)
 cb.set_label("T (°C)")
-fig.tight_layout(pad=0.4)
+fig.tight_layout(pad=1.0)
 save(fig, "04_field")
 
 # 5 — bottom profile ----------------------------------------------------------

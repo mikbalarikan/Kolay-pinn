@@ -10,6 +10,7 @@ const D = require(path.join(__dirname, "..", "..", "..", "kolay_pinn", "deck", "
 const ASSETS = path.join(__dirname, "assets");
 const S = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "data", "summary.json"), "utf8"));
 const deck = D.createDeck({ course: "KOLAY PINN", lecture: "Ders 01 · 2D ısı iletimi", assets: ASSETS,
+  eqDir: path.join(ASSETS, "eq"),
   title: "Kolay PINN · Ders 01 · 2D ısı iletimi: referans çözüm" });
 const { pres, C, W, M, BODY_TOP, hex } = deck;
 const YL = "YÜKSEK LİSANS";
@@ -68,16 +69,16 @@ pres.addSection({ title: "Giriş" });
     notes: "Bu slayt bir sözlük. İçeriğe girmeden önce terimleri tanıtıyorum ki sonraki slaytlarda yeni bir kelimeyle ve yeni bir fikirle aynı anda uğraşmayalım. " +
       "Laplace denklemi kaynaksız kararlı iletim. Dirichlet değeri sabitler, Robin değer ile türevi birbirine bağlar. Biot sayısı iki direncin oranı. Sonlu farklar türevleri komşu düğümlerle yaklaşıklar." });
   const terms = [
-    ["Laplace denklemi", "∇²T = 0 · ısı kaynağı olmayan kararlı iletim"],
-    ["Dirichlet koşulu", "Sınırda değer verilir: T = 70 °C"],
-    ["Robin koşulu", "Sınırda değer ile akı bağlanır: −k ∂T/∂n = h (T − T∞)"],
-    ["Biot sayısı", "Bi = hL/k · iletim direnci / konveksiyon direnci"],
-    ["Sonlu farklar (FDM)", "Türevler komşu düğümlerdeki değerlerle yaklaşıklanır"],
-    ["Boyutsuzlaştırma", "Değişkenleri ölçekleyip parametre sayısını azaltmak"],
+    ["Laplace denklemi", "g_laplace", "Isı kaynağı olmayan kararlı iletim"],
+    ["Dirichlet koşulu", "g_dirichlet", "Sınırda sıcaklık verilir"],
+    ["Robin koşulu", "g_robin", "Sınırda iletim akısı konveksiyona eşit"],
+    ["Biot sayısı", "g_biot", "İletim direnci / konveksiyon direnci"],
+    ["Sonlu farklar (FDM)", "g_fd", "Türev, komşu düğüm değerleriyle"],
+    ["Boyutsuzlaştırma", "g_nondim", "Sıcaklık 0 ile 1 arasına ölçeklenir"],
   ];
-  const cw = (W - 2 * M - 0.6) / 3, ch = 1.95;
-  terms.forEach(([h, b], i) => deck.card(s, { x: M + (i % 3) * (cw + 0.3), y: BODY_TOP + Math.floor(i / 3) * (ch + 0.3),
-    w: cw, h: ch, head: h, body: b, headSize: 17, bodySize: 14 }));
+  const cw = (W - 2 * M - 0.6) / 3, ch = 2.15;
+  terms.forEach(([h, m, b], i) => deck.card(s, { x: M + (i % 3) * (cw + 0.3), y: BODY_TOP + Math.floor(i / 3) * (ch + 0.25),
+    w: cw, h: ch, head: h, math: m, body: b, headSize: 17, bodySize: 14 }));
 }
 
 // =========================================================== 1 · PROBLEMİ TANIMLA
@@ -107,20 +108,23 @@ deck.section(SEC1, "01", "Problemi tanımla", "Geometri, malzeme, sınır koşul
     notes: `Önce Reynolds sayısı: U çarpı L bölü nü, yaklaşık ${fmt(cor.Re)}. Düz levhada geçiş 5 çarpı 10 üzeri 5 civarında, yani akış laminer. ` +
       `Laminer, izotermal düz levha için ortalama Nusselt: 0.664 Re üzeri yarım, Pr üzeri üçte bir. Bu ${cor.Nu} verir. h eşittir Nu çarpı akışkanın k'sı bölü L, yaklaşık ${fmt(cor.h_W_m2K)}. ` +
       "Varsayımları açıkça söyleyelim: yüzey izotermal kabul ediliyor ama bizim alt yüzeyimiz 37 ile 70 derece arasında değişiyor. Bu yüzden sabit h bir mühendislik yaklaşımı. Verilen 2000 değeriyle fark yüzde 20; korelasyonların belirsizliği zaten bu mertebede." });
-  const y = BODY_TOP + 0.15, w = 3.7, gap = (W - 2 * M - 3 * w) / 2;
+  const y = BODY_TOP + 0.1, w = 3.7, bh = 2.55, gap = (W - 2 * M - 3 * w) / 2;
   const items = [
-    [fmt(cor.Re), "", "Re = UL/ν", "< 5×10⁵ → laminer"],
-    [String(cor.Nu), "", "Nu = 0.664 Re^½ Pr^⅓", "izotermal düz levha"],
-    [fmt(cor.h_W_m2K), "W m⁻² K⁻¹", "h = Nu kf / L", "su, 20 °C özellikleri"],
+    ["re", fmt(cor.Re), "", "laminer: Re < 5×10⁵"],
+    ["nu", String(cor.Nu), "", "izotermal düz levha"],
+    ["h", fmt(cor.h_W_m2K), "W m⁻² K⁻¹", "su, 20 °C: ν, k_f, Pr"],
   ];
-  items.forEach(([v, u, f, l], i) => {
+  items.forEach(([eq, v, u, l], i) => {
     const x = M + i * (w + gap);
-    s.addShape(pres.shapes.RECTANGLE, { x, y, w, h: 2.3, fill: { color: hex("krom") }, line: { type: "none" }, objectName: `hchain_bg_${i}` });
-    deck.stat(s, { x: x + 0.3, y: y + 0.25, w: w - 0.6, value: v, unit: u, label: f });
-    s.addText(l, { x: x + 0.3, y: y + 1.6, w: w - 0.6, h: 0.45, fontSize: 13, color: hex("panel"), margin: 0, isTextBox: true, objectName: `hchain_l_${i}` });
-    if (i < 2) s.addText("→", { x: x + w, y: y + 0.8, w: gap, h: 0.6, fontSize: 28, color: hex("titanyum"), align: "center", margin: 0, isTextBox: true, objectName: `hchain_arr_${i}` });
+    s.addShape(pres.shapes.RECTANGLE, { x, y, w, h: bh, fill: { color: hex("krom") }, line: { type: "none" }, objectName: `hchain_bg_${i}` });
+    deck.math(s, eq, { x: x + 0.3, y: y + 0.25, w: w - 0.6, h: 0.75, valign: "middle", scale: 0.95 });
+    s.addText([{ text: v, options: { fontSize: 36, bold: true, color: C.accent1 } },
+               { text: u ? ` ${u}` : "", options: { fontSize: 16, bold: true, color: C.accent1 } }],
+      { x: x + 0.3, y: y + 1.12, w: w - 0.6, h: 0.75, margin: 0, valign: "middle", isTextBox: true, objectName: `hchain_v_${i}` });
+    s.addText(l, { x: x + 0.3, y: y + 1.95, w: w - 0.6, h: 0.4, fontSize: 13, color: hex("panel"), margin: 0, isTextBox: true, objectName: `hchain_l_${i}` });
+    if (i < 2) s.addText("→", { x: x + w, y: y + 1.0, w: gap, h: 0.6, fontSize: 28, color: hex("titanyum"), align: "center", margin: 0, isTextBox: true, objectName: `hchain_arr_${i}` });
   });
-  deck.card(s, { x: M, y: 4.85, w: W - 2 * M, h: 1.45, head: "Varsayımları bilerek kullanıyoruz",
+  deck.card(s, { x: M, y: 4.95, w: W - 2 * M, h: 1.35, head: "Varsayımları bilerek kullanıyoruz",
     body: "Korelasyon izotermal yüzey ister; alt yüzeyimiz 37–70 °C arasında değişiyor. Sabit h bir yaklaşım. Verilen h = 2000 ile fark %20, korelasyon belirsizliği (±%15–20) mertebesinde." });
 }
 {
@@ -130,7 +134,7 @@ deck.section(SEC1, "01", "Problemi tanımla", "Geometri, malzeme, sınır koşul
       "Bi 4.9'da, bizim durumumuzda, alt yüzeyin ortası suya doğru belirgin biçimde soğuyor. Bi 50'de yüzey neredeyse su sıcaklığına iniyor. " +
       "PINN açısından önemi: Bi büyüdükçe köşelerdeki gradyan dikleşir ve ağın öğrenmesi zorlaşır. Bu yüzden 4.9 iyi bir test durumu." });
   deck.image(s, "02_bi_regimes.png", { x: M, y: BODY_TOP, w: 7.3, h: 4.75 }, "left");
-  deck.stat(s, { x: 8.4, y: BODY_TOP + 0.1, w: 4.3, value: cor.Bi.toFixed(2), unit: "", label: "Bi = hL/k  (h = 2398, L = 0.1, k = 49)" });
+  deck.mathBox(s, ["bi_num"], { x: 8.4, y: BODY_TOP + 0.1, w: 4.33, h: 1.2, scale: 0.95 });
   deck.card(s, { x: 8.4, y: 3.55, w: 4.3, h: 2.75, head: "Okuma kuralı",
     body: "Bi < 0.1: plaka neredeyse izotermal, toplu kapasite geçerli.\nBi ≫ 1: yüzey T∞'a yaklaşır, köşelerde dik gradyan.\nBizim durum: ikisinin arası, PINN için iyi bir sınav." });
 }
@@ -148,14 +152,14 @@ deck.section(SEC2, "02", "Boyutsuzlaştır", "Birimlerden arındır, parametrele
     notes: "Sıcaklığı duvar ile su arasındaki farkla ölçekliyoruz: theta sıfır su sıcaklığı, theta bir duvar sıcaklığı. Uzunlukları L ile bölüyoruz. " +
       "Sonuç sağda: Laplace denklemi aynı kalıyor, üç kenarda theta bir, altta Robin koşulu yalnızca Bi içeriyor. L, k, h, 70 ve 20 ayrı ayrı yok oldu; hepsi Bi'nin içinde. " +
       "Boyutlu sonuca dönmek için T eşittir 20 artı 50 theta." });
-  deck.eq(s, ["θ = (T − T∞) / (Tw − T∞)", "ξ = x / L,   η = y / L", "T = 20 + 50 θ  [°C]"],
-    { x: M, y: BODY_TOP + 0.1, w: 5.4, h: 2.4, size: 20, label: "ÖLÇEKLER" });
-  deck.eq(s, ["∂²θ/∂ξ² + ∂²θ/∂η² = 0", "θ = 1   (ξ = 0,  ξ = 1,  η = 1)", "∂θ/∂η = Bi · θ   (η = 0)"],
-    { x: 6.4, y: BODY_TOP + 0.1, w: 6.33, h: 2.4, size: 20, label: "BOYUTSUZ PROBLEM" });
-  s.addText("→", { x: 5.9, y: BODY_TOP + 0.9, w: 0.6, h: 0.6, fontSize: 30, color: hex("titanyum"), align: "center", margin: 0, isTextBox: true, objectName: "nd_arrow" });
-  const ty = 4.85, tw = (W - 2 * M - 0.6) / 3;
-  [["θ = 1", "duvar, 70 °C"], ["θ = 0", "su, 20 °C"], [`θ = ${fdm.theta_mid_bottom.toFixed(2)}`, `alt orta, ${fdm.T_mid_bottom_C.toFixed(1)} °C`]]
-    .forEach(([v, l], i) => deck.stat(s, { x: M + i * (tw + 0.3), y: ty, w: tw, value: v, label: l, color: i === 2 ? C.accent1 : C.accent3 }));
+  deck.mathBox(s, ["scales"], { x: M, y: BODY_TOP, w: 4.3, h: 2.75, label: "ÖLÇEKLER", scale: 0.9 });
+  deck.mathBox(s, ["nd_problem"], { x: 5.6, y: BODY_TOP, w: W - M - 5.6, h: 2.75, label: "BOYUTSUZ PROBLEM", scale: 0.95 });
+  s.addText("→", { x: 4.9, y: BODY_TOP + 1.1, w: 0.7, h: 0.6, fontSize: 30, color: hex("titanyum"), align: "center", margin: 0, isTextBox: true, objectName: "nd_arrow" });
+  const ty = 5.2, tw = (W - 2 * M - 0.6) / 3;
+  [["v_th1", "duvar, 70 °C"], ["v_th0", "su, 20 °C"], ["v_thm", `alt orta, ${fdm.T_mid_bottom_C.toFixed(1)} °C`]].forEach(([k, l], i) => {
+    const m = deck.math(s, k, { x: M + i * (tw + 0.3), y: ty, scale: 0.9 });
+    s.addText(l, { x: M + i * (tw + 0.3), y: m.y + m.h + 0.12, w: tw, h: 0.35, fontSize: 13, color: hex("titanyum"), margin: 0, isTextBox: true, objectName: `nd_lbl_${i}` });
+  });
 }
 {
   const s = deck.content(SEC2, "Robin koşulu: alt yüzeyde iletimle gelen ısı konveksiyonla gider", { step: "ADIM 2 · ROBIN",
@@ -164,18 +168,19 @@ deck.section(SEC2, "02", "Boyutsuzlaştır", "Birimlerden arındır, parametrele
       "İşarete dikkat: normalin yönünü karıştırırsanız işaret ters döner ve ısı suya gitmek yerine sudan gelir. PINN kodunda en sık yapılan hatalardan biri bu." });
   const cw = (W - 2 * M - 0.6) / 3, y = BODY_TOP + 0.1, h = 3.1;
   const steps = [
-    ["Enerji dengesi (η = 0)", "k ∂T/∂y = h (T − T∞)", "iletim akısı = konveksiyon akısı"],
-    ["Ölçekli değişkenler", "(k ΔT / L) ∂θ/∂η = h ΔT θ", "T − T∞ = ΔT θ,  y = L η"],
-    ["Sadeleştir", "∂θ/∂η = (hL/k) θ = Bi θ", "ΔT sadeleşir, tek parametre kalır"],
+    ["Enerji dengesi, η = 0", "rob1", "iletim akısı = konveksiyon akısı", null],
+    ["Ölçekli değişkenler", "rob2", null, "rob2_sub"],
+    ["Sadeleştir", "rob3", "ΔT sadeleşir, tek parametre kalır", null],
   ];
-  steps.forEach(([hd, e, note], i) => {
+  steps.forEach(([hd, e, note, noteEq], i) => {
     const x = M + i * (cw + 0.3);
     s.addShape(pres.shapes.RECTANGLE, { x, y, w: cw, h, fill: { color: hex("krom") }, line: { type: "none" }, objectName: `rob_bg_${i}` });
     s.addText(String(i + 1), { x: x + 0.25, y: y + 0.25, w: 0.5, h: 0.5, shape: pres.shapes.OVAL, fill: { color: C.accent3 },
       color: "FFFFFF", bold: true, fontSize: 16, align: "center", valign: "middle", margin: 0, isTextBox: true, objectName: `rob_n_${i}` });
     s.addText(hd, { x: x + 0.95, y: y + 0.25, w: cw - 1.2, h: 0.5, fontSize: 17, bold: true, color: C.text1, valign: "middle", margin: 0, isTextBox: true, objectName: `rob_h_${i}` });
-    s.addText(e, { x: x + 0.25, y: y + 1.1, w: cw - 0.5, h: 0.9, fontFace: "Cambria", fontSize: 21, color: C.text1, valign: "middle", margin: 0, isTextBox: true, objectName: `rob_e_${i}` });
-    s.addText(note, { x: x + 0.25, y: y + 2.15, w: cw - 0.5, h: 0.7, fontSize: 14, color: hex("panel"), valign: "top", margin: 0, isTextBox: true, objectName: `rob_t_${i}` });
+    deck.math(s, e, { x: x + 0.25, y: y + 1.0, w: cw - 0.5, h: 1.0, valign: "middle", scale: 0.95 });
+    if (note) s.addText(note, { x: x + 0.25, y: y + 2.25, w: cw - 0.5, h: 0.6, fontSize: 14, color: hex("panel"), valign: "top", margin: 0, isTextBox: true, objectName: `rob_t_${i}` });
+    if (noteEq) deck.math(s, noteEq, { x: x + 0.25, y: y + 2.3, scale: 0.95 });
   });
   deck.card(s, { x: M, y: 5.45, w: W - 2 * M, h: 0.95, head: "İşaret kontrolü: ",
     body: "dışa dönük normal −y yönünde. Normali ters alırsanız ısı sudan plakaya akar; PINN kodunda en sık yapılan hata." });
@@ -187,12 +192,13 @@ deck.section(SEC2, "02", "Boyutsuzlaştır", "Birimlerden arındır, parametrele
       "İkinci neden: kayıp birden fazla terimden oluşuyor. Biri Kelvin bölü metre kare, diğeri Kelvin bölü metre biriminde olursa büyüklükleri onlarca kat farklı olur ve optimizer büyük terime kilitlenir. " +
       "Üçüncü neden: tek parametre Bi, sekizinci adımdaki parametrik PINN'in doğal girdisi. Bir ağ, tüm malzeme ve akış koşulları için çözüm verebilir." });
   const cw = (W - 2 * M - 0.6) / 3;
-  [["Girdiler O(1)", "ξ, η ∈ [0, 1]: tanh aktivasyonları doygunluğa girmez, gradyanlar sağlıklı kalır."],
+  [["Girdiler O(1)", "tanh aktivasyonları doygunluğa girmez, gradyanlar sağlıklı kalır.", "domain"],
    ["Kayıp terimleri dengeli", "PDE ve Robin artıkları aynı ölçekte; optimizer tek bir terime kilitlenmez."],
    ["Tek parametre: Bi", "Adım 8'de (ξ, η, Bi) girdili tek ağ, her malzeme ve akış koşulu için çözüm verir."]]
-    .forEach(([h, b], i) => deck.card(s, { x: M + i * (cw + 0.3), y: BODY_TOP + 0.1, w: cw, h: 2.5, head: h, body: b, num: i + 1, headSize: 17, bodySize: 15 }));
-  deck.eq(s, ["L = L_PDE + λ L_Robin   →   boyutsuzken λ ≈ 1 ile başlamak makul"],
-    { x: M, y: 4.95, w: W - 2 * M, h: 0.95, size: 18 });
+    .forEach(([h, b, m], i) => deck.card(s, { x: M + i * (cw + 0.3), y: BODY_TOP + 0.1, w: cw, h: 2.5, head: h, body: b, num: i + 1, headSize: 17, bodySize: 15, math: m }));
+  deck.mathBox(s, ["loss_w"], { x: M, y: 4.85, w: 6.4, h: 1.3, label: "KAYIP" });
+  deck.caption(s, "Boyutsuz formda terimler aynı ölçekte olduğu için λ ≈ 1 ile başlamak makul; boyutlu formda λ'yı elle onlarca kat ayarlamak gerekir.",
+    { x: M + 6.7, y: 5.0, w: W - 2 * M - 6.7, h: 1.1 });
 }
 deck.question(SEC2, "Boyutlu problemde kaç bağımsız parametre vardı, boyutsuzda kaç tane kaldı?", {
   hint: "İpucu: L, k, h, Tw ve T∞'ı sayın; sonra boyutsuz denklemlere bakın.",
@@ -209,24 +215,22 @@ deck.section(SEC3, "03", "FDM referansı ve doğrulama", "Ayrıklaştır, çöz,
       "Sağda alt kenar. Yüzey düğümü i, 0 bir bilinmeyen; ama altında komşu yok. Plakanın dışında, suyun içinde, hayali bir düğüm tanımlıyoruz: i, eksi 1. " +
       "Robin koşulunu merkezi farkla yazınca hayalet düğümün değerini içerideki i, 1 cinsinden buluyoruz. Bunu şablona koyunca hayalet düğüm kayboluyor ve yüzey için tek bir denklem kalıyor. " +
       "Alt köşeler yan duvarlara ait; orada theta bir." });
-  const img = deck.image(s, "03_stencil_ghost.png", { x: M, y: BODY_TOP - 0.1, w: W - 2 * M, h: 3.4 });
-  const half = (W - 2 * M - 0.3) / 2, ey = 5.25;
-  deck.eq(s, ["θᵢ₊₁,ⱼ + θᵢ₋₁,ⱼ + θᵢ,ⱼ₊₁ + θᵢ,ⱼ₋₁ − 4 θᵢ,ⱼ = 0"], { x: M, y: ey, w: half, h: 1.15, size: 18, label: "İÇ DÜĞÜM" });
-  deck.eq(s, ["θᵢ,₋₁ = θᵢ,₁ − 2Δ Bi θᵢ,₀", "θᵢ₋₁,₀ + θᵢ₊₁,₀ + 2θᵢ,₁ − (4 + 2Δ Bi) θᵢ,₀ = 0"],
-    { x: M + half + 0.3, y: ey, w: half, h: 1.15, size: 16, label: "ALT KENAR (HAYALET DÜĞÜM YOK EDİLİR)" });
+  const img = deck.image(s, "03_stencil_ghost.png", { x: M, y: BODY_TOP - 0.15, w: W - 2 * M, h: 3.2 });
+  const half = (W - 2 * M - 0.3) / 2, ey = 5.15;
+  deck.mathBox(s, ["st_in"], { x: M, y: ey, w: half, h: 1.35, label: "İÇ DÜĞÜM", scale: 0.95 });
+  deck.mathBox(s, ["st_ghost", "st_bot"], { x: M + half + 0.3, y: ey, w: half, h: 1.35, label: "ALT KENAR · HAYALET DÜĞÜM YOK EDİLİR", scale: 0.9, gap: 0.08 });
 }
 {
   const s = deck.content(SEC3, "Seri çözüm, FDM'yi ondan bağımsız bir yolla sınamamızı sağlar", { step: "ADIM 3 · ANALİTİK", level: YL,
     notes: "Değişkenlere ayırma. Theta'yı bir eksi phi olarak yazıyoruz; böylece phi yan duvarlarda ve üstte sıfır olur. Sinüs serisi yan duvarları, sinh terimi üst kenarı otomatik sağlıyor. " +
       "Geriye alt kenardaki Robin koşulu kalıyor; o da her modun katsayısı A n'yi belirliyor. Yalnızca tek n'ler var çünkü sabit bir fonksiyonun sinüs serisinde çift terimler sıfır. " +
       "Pratik not: cosh n pi büyük n'de taşar. Kodda oranı üstel fonksiyonlarla, taşmayacak biçimde yazdık. 4000 terim kullandık; alt köşelerde seri yavaş yakınsar." });
-  deck.eq(s, ["θ(ξ, η) = 1 − Σₙ ₜₑₖ Aₙ sin(nπξ) sinh(nπ(1−η))", "Aₙ = (4 Bi / nπ) / (nπ cosh nπ + Bi sinh nπ)"],
-    { x: M, y: BODY_TOP + 0.1, w: W - 2 * M, h: 2.0, size: 22 });
+  deck.mathBox(s, ["series", "an"], { x: M, y: BODY_TOP, w: W - 2 * M, h: 2.25, gap: 0.25, scale: 0.92 });
   const cw = (W - 2 * M - 0.6) / 3;
-  [["θ = 1 − φ", "φ yan duvarlarda ve üstte sıfır olur; homojen koşullar seriyi mümkün kılar."],
-   ["Robin → Aₙ", "Her modun katsayısı alt kenardaki Robin koşulundan gelir; yalnız tek n'ler kalır."],
-   ["Taşmasız hesap", "sinh/cosh oranı üstellerle yazılır; 4000 terim, köşelerde yavaş yakınsama."]]
-    .forEach(([h, b], i) => deck.card(s, { x: M + i * (cw + 0.3), y: 4.45, w: cw, h: 1.95, head: h, body: b, headSize: 17, bodySize: 14 }));
+  [["Homojenleştir", "phi", "φ yan duvarlarda ve üstte sıfır; sinüs serisi bunu sağlar.", 1],
+   ["Robin katsayıları verir", "an_rob", "Yalnız tek n'ler kalır.", 1],
+   ["Taşmasız hesap", "ratio", "4000 terim; köşelerde yavaş yakınsama.", 0.72]]
+    .forEach(([h, m, b, sc], i) => deck.card(s, { x: M + i * (cw + 0.3), y: 4.45, w: cw, h: 2.0, head: h, math: m, mathScale: sc, body: b, headSize: 17, bodySize: 14 }));
 }
 {
   const s = deck.content(SEC3, `Plakanın en soğuk noktası alt yüzeyin ortası: ${fdm.T_mid_bottom_C.toFixed(1)} °C`, { step: "ADIM 3 · SONUÇ",
@@ -237,7 +241,8 @@ deck.section(SEC3, "03", "FDM referansı ve doğrulama", "Ayrıklaştır, çöz,
   const x0 = 7.4, sw = W - M - x0;
   deck.stat(s, { x: x0, y: BODY_TOP, w: sw, value: fdm.T_mid_bottom_C.toFixed(1), unit: "°C", label: "en düşük sıcaklık, alt yüzey ortası" });
   deck.stat(s, { x: x0, y: BODY_TOP + 1.45, w: sw, value: (fdm.Q_per_depth_W_m / 1000).toFixed(2), unit: "kW/m", label: "alttan çekilen ısı Q′, birim derinlik" });
-  deck.stat(s, { x: x0, y: BODY_TOP + 2.9, w: sw, value: fdm.int_theta_bottom.toFixed(3), unit: "", label: "∫ θ(ξ, 0) dξ  ·  Q′ = hLΔT ∫θ dξ", color: C.accent3 });
+  deck.stat(s, { x: x0, y: BODY_TOP + 2.9, w: sw, value: fdm.int_theta_bottom.toFixed(3), unit: "", label: "boyutsuz alt yüzey integrali", color: C.accent3 });
+  deck.math(s, "qprime", { x: x0, y: BODY_TOP + 3.95, scale: 1 });
 }
 {
   const s = deck.content(SEC3, "FDM ve seri çözüm alt yüzeyde üst üste düşer", { step: "ADIM 3 · DOĞRULAMA",
@@ -317,19 +322,25 @@ pres.addSection({ title: SEC4 });
   const s = deck.content(SEC4, "Sıradaki ders: aynı problemi veri kullanmadan bir sinir ağıyla çözeceğiz", { step: "DERS 02 · ÖNİZLEME",
     notes: "Gelecek ders dördüncü adım. Girdi xi ve eta, çıktı theta olan küçük bir ağ kuracağız. Üç Dirichlet kenarını ağın yapısına gömeceğiz, böylece kayıpta yalnızca PDE ve Robin artıkları kalacak. " +
       "Türevleri otomatik türevle alacağız. Eğitimden sonra bugün kurduğumuz referansla, özellikle köşelerde ve alt yüzey ısı akısında karşılaştıracağız." });
-  const y = BODY_TOP + 0.4, bh = 1.3;
-  const boxes = [["(ξ, η)", "girdi"], ["MLP · tanh", "4–5 katman × 50"], ["θ̂ = 1 + ξ(1−ξ)(1−η) N", "Dirichlet gömülü"], ["L = |∇²θ̂|² + |∂θ̂/∂η − Bi θ̂|²", "kayıp: PDE + Robin"]];
-  const bw = [1.9, 2.3, 3.4, 3.7], gap = (W - 2 * M - bw.reduce((a, b) => a + b, 0)) / 3;
+  const y = BODY_TOP + 0.3, bh = 1.45;
+  const boxes = [
+    { m: "pv_in", l: "girdi", w: 1.6 },
+    { t: "MLP · tanh", l: "4–5 katman × 50 nöron", w: 2.2 },
+    { m: "pv_hard", l: "Dirichlet kenarları gömülü", w: 3.95, sc: 0.92 },
+    { m: "pv_loss", l: "kayıp: PDE + Robin artığı", w: 3.55, sc: 0.92, fill: "plan" },
+  ];
+  const gap = (W - 2 * M - boxes.reduce((a, b) => a + b.w, 0)) / 3;
   let x = M;
-  boxes.forEach(([t, l], i) => {
-    s.addText(t, { x, y, w: bw[i], h: bh, shape: pres.shapes.RECTANGLE, fill: { color: i === 3 ? hex("plan") : hex("krom") },
-      color: i === 3 ? "FFFFFF" : C.text1, fontFace: "Cambria", fontSize: i >= 2 ? 16 : 18, bold: i < 2, align: "center", valign: "middle",
-      margin: 4, isTextBox: true, objectName: `pinn_box_${i}` });
-    s.addText(l, { x, y: y + bh + 0.12, w: bw[i], h: 0.4, fontSize: 13, color: hex("titanyum"), align: "center", margin: 0, isTextBox: true, objectName: `pinn_lbl_${i}` });
-    if (i < 3) s.addText("→", { x: x + bw[i], y: y + 0.35, w: gap, h: 0.6, fontSize: 24, color: hex("titanyum"), align: "center", margin: 0, isTextBox: true, objectName: `pinn_arr_${i}` });
-    x += bw[i] + gap;
+  boxes.forEach((b, i) => {
+    s.addShape(pres.shapes.RECTANGLE, { x, y, w: b.w, h: bh, fill: { color: hex("krom") },
+      line: b.fill ? { color: hex(b.fill), width: 2.5 } : { type: "none" }, objectName: `pinn_box_${i}` });
+    if (b.m) deck.math(s, b.m, { x, y, w: b.w, h: bh, align: "center", valign: "middle", scale: b.sc || 1 });
+    else s.addText(b.t, { x, y, w: b.w, h: bh, fontSize: 18, bold: true, color: C.text1, align: "center", valign: "middle", margin: 0, isTextBox: true, objectName: `pinn_t_${i}` });
+    s.addText(b.l, { x, y: y + bh + 0.12, w: b.w, h: 0.4, fontSize: 13, color: hex("titanyum"), align: "center", margin: 0, isTextBox: true, objectName: `pinn_lbl_${i}` });
+    if (i < 3) s.addText("→", { x: x + b.w, y: y + 0.42, w: gap, h: 0.6, fontSize: 24, color: hex("titanyum"), align: "center", margin: 0, isTextBox: true, objectName: `pinn_arr_${i}` });
+    x += b.w + gap;
   });
-  deck.card(s, { x: M, y: 4.6, w: W - 2 * M, h: 1.2, head: "Başarı ölçütü bugünkü referans",
+  deck.card(s, { x: M, y: 4.75, w: W - 2 * M, h: 1.2, head: "Başarı ölçütü bugünkü referans",
     body: "Bağıl L₂ hata, köşe hata haritası ve alt yüzey ısı akısı Q′; kayıp eğrisi tek başına yeterli değil." });
 }
 {

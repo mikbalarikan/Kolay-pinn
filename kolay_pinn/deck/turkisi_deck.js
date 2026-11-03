@@ -46,7 +46,7 @@ function pngSize(file) {
   return { w: b.readUInt32BE(16), h: b.readUInt32BE(20) };
 }
 
-function createDeck({ course, lecture, assets, title }) {
+function createDeck({ course, lecture, assets, title, eqDir }) {
   const pres = new pptxgen();
   pres.layout = "LAYOUT_WIDE";
   pres.author = "Türkişi Engineering";
@@ -55,6 +55,8 @@ function createDeck({ course, lecture, assets, title }) {
   pres.theme = { headFontFace: THEME.headFontFace, bodyFontFace: THEME.bodyFontFace };
   const C = pres.SchemeColor;
   const A = (f) => path.join(assets, f);
+  const EQ = eqDir ? JSON.parse(fs.readFileSync(path.join(eqDir, "index.json"), "utf8")) : {};
+  const eqUsed = {};
   const footer = `${course} · ${lecture}`;
 
   // ---------- layouts ----------
@@ -135,7 +137,7 @@ function createDeck({ course, lecture, assets, title }) {
       return { x, y: box.y + (box.h - h) / 2, w, h };
     },
 
-    card(s, { x, y, w, h, head, body, num, dark, headSize = 16, bodySize = 14 }) {
+    card(s, { x, y, w, h, head, body, num, dark, headSize = 16, bodySize = 14, math, mathScale = 1 }) {
       s.addShape(pres.shapes.RECTANGLE, { x, y, w, h, fill: { color: dark ? hex("panel") : hex("krom") }, line: { type: "none" }, objectName: id("card") });
       let tx = x + 0.25;
       if (num !== undefined) {
@@ -147,19 +149,53 @@ function createDeck({ course, lecture, assets, title }) {
       const tw = x + w - 0.25 - tx;
       const fg = dark ? C.background2 : C.text1;
       const runs = [];
+      if (math) {
+        // head, then the equation, then body underneath
+        s.addText(head, { x: tx, y: y + 0.22, w: tw, h: 0.4, fontSize: headSize, bold: true, color: fg, margin: 0,
+          valign: "top", isTextBox: true, objectName: id("cardhead") });
+        const m = deck.math(s, math, { x: tx, y: y + 0.75, scale: mathScale });
+        if (body) s.addText(body, { x: tx, y: m.y + m.h + 0.18, w: tw, h: y + h - 0.2 - (m.y + m.h + 0.18),
+          fontSize: bodySize, color: dark ? hex("gumus") : hex("panel"), margin: 0, valign: "top", isTextBox: true,
+          objectName: id("cardbody") });
+        return;
+      }
       if (head) runs.push({ text: head, options: { bold: true, fontSize: headSize, color: fg, breakLine: !!body } });
       if (body) runs.push({ text: body, options: { fontSize: bodySize, color: dark ? hex("gumus") : hex("panel") } });
       s.addText(runs, { x: tx, y: y + 0.22, w: tw, h: h - 0.44, valign: "top", margin: 0, paraSpaceAfter: 4,
         isTextBox: true, objectName: id("cardtext") });
     },
 
-    eq(s, lines, { x, y, w, h, size = 18, label }) {   // equation block (Cambria Math-safe)
+    // ---- matematik: LaTeX ile dizilir; PowerPoint'te düzenlenebilir denklem (OMML), diğerlerinde LaTeX görseli
+    math(s, key, { x, y, scale = 1, align = "left", w: boxW, h: boxH, valign = "top" }) {
+      const e = EQ[key];
+      if (!e) throw new Error(`denklem yok: ${key} (önce equations.py çalıştırın)`);
+      const w = e.w * scale, h = e.h * scale;
+      const px = align === "center" && boxW ? x + (boxW - w) / 2 : align === "right" && boxW ? x + boxW - w : x;
+      const py = valign === "middle" && boxH ? y + (boxH - h) / 2 : y;
+      eqUsed[key] = e;
+      s.addImage({ path: path.join(eqDir, e.png), x: px, y: py, w, h,
+        altText: e.tex, objectName: `eq:${key}:${align === "center" ? "c" : "l"}:${scale}` });
+      return { x: px, y: py, w, h };
+    },
+
+    mathSize(key, scale = 1) { const e = EQ[key]; return { w: e.w * scale, h: e.h * scale }; },
+
+    // krom zeminli denklem bloğu; keys alt alta, sola yaslı, dikeyde ortalı
+    mathBox(s, keys, { x, y, w, h, label, gap = 0.22, scale = 1, align = "left" }) {
       s.addShape(pres.shapes.RECTANGLE, { x, y, w, h, fill: { color: hex("krom") }, line: { type: "none" }, objectName: id("eqbg") });
-      const runs = [];
-      if (label) runs.push({ text: label, options: { fontSize: 12, color: hex("titanyum"), bold: true, breakLine: true, fontFace: "Arial" } });
-      lines.forEach((t, i) => runs.push({ text: t, options: { breakLine: i < lines.length - 1 } }));
-      s.addText(runs, { x: x + 0.3, y: y + 0.15, w: w - 0.6, h: h - 0.3, fontFace: "Cambria", fontSize: size,
-        color: C.text1, valign: "middle", margin: 0, paraSpaceAfter: 6, isTextBox: true, objectName: id("eq") });
+      let top = y + 0.2;
+      if (label) {
+        s.addText(label, { x: x + 0.3, y: y + 0.18, w: w - 0.6, h: 0.3, fontSize: 12, bold: true, color: hex("titanyum"),
+          charSpacing: 1, margin: 0, isTextBox: true, objectName: id("eqlabel") });
+        top = y + 0.55;
+      }
+      const hs = keys.map((k) => deck.mathSize(k, scale).h);
+      const total = hs.reduce((a, b) => a + b, 0) + gap * (keys.length - 1);
+      let cy = top + Math.max(0, (y + h - 0.2 - top - total) / 2);
+      keys.forEach((k, i) => {
+        deck.math(s, k, { x: x + 0.3, y: cy, scale, align, w: w - 0.6 });
+        cy += hs[i] + gap;
+      });
     },
 
     stat(s, { x, y, w, value, unit, label, color, dark }) {
@@ -230,10 +266,50 @@ function createDeck({ course, lecture, assets, title }) {
     async write(file) {
       await pres.writeFile({ fileName: file });
       await applyTheme(file, THEME);
+      if (eqDir) await nativeEquations(file, EQ, eqDir);
       return file;
     },
   };
   return deck;
+}
+
+// Replace each LaTeX picture named "eq:<key>:<align>:<scale>" with
+//   mc:AlternateContent  ->  Choice(a14): text box holding the editable OMML equation
+//                            Fallback  : the original LaTeX picture
+// PowerPoint 2010+ shows the editable equation; other viewers show the LaTeX render.
+async function nativeEquations(file, EQ, eqDir) {
+  const zip = await JSZip.loadAsync(fs.readFileSync(file));
+  const NS_M = "http://schemas.openxmlformats.org/officeDocument/2006/math";
+  const NS_A14 = "http://schemas.microsoft.com/office/drawing/2010/main";
+  const NS_MC = "http://schemas.openxmlformats.org/markup-compatibility/2006";
+  const omml = {};
+  const runProps = (sz, col) => `<a:rPr lang="tr-TR" sz="${sz}"><a:solidFill><a:srgbClr val="${col}"/></a:solidFill>` +
+    `<a:latin typeface="Cambria Math" panose="02040503050406030204" pitchFamily="18" charset="0"/></a:rPr>`;
+  for (const name of Object.keys(zip.files).filter((f) => /^ppt\/slides\/slide\d+\.xml$/.test(f))) {
+    let xml = await zip.file(name).async("string");
+    let changed = false;
+    xml = xml.replace(/<p:pic>([\s\S]*?)<\/p:pic>/g, (pic, inner) => {
+      const m = inner.match(/<p:cNvPr id="(\d+)" name="eq:([^:"]+):([lc]):([\d.]+)"/);
+      if (!m) return pic;
+      const [, cid, key, al, scale] = m;
+      const e = EQ[key];
+      const xfrm = inner.match(/<a:xfrm[^>]*>[\s\S]*?<\/a:xfrm>/)[0];
+      const sz = Math.round(e.size * Number(scale) * 100);
+      if (!omml[key]) omml[key] = fs.readFileSync(path.join(eqDir, e.omml), "utf8");
+      const body = omml[key].replace(/<m:r>(<m:rPr>[\s\S]*?<\/m:rPr>)?/g, (_, rp) => `<m:r>${rp || ""}${runProps(sz, e.color)}`);
+      const jc = al === "c" ? "center" : "left";
+      const sp = `<p:sp><p:nvSpPr><p:cNvPr id="${cid}" name="Denklem ${key}"/><p:cNvSpPr txBox="1"/><p:nvPr/></p:nvSpPr>` +
+        `<p:spPr>${xfrm}<a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:noFill/></p:spPr>` +
+        `<p:txBody><a:bodyPr wrap="none" lIns="0" tIns="0" rIns="0" bIns="0" anchor="ctr"><a:noAutofit/></a:bodyPr><a:lstStyle/>` +
+        `<a:p><a:pPr algn="${al === "c" ? "ctr" : "l"}"/><a14:m><m:oMathPara xmlns:m="${NS_M}"><m:oMathParaPr><m:jc m:val="${jc}"/></m:oMathParaPr>` +
+        `${body}</m:oMathPara></a14:m><a:endParaRPr lang="tr-TR" sz="${sz}"/></a:p></p:txBody></p:sp>`;
+      changed = true;
+      return `<mc:AlternateContent xmlns:mc="${NS_MC}"><mc:Choice xmlns:a14="${NS_A14}" Requires="a14">${sp}</mc:Choice>` +
+        `<mc:Fallback>${pic}</mc:Fallback></mc:AlternateContent>`;
+    });
+    if (changed) zip.file(name, xml);
+  }
+  fs.writeFileSync(file, await zip.generateAsync({ type: "nodebuffer", compression: "DEFLATE" }));
 }
 
 // Write THEME colours + fonts into ppt/theme/theme*.xml (pptxgenjs cannot).
@@ -253,4 +329,4 @@ async function applyTheme(file, theme) {
   fs.writeFileSync(file, await zip.generateAsync({ type: "nodebuffer", compression: "DEFLATE" }));
 }
 
-module.exports = { createDeck, applyTheme, THEME, PAL };
+module.exports = { createDeck, applyTheme, nativeEquations, THEME, PAL };

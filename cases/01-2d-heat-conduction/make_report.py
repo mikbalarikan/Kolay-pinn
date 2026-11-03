@@ -117,6 +117,54 @@ cor, fdm, cv_ = S["correlation"], S["fdm_N101"], S["convergence"]
 fig_png = HERE / "figures" / "fig01_fdm_reference.png"
 
 content_w = PAGE_W - 36 * mm
+
+# ---------------------------------------------------------------- equations (LaTeX, same source as the lecture)
+sys.path.insert(0, str(HERE / "lecture"))
+from equations import ALL_TEX  # noqa: E402
+from kolay_pinn.mathtex import render_set  # noqa: E402
+
+REPORT_EQ = {k: {"tex": ALL_TEX[k], "size": 10.5} for k in
+             ["nd_problem", "rob1", "rob3", "qprime", "st_in", "st_ghost", "st_bot", "series", "an"]}
+REPORT_EQ.update({k + "_t": {"tex": ALL_TEX[k], "size": 8.5} for k in ["re", "nu", "h", "g_biot", "g_nondim"]})
+REPORT_EQ["scales_inline"] = {"tex": r"\theta = \frac{T - T_\infty}{T_w - T_\infty}, \qquad \xi = \frac{x}{L}, \qquad \eta = \frac{y}{L}", "size": 10.5}
+EQDIR = HERE / "report" / "eq"
+EQX = render_set(REPORT_EQ, EQDIR, color=C["derin"].lstrip("#"), omml=False)
+_eqn = [0]
+
+
+def M(key):
+    """inline-size equation image (for table cells)"""
+    e = EQX[key]
+    return Image(str(EQDIR / e["png"]), width=e["w"] * 72, height=e["h"] * 72)
+
+
+def E(key, numbered=True):
+    """display equation, centred, with (n) at the right margin"""
+    e = EQX[key]
+    img = Image(str(EQDIR / e["png"]), width=e["w"] * 72, height=e["h"] * 72)
+    if numbered:
+        _eqn[0] += 1
+    t = Table([["", img, P(f"({_eqn[0]})" if numbered else "", "p")]],
+              colWidths=[14 * mm, content_w - 28 * mm, 14 * mm], hAlign="CENTER")
+    t.setStyle(TableStyle([("ALIGN", (1, 0), (1, 0), "CENTER"), ("ALIGN", (2, 0), (2, 0), "RIGHT"),
+                           ("VALIGN", (0, 0), (-1, -1), "MIDDLE"), ("TOPPADDING", (0, 0), (-1, -1), 4),
+                           ("BOTTOMPADDING", (0, 0), (-1, -1), 4)]))
+    return t
+
+
+def table_m(rows, widths):
+    """table whose cells may be equation images"""
+    data = [[c if not isinstance(c, str) else P(c, "cellb" if i == 0 else "cell") for c in r] for i, r in enumerate(rows)]
+    t = Table(data, colWidths=widths, hAlign="LEFT")
+    style = [("LINEABOVE", (0, 0), (-1, 0), 0.8, INK), ("LINEBELOW", (0, -1), (-1, -1), 0.8, INK),
+             ("LINEBELOW", (0, 0), (-1, 0), 0.4, MUTED), ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+             ("TOPPADDING", (0, 0), (-1, -1), 3), ("BOTTOMPADDING", (0, 0), (-1, -1), 3), ("LEFTPADDING", (0, 0), (-1, -1), 4)]
+    for r in range(2, len(rows), 2):
+        style.append(("BACKGROUND", (0, r), (-1, r), col["kagit"]))
+    t.setStyle(TableStyle(style))
+    return t
+
+
 story = [Spacer(1, BAND_H - 12 * mm)]
 story += [P("Adım 1–3: problem tanımı, boyutsuzlaştırma ve FDM referansı", "h1"),
           P("Kare çelik plaka, üç kenar 70 °C, alt kenar suyla konvektif soğutma. "
@@ -127,31 +175,38 @@ story += [P("1 · Problem tanımı", "h2"),
                  ["Plaka boyu L", "0.1 m", "kare"],
                  ["Isı iletim katsayısı k", "49 W m<super>−1</super> K<super>−1</super>", "çelik"],
                  ["Duvar sıcaklığı T<sub>w</sub>", "70 °C", "üst, sol, sağ"],
-                 ["Akışkan", "su, 1 m s<super>−1</super>, 20 °C", "alt kenar boyunca"],
-                 ["Re<sub>L</sub> = UL/ν", f"{cor['Re']:,}".replace(",", " "), "&lt; 5×10<super>5</super> → laminer"],
-                 ["Nu<sub>L</sub> = 0.664 Re<super>1/2</super> Pr<super>1/3</super>", f"{cor['Nu']}", "izotermal düz levha"],
-                 ["h = Nu k<sub>f</sub>/L", f"{cor['h_W_m2K']:,} W m<super>−2</super> K<super>−1</super>".replace(",", " "),
-                  "su 20 °C: ν = 1.004×10<super>−6</super>, k<sub>f</sub> = 0.598, Pr = 7.01"],
-                 ["Bi = hL/k", f"<b>{cor['Bi']:.2f}</b>", "h = 2000 ile 4.08; film 35 °C ile 5.3"]],
+                 ["Akışkan", "su, 1 m s<super>−1</super>, 20 °C", "alt kenar boyunca"]],
                 [48 * mm, 42 * mm, content_w - 90 * mm]),
+          Spacer(1, 6),
+          P("Su tarafının ortalama ısı taşınım katsayısı laminer, izotermal düz levha korelasyonundan; su özellikleri 20 °C'de "
+            "(ν = 1.004×10<super>−6</super> m² s<super>−1</super>, k<sub>f</sub> = 0.598 W m<super>−1</super> K<super>−1</super>, Pr = 7.01):"),
+          table_m([["Tanım", "Değer", "Not"],
+                   [M("re_t"), f"{cor['Re']:,}".replace(",", " "), "&lt; 5×10<super>5</super> → laminer"],
+                   [M("nu_t"), f"{cor['Nu']}", "izotermal düz levha"],
+                   [M("h_t"), f"{cor['h_W_m2K']:,} W m<super>−2</super> K<super>−1</super>".replace(",", " "), "verilen h = 2000 ile fark %20"],
+                   [M("g_biot_t"), f"<b>{cor['Bi']:.2f}</b>", "h = 2000 ile 4.08; film 35 °C ile 5.3"]],
+                  [48 * mm, 42 * mm, content_w - 90 * mm]),
           Spacer(1, 3),
-          P("Bi ≈ 5 ≫ 0.1: plaka içinde güçlü gradyan var, toplu kapasite yaklaşımı geçersiz — PINN için iyi bir test. "
+          P("Bi ≈ 5, 0.1 eşiğinin çok üstünde: plaka içinde güçlü gradyan var, toplu kapasite yaklaşımı geçersiz — PINN için iyi bir test. "
             "Korelasyon izotermal yüzey varsayar; burada alt yüzey 37–70 °C arasında değiştiği için sabit h bir "
             "mühendislik kabulüdür.")]
 
 story += [P("2 · Boyutsuzlaştırma", "h2"),
-          P("θ = (T − T<sub>∞</sub>)/(T<sub>w</sub> − T<sub>∞</sub>), ξ = x/L, η = y/L tanımlarıyla tek parametre Bi kalır:"),
-          P("∂²θ/∂ξ² + ∂²θ/∂η² = 0          (ξ, η) ∈ [0, 1]²<br/>"
-            "θ = 1                          ξ = 0, ξ = 1, η = 1<br/>"
-            "∂θ/∂η = Bi · θ                 η = 0   (k ∂T/∂y = h (T − T∞))", "eq"),
-          P("Alttan çıkan ısı (birim derinlik): Q′ = h L (T<sub>w</sub> − T<sub>∞</sub>) ∫<sub>0</sub><super>1</super> θ(ξ, 0) dξ.")]
+          P("Ölçekler:"), E("scales_inline", numbered=False),
+          P("Bu tanımlarla problem tek parametreye, Bi'ye iner:"),
+          E("nd_problem"),
+          P("Robin koşulu alt yüzeydeki enerji dengesinden gelir; ΔT = T<sub>w</sub> − T<sub>∞</sub> sadeleşir:"),
+          E("rob1"), E("rob3"),
+          KeepTogether([P("Alttan çıkan ısı, birim derinlik başına:"), E("qprime")])]
 
 story += [P("3 · FDM referans çözücü ve analitik doğrulama", "h2"),
-          P("Düzgün N×N düğüm ağı, ikinci mertebe merkezi farklar. Robin koşulu alt kenarda hayalet düğümle: "
-            "θ<sub>i,−1</sub> = θ<sub>i,1</sub> − 2Δ Bi θ<sub>i,0</sub>. Alt köşeler yan duvarlara aittir (θ = 1). "
-            "Seyrek doğrudan çözücü. Doğrulama için değişkenlere ayırma serisi:"),
-          P("θ = 1 − Σ<sub>n tek</sub> A<sub>n</sub> sin(nπξ) sinh(nπ(1−η)),<br/>"
-            "A<sub>n</sub> = (4Bi/nπ) / (nπ cosh nπ + Bi sinh nπ)", "eq")]
+          P("Düzgün N×N düğüm ağı, ikinci mertebe merkezi farklar. İç düğümlerde beş noktalı şablon:"),
+          E("st_in"),
+          P("Alt kenarda Robin koşulu hayalet düğümle uygulanır; hayalet değer şablona konunca yüzey denklemi kalır. "
+            "Alt köşeler yan duvarlara aittir (θ = 1). Doğrusal sistem seyrek doğrudan çözücüyle çözülür."),
+          E("st_ghost"), E("st_bot"),
+          KeepTogether([P("Doğrulama için değişkenlere ayırma ile elde edilen seri çözüm (4000 terim, taşmasız hesap):"),
+                        E("series"), E("an")])]
 
 img = Image(str(fig_png), width=content_w, height=content_w * 112 / 183)
 legend = P("<b>Fig. 1 | İkinci mertebe FDM seri çözümü yeniden üretiyor; hata alt köşelerdeki tekillikte toplanıyor.</b> "

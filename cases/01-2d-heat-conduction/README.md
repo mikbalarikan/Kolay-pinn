@@ -38,11 +38,13 @@ adım adım PINN'e geçmek.
 **h — düz levha üzerinde laminer akış korelasyonu.** Su özellikleri 20 °C'de
 (Incropera Tablo A.6): ν = 1.004×10⁻⁶ m²/s, k_f = 0.598 W/m·K, Pr = 7.01.
 
-```
-Re_L = U L / ν                 = 1.0 × 0.1 / 1.004e-6   ≈ 99 600   (< 5×10⁵ → laminer)
-Nu_L = 0.664 Re_L^½ Pr^⅓       = 0.664 × 315.6 × 1.913  ≈ 401
-h    = Nu_L k_f / L            = 401 × 0.598 / 0.1      ≈ 2 400 W/m²K
-Bi   = h L / k_s               = 2 398 × 0.1 / 49       ≈ 4.9
+```math
+\begin{aligned}
+\mathrm{Re}_L &= \frac{U L}{\nu} = \frac{1.0 \times 0.1}{1.004\times10^{-6}} \approx 99\,600 \quad (< 5\times10^5 \Rightarrow \text{laminer}) \\
+\overline{\mathrm{Nu}}_L &= 0.664\,\mathrm{Re}_L^{1/2}\,\mathrm{Pr}^{1/3} = 0.664 \times 315.6 \times 1.913 \approx 401 \\
+\bar h &= \frac{\overline{\mathrm{Nu}}_L\,k_f}{L} = \frac{401 \times 0.598}{0.1} \approx 2\,400\ \mathrm{W\,m^{-2}\,K^{-1}} \\
+\mathrm{Bi} &= \frac{\bar h\,L}{k} = \frac{2398 \times 0.1}{49} \approx 4.9
+\end{aligned}
 ```
 
 Notlar:
@@ -53,33 +55,40 @@ Notlar:
 - Korelasyon izotermal levha varsayar; alt yüzey burada 37–70 °C arasında değişiyor.
   Bu yüzden h sabit kabulü bir mühendislik yaklaşımıdır. İleride gerçek bir eşlenik
   (conjugate) CFD ile karşılaştırma ilginç bir yan adım olur.
-- Bi ≈ 5 ≫ 0.1: plaka içinde güçlü sıcaklık gradyanı var — PINN için iyi bir test.
+- $\mathrm{Bi} \approx 5 \gg 0.1$: plaka içinde güçlü sıcaklık gradyanı var — PINN için iyi bir test.
 
 ## 2. Boyutsuzlaştırma
 
-```
-θ = (T − T∞) / (T_w − T∞),    ξ = x / L,    η = y / L
-```
-
-Boyutsuz problem, ξ, η ∈ [0, 1]:
-
-```
-∂²θ/∂ξ² + ∂²θ/∂η² = 0                     (Laplace)
-θ = 1                    ξ = 0, ξ = 1, η = 1  (70 °C duvarlar)
-∂θ/∂η = Bi · θ           η = 0               (Robin / konveksiyon)
+```math
+\theta = \frac{T - T_\infty}{T_w - T_\infty}, \qquad \xi = \frac{x}{L}, \qquad \eta = \frac{y}{L}
 ```
 
-Robin koşulunun türetilmesi: alt yüzeyde dışarı (−y yönünde) çıkan iletim akısı,
-konveksiyonla taşınan akıya eşit → k ∂T/∂y = h (T − T∞). L ve ΔT ile bölünce
-∂θ/∂η = (hL/k) θ = Bi θ.
+Boyutsuz problem, $(\xi, \eta) \in [0,1]^2$:
+
+```math
+\begin{aligned}
+&\frac{\partial^2\theta}{\partial\xi^2} + \frac{\partial^2\theta}{\partial\eta^2} = 0 && \text{(Laplace)} \\
+&\theta = 1, \quad \xi = 0,\ \xi = 1,\ \eta = 1 && \text{(duvarlar, } 70\,^\circ\mathrm{C}\text{)} \\
+&\frac{\partial\theta}{\partial\eta} = \mathrm{Bi}\,\theta, \quad \eta = 0 && \text{(Robin / konveksiyon)}
+\end{aligned}
+```
+
+Robin koşulunun türetilmesi: alt yüzeyde dışarı (−y yönünde) çıkan iletim akısı, konveksiyonla taşınan
+akıya eşit; $T - T_\infty = \Delta T\,\theta$ ve $y = L\eta$ yazınca $\Delta T$ sadeleşir:
+
+```math
+k\,\frac{\partial T}{\partial y} = h\,(T - T_\infty)
+\quad\Longrightarrow\quad
+\frac{\partial\theta}{\partial\eta} = \frac{hL}{k}\,\theta = \mathrm{Bi}\,\theta
+```
 
 Tek fiziksel parametre Bi. Geometri ve sıcaklıklar ölçekten düştü — PINN'i boyutsuz
 formda eğitmenin ana sebebi bu (girdi ve çıktılar O(1)).
 
-Sıcaklık: T = 20 + 50 θ [°C]. Alt yüzeyden çıkan ısı (birim derinlik başına):
+Sıcaklık: $T = 20 + 50\,\theta$ [°C]. Alt yüzeyden çıkan ısı (birim derinlik başına):
 
-```
-Q' = h L (T_w − T∞) ∫₀¹ θ(ξ, 0) dξ
+```math
+Q' = \bar h\,L\,(T_w - T_\infty) \int_0^1 \theta(\xi, 0)\,d\xi
 ```
 
 ## 3. Referans FDM çözücü
@@ -87,18 +96,22 @@ Q' = h L (T_w − T∞) ∫₀¹ θ(ξ, 0) dξ
 `fdm_solver.py`: düzgün N×N düğüm ağı, 2. mertebe merkezi farklar, Robin koşulu için
 alt kenarda hayalet düğüm:
 
-```
-θ[i, −1] = θ[i, 1] − 2Δ·Bi·θ[i, 0]
-⇒ θ[i−1,0] + θ[i+1,0] + 2θ[i,1] − (4 + 2Δ·Bi) θ[i,0] = 0
+```math
+\begin{aligned}
+&\theta_{i+1,j} + \theta_{i-1,j} + \theta_{i,j+1} + \theta_{i,j-1} - 4\,\theta_{i,j} = 0 && \text{(iç düğüm)} \\
+&\theta_{i,-1} = \theta_{i,1} - 2\Delta\,\mathrm{Bi}\,\theta_{i,0} && \text{(hayalet düğüm)} \\
+&\theta_{i-1,0} + \theta_{i+1,0} + 2\,\theta_{i,1} - (4 + 2\Delta\,\mathrm{Bi})\,\theta_{i,0} = 0 && \text{(alt kenar)}
+\end{aligned}
 ```
 
-Alt köşeler yan duvarlara ait (θ = 1). Doğrusal sistem seyrek doğrudan çözücüyle çözülür.
+Alt köşeler yan duvarlara ait ($\theta = 1$). Doğrusal sistem seyrek doğrudan çözücüyle çözülür.
 
 **Analitik doğrulama.** Değişkenlere ayırma ile:
 
-```
-θ = 1 − Σ_{n tek} A_n sin(nπξ) sinh(nπ(1−η)),
-A_n = (4 Bi / nπ) / (nπ cosh nπ + Bi sinh nπ)
+```math
+\theta(\xi,\eta) = 1 - \sum_{n\ \text{tek}} A_n \sin(n\pi\xi)\,\sinh\big(n\pi(1-\eta)\big),
+\qquad
+A_n = \frac{4\,\mathrm{Bi}/(n\pi)}{n\pi\cosh(n\pi) + \mathrm{Bi}\,\sinh(n\pi)}
 ```
 
 ### Sonuçlar (Bi = 4.895, N = 101)
@@ -140,7 +153,7 @@ python fdm_solver.py            # çözer, data/fdm_N101.{npz,csv} yazar
 python fdm_solver.py --Bi 4.08  # h = 2000 W/m²K durumu
 python plot_reference.py        # figures/fig01_fdm_reference.{pdf,svg,png} + data/summary.json
 python make_report.py           # report/case01_adim1-3_fdm_referans.pdf
-python lecture/make_slide_figures.py && node lecture/build_lecture.js   # ders destesi (önce kökte: npm install)
+python lecture/equations.py && python lecture/make_slide_figures.py && node lecture/build_lecture.js   # ders destesi (önce kökte: npm install; ayrıca pdflatex + pandoc)
 ```
 
 `data/fdm_N101.npz` alanları: `x, y, theta, theta_exact, Bi, L, k, T_wall, T_inf`.
