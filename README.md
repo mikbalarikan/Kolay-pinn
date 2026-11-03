@@ -13,7 +13,7 @@ Her case dört çıktı üretir: **ders destesi** (.pptx, konuşmacı notları =
 
 | Case | Problem | Durum | Ders | Rapor |
 |---|---|---|---|---|
-| [01 · 2D ısı iletimi](cases/01-2d-heat-conduction/) | Kare çelik plaka, üç kenar 70 °C, alt kenar su ile konvektif soğutma (Bi ≈ 4.9) | Adım 1–3 ✅ · PINN ⏳ | [Ders 01 .pptx](cases/01-2d-heat-conduction/lecture/ders01_2d_isi_iletimi_referans.pptx) · [defter](cases/01-2d-heat-conduction/notebook/ders01_adim_adim_fdm.ipynb) | [PDF](cases/01-2d-heat-conduction/report/case01_adim1-3_fdm_referans.pdf) |
+| [01 · 2D ısı iletimi](cases/01-2d-heat-conduction/) | Kare çelik plaka, üç kenar 70 °C, alt kenar su ile konvektif soğutma (Bi ≈ 4.9) | Adım 1–5 ✅ · hibrit ⏳ | [Ders 01](cases/01-2d-heat-conduction/lecture/ders01_2d_isi_iletimi_referans.pptx) · [defter](cases/01-2d-heat-conduction/notebook/ders01_adim_adim_fdm.ipynb)<br>[Ders 02](cases/01-2d-heat-conduction/lecture/ders02/ders02_forward_pinn.pptx) · [defter](cases/01-2d-heat-conduction/notebook/ders02_forward_pinn.ipynb) | [Adım 1–3](cases/01-2d-heat-conduction/report/case01_adim1-3_fdm_referans.pdf)<br>[Adım 4–5](cases/01-2d-heat-conduction/report/case01_adim4-5_forward_pinn.pdf) |
 
 Ek okuma: [PINN × CFD atlası](docs/pinn-cfd-atlas.html) — en çok yıldız alan 10 projenin görsel rehberi.
 
@@ -21,6 +21,8 @@ Ek okuma: [PINN × CFD atlası](docs/pinn-cfd-atlas.html) — en çok yıldız a
 
 ```
 kolay_pinn/style.py     ortak figür stili: Türkişi paleti + Nature figür kuralları (+ slayt boyutu)
+kolay_pinn/mathtex.py   LaTeX denklem dizgisi: PNG + PowerPoint denklem nesnesi (OMML)
+kolay_pinn/report.py    kimlikli PDF rapor iskeleti
 kolay_pinn/deck/        ders destesi çatısı (pptxgenjs): tema, yerleşimler, bileşenler
 brand/                  palet (palette.json), maskot, banner ve onu üreten betik
 cases/NN-<ad>/          her case: çözücüler, figures/, data/, report/, lecture/, README

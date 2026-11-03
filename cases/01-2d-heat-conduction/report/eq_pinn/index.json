@@ -1,0 +1,42 @@
+{
+ "hard": {
+  "png": "hard.png",
+  "omml": null,
+  "w": 2.3656,
+  "h": 0.2163,
+  "size": 10.5,
+  "color": "0D161F",
+  "tex": "\\hat\\theta(\\xi,\\eta) = 1 + \\xi\\,(1-\\xi)\\,(1-\\eta)\\,\\mathcal{N}(\\xi,\\eta)",
+  "hash": "77c25c8a3bf9"
+ },
+ "loss": {
+  "png": "loss.png",
+  "omml": null,
+  "w": 3.3329,
+  "h": 0.4846,
+  "size": 10.5,
+  "color": "0D161F",
+  "tex": "\\mathcal{L} = \\frac{1}{N_r}\\sum_{k=1}^{N_r}\\big(\\nabla^2\\hat\\theta(\\mathbf{x}_k)\\big)^2 + \\frac{\\lambda}{N_b}\\sum_{m=1}^{N_b}\\Big(\\frac{\\partial\\hat\\theta}{\\partial\\eta} - \\mathrm{Bi}\\,\\hat\\theta\\Big)^2_{(\\xi_m,0)}",
+  "hash": "1cb7f86de76c"
+ },
+ "conflict": {
+  "png": "conflict.png",
+  "omml": null,
+  "w": 4.9219,
+  "h": 0.4006,
+  "size": 10.5,
+  "color": "0D161F",
+  "tex": "\\left.\\frac{\\partial\\theta}{\\partial\\eta}\\right|_{\\xi=0} = 0 \\;\\;(\\text{yan duvar, } \\theta\\equiv1) \\qquad\\text{ama}\\qquad \\frac{\\partial\\theta}{\\partial\\eta} = \\mathrm{Bi}\\,\\theta = \\mathrm{Bi} \\;\\;(\\text{Robin, köşede})",
+  "hash": "ba0223298825"
+ },
+ "relL2": {
+  "png": "relL2.png",
+  "omml": null,
+  "w": 1.7393,
+  "h": 0.2163,
+  "size": 10.5,
+  "color": "0D161F",
+  "tex": "\\varepsilon_{L_2} = \\|\\hat\\theta - \\theta_{\\mathrm{seri}}\\|_2 \\,/\\, \\|\\theta_{\\mathrm{seri}}\\|_2",
+  "hash": "7b31d843d45a"
+ }
+}
