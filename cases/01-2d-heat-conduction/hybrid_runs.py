@@ -24,6 +24,10 @@ for s in (0, 1, 2):
         PLAN[f"hyb_{w}_s{s}"] = f"--n-data 20 --noise 0.01 --where {w} --seed {s}"
 for sig, name in ((0.0, "clean"), (0.05, "noisy05")):     # gürültü düzeyi (N_d = 20, tohum 0)
     PLAN[f"hyb_{name}"] = f"--n-data 20 --noise {sig} --where uniform --seed 0"
+# yanlış fizik: model Bi = 2 bilir, ölçümler gerçek Bi = 4.895'ten gelir — veri burada işe yarar mı?
+PLAN["wrongbi_n0"] = "--bi-model 2 --n-data 0 --seed 0"
+for n, mu in ((20, 1), (20, 100), (80, 100)):
+    PLAN[f"wrongbi_n{n}_mu{mu}"] = f"--bi-model 2 --n-data {n} --noise 0.01 --where uniform --mu {mu} --seed 0"
 
 if __name__ == "__main__":
     if "--list" in sys.argv:

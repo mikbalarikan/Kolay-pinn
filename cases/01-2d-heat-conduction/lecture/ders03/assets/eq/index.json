@@ -1,0 +1,132 @@
+{
+ "g_data": {
+  "png": "g_data.png",
+  "omml": "g_data.omml.xml",
+  "w": 2.6802,
+  "h": 0.5744,
+  "size": 17,
+  "color": "0D161F",
+  "tex": "\\mathcal{L}_{\\mathrm{veri}} = \\frac{1}{N_d}\\sum_{i=1}^{N_d}\\big(\\hat\\theta(\\mathbf{x}_i) - \\theta_i^{\\mathrm{ö}}\\big)^2",
+  "hash": "358258d19d27"
+ },
+ "g_mu": {
+  "png": "g_mu.png",
+  "omml": "g_mu.omml.xml",
+  "w": 0.6482,
+  "h": 0.248,
+  "size": 17,
+  "color": "0D161F",
+  "tex": "\\mu\\,\\mathcal{L}_{\\mathrm{veri}}",
+  "hash": "af696c0bc43b"
+ },
+ "g_noise": {
+  "png": "g_noise.png",
+  "omml": "g_noise.omml.xml",
+  "w": 1.3571,
+  "h": 0.3009,
+  "size": 17,
+  "color": "0D161F",
+  "tex": "\\varepsilon_i \\sim \\mathcal{N}(0, \\sigma^2)",
+  "hash": "6649ba45512a"
+ },
+ "g_model": {
+  "png": "g_model.png",
+  "omml": "g_model.omml.xml",
+  "w": 2.0812,
+  "h": 0.3736,
+  "size": 17,
+  "color": "0D161F",
+  "tex": "\\varepsilon_{\\mathrm{model}} = \\mathrm{RMS}\\big(\\hat\\theta - \\theta\\big)",
+  "hash": "2c58040f67c8"
+ },
+ "g_wrong": {
+  "png": "g_wrong.png",
+  "omml": "g_wrong.omml.xml",
+  "w": 1.1998,
+  "h": 0.2506,
+  "size": 17,
+  "color": "0D161F",
+  "tex": "\\mathrm{Bi}_{\\mathrm{model}} \\neq \\mathrm{Bi}",
+  "hash": "1e81af186cd0"
+ },
+ "g_filter": {
+  "png": "g_filter.png",
+  "omml": "g_filter.omml.xml",
+  "w": 1.7438,
+  "h": 0.3229,
+  "size": 17,
+  "color": "0D161F",
+  "tex": "\\mathrm{RMS}(\\hat\\theta - \\theta^{\\mathrm{ö}}) \\approx \\sigma",
+  "hash": "012ecf5c0511"
+ },
+ "hybrid": {
+  "png": "hybrid.png",
+  "omml": "hybrid.omml.xml",
+  "w": 5.2635,
+  "h": 0.9022,
+  "size": 20,
+  "color": "0D161F",
+  "tex": "\\mathcal{L} = \\underbrace{\\mathcal{L}_{\\mathrm{PDE}} + \\lambda\\,\\mathcal{L}_{\\mathrm{Robin}}}_{\\text{fizik}} \\;+\\; \\mu\\,\\underbrace{\\frac{1}{N_d}\\sum_{i=1}^{N_d}\\big(\\hat\\theta(\\mathbf{x}_i) - \\theta_i^{\\mathrm{ö}}\\big)^2}_{\\text{veri}}",
+  "hash": "ebaa961dfeaa"
+ },
+ "meas": {
+  "png": "meas.png",
+  "omml": "meas.omml.xml",
+  "w": 4.3326,
+  "h": 0.3467,
+  "size": 20,
+  "color": "0D161F",
+  "tex": "\\theta_i^{\\mathrm{ö}} = \\theta_{\\mathrm{FDM}}(\\mathbf{x}_i) + \\varepsilon_i, \\qquad \\varepsilon_i \\sim \\mathcal{N}(0, \\sigma^2)",
+  "hash": "c727e195542c"
+ },
+ "sigma_C": {
+  "png": "sigma_C.png",
+  "omml": "sigma_C.omml.xml",
+  "w": 4.4575,
+  "h": 0.2901,
+  "size": 18,
+  "color": "0D161F",
+  "tex": "\\sigma = 0.01 \\;\\Longleftrightarrow\\; \\sigma_T = \\sigma\\,(T_w - T_\\infty) = 0.5\\ ^\\circ\\mathrm{C}",
+  "hash": "413ae132c9ca"
+ },
+ "scale": {
+  "png": "scale.png",
+  "omml": "scale.omml.xml",
+  "w": 4.2771,
+  "h": 0.3054,
+  "size": 19,
+  "color": "0D161F",
+  "tex": "\\mathcal{L}_{\\mathrm{veri}} \\approx \\sigma^2 = 10^{-4} \\quad\\ll\\quad \\mathcal{L}_{\\mathrm{Robin}} \\approx 0.08",
+  "hash": "e495b9daa2cd"
+ },
+ "criterion": {
+  "png": "criterion.png",
+  "omml": "criterion.omml.xml",
+  "w": 4.642,
+  "h": 0.6488,
+  "size": 22,
+  "color": "0D161F",
+  "tex": "\\frac{\\sigma}{\\sqrt{N_d}} \\;<\\; \\varepsilon_{\\mathrm{model}} \\quad\\Rightarrow\\quad \\text{veri bilgi taşır}",
+  "hash": "d0d2a9502410"
+ },
+ "wrong": {
+  "png": "wrong.png",
+  "omml": "wrong.omml.xml",
+  "w": 5.5661,
+  "h": 0.6997,
+  "size": 17,
+  "color": "0D161F",
+  "tex": "\\mathcal{L}_{\\mathrm{Robin}} = \\frac{1}{N_b}\\sum_{m}\\Big(\\frac{\\partial\\hat\\theta}{\\partial\\eta} - \\underbrace{2}_{\\mathrm{Bi}_{\\mathrm{model}}}\\,\\hat\\theta\\Big)^2, \\qquad \\text{ölçümler: } \\mathrm{Bi} = 4.895",
+  "hash": "4ab517c0853b"
+ },
+ "pv_inverse": {
+  "png": "pv_inverse.png",
+  "omml": "pv_inverse.omml.xml",
+  "w": 4.202,
+  "h": 0.4935,
+  "size": 22,
+  "color": "0D161F",
+  "tex": "\\min_{\\mathbf{w},\\,\\mathrm{Bi}}\\ \\mathcal{L}_{\\mathrm{PDE}} + \\lambda\\,\\mathcal{L}_{\\mathrm{Robin}}(\\mathrm{Bi}) + \\mu\\,\\mathcal{L}_{\\mathrm{veri}}",
+  "hash": "a12724bc0632"
+ }
+}

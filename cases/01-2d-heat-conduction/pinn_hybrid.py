@@ -61,8 +61,10 @@ def train(args, X_d, y_d):
     Xd, yd = torch.tensor(X_d), torch.tensor(y_d)[:, None]
     hist = {"it": [], "loss": [], "pde": [], "rob": [], "data": [], "phase": []}
 
+    bi_model = args.Bi if args.bi_model is None else args.bi_model   # modelin "bildiği" Bi (yanlış olabilir)
+
     def loss_fn():
-        r_pde, r_rob = residuals(model, X_int, X_bot, args.Bi)
+        r_pde, r_rob = residuals(model, X_int, X_bot, bi_model)
         l_pde, l_rob = (r_pde ** 2).mean(), (r_rob ** 2).mean()
         l_dat = ((theta_hat(model, Xd) - yd) ** 2).mean() if len(Xd) else torch.zeros(())
         return l_pde + args.lam * l_rob + args.mu * l_dat, l_pde, l_rob, l_dat
@@ -115,6 +117,8 @@ if __name__ == "__main__":
     ap.add_argument("--noise", type=float, default=0.01, help="ölçüm gürültüsü σ (θ biriminde; 0.01 ≙ 0.5 °C)")
     ap.add_argument("--where", default="uniform", choices=["uniform", "corner", "bottom"])
     ap.add_argument("--mu", type=float, default=1.0, help="veri teriminin ağırlığı")
+    ap.add_argument("--bi-model", type=float, default=None,
+                    help="kayıptaki Robin koşulunda kullanılan Bi (yanlış fizik deneyi); ölçümler ve referans gerçek --Bi ile")
     ap.add_argument("--lam", type=float, default=1.0)
     ap.add_argument("--skip", type=float, default=0.0)
     ap.add_argument("--width", type=int, default=50)
@@ -138,10 +142,11 @@ if __name__ == "__main__":
     with torch.no_grad():
         fit = theta_hat(model, torch.tensor(X_d)).numpy()[:, 0]
     metrics.update(info)
+    rms = lambda a: float(np.sqrt(np.mean(a ** 2))) if a.size else 0.0  # noqa: E731
     metrics.update({"n_data": args.n_data, "noise": args.noise, "where": args.where, "mu": args.mu,
-                    "data_rmse_vs_noisy": float(np.sqrt(np.mean((fit - y_d) ** 2))),
-                    "data_rmse_vs_clean": float(np.sqrt(np.mean((fit - clean) ** 2))),
-                    "noise_rms": float(np.sqrt(np.mean((y_d - clean) ** 2))), "config": vars(args)})
+                    "bi_model": args.Bi if args.bi_model is None else args.bi_model,
+                    "data_rmse_vs_noisy": rms(fit - y_d), "data_rmse_vs_clean": rms(fit - clean),
+                    "noise_rms": rms(y_d - clean), "config": vars(args)})
 
     torch.save(model.state_dict(), out / "model.pt")
     np.savez_compressed(out / "history.npz", **{k: np.array(v) for k, v in hist.items()})
