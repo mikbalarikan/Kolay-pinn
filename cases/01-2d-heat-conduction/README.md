@@ -1,10 +1,12 @@
+![Kolay PINN · Case 01](figures/banner_case01.png)
+
 # Case 01 — PINN for 2D Heat Conduction
 
 Kare çelik plaka, üç kenarı 70 °C, alt kenarı 20 °C suyla konvektif soğutuluyor.
 Hedef: aynı problemi önce klasik sayısal yöntemle (FDM) çözüp referans almak, sonra
 adım adım PINN'e geçmek.
 
-![Sıcaklık alanı](figures/temperature_field.png)
+📄 **Rapor (Adım 1–3):** [`report/case01_adim1-3_fdm_referans.pdf`](report/case01_adim1-3_fdm_referans.pdf)
 
 ## Yol haritası
 
@@ -121,9 +123,13 @@ köşelerdeki tekillik: yan duvar θ = 1 isterken alt kenar soğuyor, köşede �
 sonsuza gider. **PINN hatası da büyük olasılıkla tam burada toplanacak** — 5. adımda
 sadece toplam kayba değil, hata haritasına bakacağız.
 
-![bottom](figures/bottom_profile.png)
-![conv](figures/grid_convergence.png)
-![err](figures/error_map.png)
+![Fig. 1](figures/fig01_fdm_reference.png)
+
+**Fig. 1 | İkinci mertebe FDM seri çözümü yeniden üretiyor; hata alt köşelerdeki tekillikte toplanıyor.**
+**a**, N = 101 ağında sıcaklık alanı, izotermler °C. **b**, soğutulan yüzeyin sıcaklığı: FDM (çizgi) ve 4000
+terimli seri çözüm (her 5. düğüm). **c**, mutlak hatanın log₁₀ haritası; açık bant hatanın işaret değiştirdiği
+yer. **d**, N = 26–201 için bağıl L₂ ve maksimum hata; p en küçük kareler eğimi (L₂: 1.77, maks.: 0.88).
+Vektör sürümler: [`fig01_fdm_reference.pdf`](figures/fig01_fdm_reference.pdf) · [`.svg`](figures/fig01_fdm_reference.svg)
 
 ### Çalıştırma
 
@@ -131,7 +137,8 @@ sadece toplam kayba değil, hata haritasına bakacağız.
 pip install -r requirements.txt
 python fdm_solver.py            # çözer, data/fdm_N101.{npz,csv} yazar
 python fdm_solver.py --Bi 4.08  # h = 2000 W/m²K durumu
-python plot_reference.py        # figures/*.png
+python plot_reference.py        # figures/fig01_fdm_reference.{pdf,svg,png} + data/summary.json
+python make_report.py           # report/case01_adim1-3_fdm_referans.pdf
 ```
 
 `data/fdm_N101.npz` alanları: `x, y, theta, theta_exact, Bi, L, k, T_wall, T_inf`.
