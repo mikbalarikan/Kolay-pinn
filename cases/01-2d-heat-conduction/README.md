@@ -6,6 +6,7 @@ Kare çelik plaka, üç kenarı 70 °C, alt kenarı 20 °C suyla konvektif soğu
 Hedef: aynı problemi önce klasik sayısal yöntemle (FDM) çözüp referans almak, sonra
 adım adım PINN'e geçmek.
 
+🎓 **Ders 01 (26 slayt, ~50 dk, konuşmacı notlu):** [`lecture/ders01_2d_isi_iletimi_referans.pptx`](lecture/ders01_2d_isi_iletimi_referans.pptx)
 📄 **Rapor (Adım 1–3):** [`report/case01_adim1-3_fdm_referans.pdf`](report/case01_adim1-3_fdm_referans.pdf)
 
 ## Yol haritası
@@ -139,6 +140,7 @@ python fdm_solver.py            # çözer, data/fdm_N101.{npz,csv} yazar
 python fdm_solver.py --Bi 4.08  # h = 2000 W/m²K durumu
 python plot_reference.py        # figures/fig01_fdm_reference.{pdf,svg,png} + data/summary.json
 python make_report.py           # report/case01_adim1-3_fdm_referans.pdf
+python lecture/make_slide_figures.py && node lecture/build_lecture.js   # ders destesi (önce kökte: npm install)
 ```
 
 `data/fdm_N101.npz` alanları: `x, y, theta, theta_exact, Bi, L, k, T_wall, T_inf`.
