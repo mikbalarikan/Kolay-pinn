@@ -15,6 +15,11 @@ adım adım PINN'e geçmek.
 📓 [`notebook/ders02_forward_pinn.ipynb`](notebook/ders02_forward_pinn.ipynb) ·
 📄 [`report/case01_adim4-5_forward_pinn.pdf`](report/case01_adim4-5_forward_pinn.pdf)
 
+**Ders 03 · Hibrit PINN (Adım 6)**
+🎓 [`lecture/ders03/ders03_hibrit_pinn.pptx`](lecture/ders03/ders03_hibrit_pinn.pptx) ·
+📓 [`notebook/ders03_hibrit_pinn.ipynb`](notebook/ders03_hibrit_pinn.ipynb) ·
+📄 [`report/case01_adim6_hibrit_pinn.pdf`](report/case01_adim6_hibrit_pinn.pdf)
+
 ## Yol haritası
 
 | # | Adım | Durum |
@@ -24,7 +29,7 @@ adım adım PINN'e geçmek.
 | 3 | Referans FDM çözücü + analitik doğrulama | ✅ |
 | 4 | Forward PINN (sadece fizik, veri yok) | ✅ |
 | 5 | Doğrulama: L2 hata, hata haritası, alt yüzey ısı akısı | ✅ |
-| 6 | Hibrit PINN: seyrek + gürültülü referans verisi | ⏳ |
+| 6 | Hibrit PINN: seyrek + gürültülü referans verisi | ✅ |
 | 7 | Ters problem: Bi'yi iç sıcaklıklardan geri bul | ⏳ |
 | 8 | Parametrik vekil model: girdi (x, y, Bi) | ⏳ |
 | 9 | Framework karşılaştırması (DeepXDE / PhysicsNeMo) | ⏳ |
@@ -215,6 +220,57 @@ Vektör: [`fig03_robustness.pdf`](figures/fig03_robustness.pdf) · [`.svg`](figu
    uzun L-BFGS ve 4×100 bu aralıkta kaldı, 8×50 daha kötü. Sonuçlar en az üç tohumla raporlanmalı.
 5. **Bu problemde FDM üstün.** PINN'in değeri ölçüm verisi (Adım 6), bilinmeyen parametre (Adım 7) ve parametrik çözümde (Adım 8).
 
+---
+## 6. Hibrit PINN: fizik + seyrek gürültülü ölçüm
+
+`pinn_hybrid.py`: Adım 4'ün ağı ve eğitimi, kayba bir veri terimi eklenmiş. Ölçümler FDM (N = 201) iç düğümlerinden, Gauss gürültüsüyle.
+`python hybrid_runs.py` (24 koşu, 2 CPU'da ~3.5 saat) → `python hybrid_summary.py`.
+
+```math
+\mathcal{L} = \mathcal{L}_{\mathrm{PDE}} + \lambda\,\mathcal{L}_{\mathrm{Robin}}
++ \mu\,\frac{1}{N_d}\sum_{i=1}^{N_d}\big(\hat\theta(\mathbf{x}_i) - \theta_i^{\mathrm{ö}}\big)^2,
+\qquad \theta_i^{\mathrm{ö}} = \theta_{\mathrm{FDM}}(\mathbf{x}_i) + \varepsilon_i,\quad \varepsilon_i \sim \mathcal{N}(0, \sigma^2)
+```
+
+Doğru fizik (Bi = 4.895), σ = 0.01 (≙ 0.5 °C), 3 tohum:
+
+| Yapılandırma | Bağıl L₂ geo. ort. | Aralık | Veri yok'a oran |
+|---|---|---|---|
+| N_d = 0 · düzgün · μ = 1 | 4.2e-04 | 2.4e-04 – 9.5e-04 | 1.00 |
+| N_d = 5 · düzgün · μ = 1 | 6.4e-04 | 3.7e-04 – 9.2e-04 | 1.54 |
+| N_d = 20 · düzgün · μ = 1 | 5.9e-04 | 4.1e-04 – 9.6e-04 | 1.40 |
+| N_d = 80 · düzgün · μ = 1 | 5.1e-04 | 3.3e-04 – 1.0e-03 | 1.22 |
+| N_d = 20 · köşe, μ = 1 | 4.2e-04 | 3.0e-04 – 8.2e-04 | 1.01 |
+| N_d = 20 · alt şerit, μ = 1 | 4.6e-04 | 3.1e-04 – 8.1e-04 | 1.10 |
+| N_d = 20 · düzgün, μ = 100 | 1.1e-03 | 5.7e-04 – 1.6e-03 | 2.64 |
+
+Yanlış fizik (kayıpta Bi = 2; ölçüm ve doğrulama gerçek Bi ile), tohum 0; doğru fizik, veri yok: 9.5e-04:
+
+| Koşu | Bağıl L₂ | Q′ hatası |
+|---|---|---|
+| veri yok | 9.2e-02 | %43.8 |
+| 20 sensör μ = 1 | 9.1e-02 | %43.6 |
+| 20 sensör μ = 100 | 6.1e-02 | %32.0 |
+| 80 sensör μ = 100 | 4.6e-02 | %26.0 |
+
+![Fig. 4](figures/fig04_hybrid.png)
+
+**Fig. 4 | Fizik doğruyken seyrek veri hatayı değiştirmez; fizik yanlışken hatayı yalnız sınırlı ölçüde düşürür.**
+**a**, sensör sayısı; gri bant veri yok koşularının aralığı. **b**, yerleşim ve veri ağırlığı. **c**, sensörlerde ağın ölçüme (boş) ve gerçeğe (dolu) göre RMS farkı. **d**, yanlış fizik; etiketler Q′ hatası.
+Vektör: [`fig04_hybrid.pdf`](figures/fig04_hybrid.pdf) · [`.svg`](figures/fig04_hybrid.svg)
+
+**Bulgular**
+1. **Doğru fizikte seyrek veri bilgi taşımaz.** 5/20/80 sensör, köşe ve alt şerit yerleşimi, gürültüsüz veri bile hatayı veri yok
+   aralığının dışına taşımadı. Veri yokken modelin RMS hatası (≈ 3.6e-04) σ/√N_d'den küçük;
+   ölçütün sağlanması için ~760 sensör gerekirdi.
+2. **Fizik gürültüyü süzer.** σ = 0.01'de ağ sensörlerde ölçüme 9.2e-03 (≈ σ), gerçeğe 2.1e-04 uzak;
+   σ = 0.05'te de bağıl L₂ değişmedi.
+3. **Büyük μ zarar verir.** μ = 100 hatayı ortalamada 2.6 kat artırdı: ağ gürültüye doğru bükülüyor.
+   μ = 1'de ise veri terimi (≈ σ² = 1e-4) köşe çelişkisinin kayıp tabanının (≈ 0.08) binde biri.
+4. **Yanlış fizikte veri sınırlı.** Bi = 2 ile hata doğru fiziğin 96 katı; veri en çok 2.0 kat düşürdü
+   (Q′ hatası %44 → %26). Yanlış Robin ile ölçümler çekişiyor;
+   çözüm Bi'yi öğrenmek (Adım 7).
+
 ### Çalıştırma
 
 ```bash
@@ -235,6 +291,12 @@ python study_runs.py && python study_summary.py   # sağlamlık: fig03_robustnes
 python make_report_pinn.py          # report/case01_adim4-5_forward_pinn.pdf
 python lecture/ders02/equations.py && python lecture/ders02/make_slide_figures.py && node lecture/ders02/build_lecture.js
 python notebook/build_notebook_ders02.py
+
+# Adım 6
+python hybrid_runs.py && python hybrid_summary.py   # fig04_hybrid.* + data/summary_hybrid.json
+python make_report_hybrid.py        # report/case01_adim6_hibrit_pinn.pdf
+python lecture/ders03/equations.py && python lecture/ders03/make_slide_figures.py && node lecture/ders03/build_lecture.js
+python notebook/build_notebook_ders03.py
 ```
 
 `data/fdm_N101.npz` alanları: `x, y, theta, theta_exact, Bi, L, k, T_wall, T_inf`.

@@ -80,7 +80,7 @@ rng = np.random.default_rng(1)
 def band(ax, label=True):
     ax.axhspan(b["min"], b["max"], color=C["krom"], zorder=0)
     if label:
-        ax.text(0.98, b["max"] * 1.08, "veri yok · 3 tohum aralığı", ha="right", fontsize=5.5, color=MUTED,
+        ax.text(0.98, b["min"] * 1.04, "veri yok · 3 tohum aralığı", ha="right", va="bottom", fontsize=5.5, color=MUTED,
                 transform=ax.get_yaxis_transform())
 
 
@@ -129,7 +129,7 @@ ax.set_ylabel("sensörlerde θ RMSE")
 ax.legend(loc="upper left", fontsize=5.5, handletextpad=0.2)
 for x, n in zip(xs, nz):
     ax.text(x + 0.12, n["data_rmse_vs_clean"], f"L$_2$ {n['rel_L2']:.1e}", fontsize=5.5, color=INK, va="center")
-ax.set_title("ağ gürültüyü ezberlemiyor: fizik onu düzeltiyor (tohum 0)", fontsize=6, color=MUTED, pad=3)
+ax.set_title("ağ gürültüyü ezberlemiyor: fizik onu süzüyor (tohum 0)", fontsize=6, color=MUTED, pad=3)
 panel_letter(ax, "c", dx=-0.17, dy=1.02)
 
 # d — yanlış fizik: veri burada işe yarar
@@ -139,15 +139,16 @@ vals = [S["wrong_bi"][g.replace("\n", " ")]["rel_L2"] for g in names]
 cols = [C["titanyum"]] + [C["lila"]] * 3
 ax.bar(range(len(names)), vals, width=0.55, color=cols, zorder=3)
 ax.axhline(S["correct_physics_seed0"]["rel_L2"], color=INK, lw=0.7, ls=(0, (3, 2)), zorder=4)
-ax.text(len(names) - 0.5, S["correct_physics_seed0"]["rel_L2"] * 1.15, "doğru fizik, veri yok (tohum 0)",
-        ha="right", fontsize=5.5, color=MUTED)
+ax.text(len(names) - 0.55, S["correct_physics_seed0"]["rel_L2"] * 0.85, "doğru fizik, veri yok (tohum 0)",
+        ha="right", va="top", fontsize=5.5, color=INK, zorder=5, bbox=dict(fc="white", ec="none", pad=0.6))
+ax.set_ylim(4e-4, 0.25)
 for i, g in enumerate(names):
     q = S["wrong_bi"][g.replace("\n", " ")]["Q_rel_err"]
-    ax.text(i, vals[i] * 1.12, f"Q hatası {q * 100:.1f} %", ha="center", fontsize=5.5, color=INK)
+    ax.text(i, vals[i] * 1.12, f"Q hatası %{q * 100:.0f}", ha="center", fontsize=5.5, color=INK)
 ax.set_yscale("log")
 ax.set_xticks(range(len(names)), names, fontsize=6)
 ax.set_ylabel("bağıl L$_2$ hata")
-ax.set_title("model Bi = 2 sanıyor (gerçek 4.9): ölçüm hatayı düşürüyor", fontsize=6, color=MUTED, pad=3)
+ax.set_title("model Bi = 2 sanıyor (gerçek 4.9): veri hatayı en çok 2 kat düşürüyor", fontsize=6, color=MUTED, pad=3)
 panel_letter(ax, "d", dx=-0.17, dy=1.02)
 
 fig.tight_layout(pad=0.4, w_pad=1.4, h_pad=1.2)
