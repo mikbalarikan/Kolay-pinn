@@ -1,0 +1,177 @@
+{
+ "name": "Türkişi Engineering palette",
+ "version": 5,
+ "date": "2026-10-29",
+ "source": "Türkişi kimlik paketi, palet v5 (F05 + Parlak Set)",
+ "colors": {
+  "gece": {
+   "hex": "#070C11",
+   "name": "Gece",
+   "group": "zemin",
+   "role": "küçük resim zemini, kontur"
+  },
+  "derin": {
+   "hex": "#0D161F",
+   "name": "Derin",
+   "group": "zemin",
+   "role": "kutu ve etiket zemini"
+  },
+  "zemin": {
+   "hex": "#141F2B",
+   "name": "Lacivert Çelik",
+   "group": "zemin",
+   "role": "ana zemin"
+  },
+  "panel": {
+   "hex": "#202E3C",
+   "name": "Panel",
+   "group": "zemin",
+   "role": "kart, panel, tablo satırı"
+  },
+  "gunmetal": {
+   "hex": "#394A5A",
+   "name": "Gunmetal",
+   "group": "zemin",
+   "role": "çerçeve, pasif çizgi, 3B gölge"
+  },
+  "kagit": {
+   "hex": "#FCFCFA",
+   "name": "Kağıt",
+   "group": "zemin",
+   "role": "teknik resim sayfası"
+  },
+  "titanyum": {
+   "hex": "#808E9B",
+   "name": "Titanyum",
+   "group": "metal",
+   "role": "üçüncül yazı, eksen, kaynak satırı"
+  },
+  "gumus": {
+   "hex": "#B7C3CD",
+   "name": "Gümüş",
+   "group": "metal",
+   "role": "ikincil yazı, koyu zeminde ölçü çizgisi, 3B gövde"
+  },
+  "krom": {
+   "hex": "#ECF1F5",
+   "name": "Krom",
+   "group": "metal",
+   "role": "ana yazı; parlak gümüş çerçeve"
+  },
+  "elektrik_isigi": {
+   "hex": "#64BFFF",
+   "name": "Elektrik Işığı",
+   "group": "vurgu",
+   "role": "koyu zeminde o anda yeni gelen şey"
+  },
+  "elektrik": {
+   "hex": "#2E8BFF",
+   "name": "Elektrik Mavisi",
+   "group": "vurgu",
+   "role": "açık zeminde ve 3B'de yeni gelen şey"
+  },
+  "celik_mavisi": {
+   "hex": "#39659B",
+   "name": "Çelik Mavisi",
+   "group": "yapı",
+   "role": "yapı: bant, şerit, çip, KURAL"
+  },
+  "kirmizi": {
+   "hex": "#AF1537",
+   "name": "Oğuz Kırmızısı",
+   "group": "kimlik",
+   "role": "yalnızca kimlik: logo, TUZAK, CTA rozeti"
+  },
+  "gecti": {
+   "hex": "#46D193",
+   "name": "Geçti",
+   "group": "durum",
+   "role": "yalnızca durum, işaretiyle: geçti"
+  },
+  "hata": {
+   "hex": "#FB5F64",
+   "name": "Hata",
+   "group": "durum",
+   "role": "yalnızca durum, işaretiyle: yanlış"
+  },
+  "plan": {
+   "hex": "#15A5B4",
+   "name": "Plan Camgöbeği",
+   "group": "grafik",
+   "role": "beyaz zeminde ölçü çizgisi, grafikte seri 1, hologram"
+  },
+  "lila": {
+   "hex": "#9174D9",
+   "name": "Lila",
+   "group": "grafik",
+   "role": "grafikte veri serisi 2"
+  },
+  "neon_kirmizi": {
+   "hex": "#FF3347",
+   "name": "Neon Kırmızı",
+   "group": "parlak",
+   "role": "parlak kırmızı vurgu; kimlik kırmızısı değil"
+  },
+  "fosfor_sarisi": {
+   "hex": "#E6FF1F",
+   "name": "Fosfor Sarısı",
+   "group": "parlak",
+   "role": "zeminde en parlak renk (14.8:1)"
+  },
+  "asit_lime": {
+   "hex": "#9DFF2E",
+   "name": "Asit Lime",
+   "group": "parlak",
+   "role": "canlı yeşil; durum karesinde vurgu olmaz"
+  },
+  "neon_camgobegi": {
+   "hex": "#00E5FF",
+   "name": "Neon Camgöbeği",
+   "group": "parlak",
+   "role": "F05 mavisine en yakın parlak"
+  },
+  "parca_mandalina": {
+   "hex": "#FF9A4D",
+   "name": "Neon Mandalina",
+   "group": "parlak",
+   "role": "mavinin tamamlayıcısı; 2. parça rengi"
+  },
+  "mercan_kirmizi": {
+   "hex": "#FF5F57",
+   "name": "Mercan Kırmızı",
+   "group": "parlak",
+   "role": "yumuşak kırmızı; Hata'ya yakın, durumda yok"
+  },
+  "elektrik_mor": {
+   "hex": "#B07CFF",
+   "name": "Elektrik Mor",
+   "group": "parlak",
+   "role": "şık mor; 3B'de yalnız küçük parça"
+  },
+  "neon_magenta": {
+   "hex": "#FF4FB0",
+   "name": "Neon Magenta",
+   "group": "parlak",
+   "role": "en cırtlak sıcak renk"
+  },
+  "parca_gumus": {
+   "hex": "#EEF3FA",
+   "name": "Parlak Gümüş",
+   "group": "parça",
+   "role": "3B / CAD gövdesi: varsayılan"
+  },
+  "parca_nane": {
+   "hex": "#5CFFB8",
+   "name": "Neon Nane",
+   "group": "parça",
+   "role": "3B: üçüncü parça grubu"
+  }
+ },
+ "usage_in_kolay_pinn": {
+  "figures": "Nature kuralları: beyaz zemin, vektör çıktı, düzenlenebilir metin. Seri 1 = plan, seri 2 = lila, referans çizgisi = titanyum.",
+  "sequential": "sıcaklık: krom -> elektrik_isigi -> elektrik -> celik_mavisi -> derin (tek ton ailesi)",
+  "diverging": "plan <- kagit -> parca_mandalina (işaretli hata)",
+  "identity": "kirmizi yalnız Ti işaretinde ve rozette; grafik verisinde kullanılmaz",
+  "dark_ground": "banner ve PDF kapağı: zemin/gece/panel, yazı krom/gumus, tek vurgu fosfor_sarisi"
+ }
+}
