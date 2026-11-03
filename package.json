@@ -1,0 +1,12 @@
+{
+  "name": "kolay-pinn",
+  "private": true,
+  "description": "Kolay PINN ders desteleri (pptxgenjs)",
+  "scripts": {
+    "ders01": "node cases/01-2d-heat-conduction/lecture/build_lecture.js"
+  },
+  "dependencies": {
+    "pptxgenjs": "^3.12.0",
+    "jszip": "^3.10.1"
+  }
+}

@@ -1,0 +1,342 @@
+{
+ "g_laplace": {
+  "png": "g_laplace.png",
+  "omml": "g_laplace.omml.xml",
+  "w": 2.3181,
+  "h": 0.5968,
+  "size": 17,
+  "color": "0D161F",
+  "tex": "\\nabla^2 T = \\frac{\\partial^2 T}{\\partial x^2} + \\frac{\\partial^2 T}{\\partial y^2} = 0",
+  "hash": "4d9baa08d42c"
+ },
+ "g_dirichlet": {
+  "png": "g_dirichlet.png",
+  "omml": "g_dirichlet.omml.xml",
+  "w": 1.786,
+  "h": 0.2763,
+  "size": 17,
+  "color": "0D161F",
+  "tex": "T = T_w \\quad \\text{(sınırda)}",
+  "hash": "5418d07f2d5b"
+ },
+ "g_robin": {
+  "png": "g_robin.png",
+  "omml": "g_robin.omml.xml",
+  "w": 2.1646,
+  "h": 0.5253,
+  "size": 17,
+  "color": "0D161F",
+  "tex": "-k\\,\\frac{\\partial T}{\\partial n} = h\\,\\left(T - T_\\infty\\right)",
+  "hash": "52e1bd486434"
+ },
+ "g_biot": {
+  "png": "g_biot.png",
+  "omml": "g_biot.omml.xml",
+  "w": 0.9159,
+  "h": 0.5253,
+  "size": 17,
+  "color": "0D161F",
+  "tex": "\\mathrm{Bi} = \\frac{h\\,L}{k}",
+  "hash": "7e8145a9b407"
+ },
+ "g_fd": {
+  "png": "g_fd.png",
+  "omml": "g_fd.omml.xml",
+  "w": 2.4852,
+  "h": 0.5511,
+  "size": 17,
+  "color": "0D161F",
+  "tex": "\\frac{\\partial^2 T}{\\partial x^2} \\approx \\frac{T_{i+1} - 2T_i + T_{i-1}}{\\Delta x^2}",
+  "hash": "53a5bbdfef2c"
+ },
+ "g_nondim": {
+  "png": "g_nondim.png",
+  "omml": "g_nondim.omml.xml",
+  "w": 1.3441,
+  "h": 0.558,
+  "size": 17,
+  "color": "0D161F",
+  "tex": "\\theta = \\frac{T - T_\\infty}{T_w - T_\\infty}",
+  "hash": "fbacd8ec7d95"
+ },
+ "re": {
+  "png": "re.png",
+  "omml": "re.omml.xml",
+  "w": 1.2635,
+  "h": 0.6077,
+  "size": 20,
+  "color": "0D161F",
+  "tex": "\\mathrm{Re}_L = \\frac{U L}{\\nu}",
+  "hash": "e0c70da780bf"
+ },
+ "nu": {
+  "png": "nu.png",
+  "omml": "nu.omml.xml",
+  "w": 2.698,
+  "h": 0.3897,
+  "size": 20,
+  "color": "0D161F",
+  "tex": "\\overline{\\mathrm{Nu}}_L = 0.664\\,\\mathrm{Re}_L^{1/2}\\,\\mathrm{Pr}^{1/3}",
+  "hash": "bf193847f370"
+ },
+ "h": {
+  "png": "h.png",
+  "omml": "h.omml.xml",
+  "w": 1.361,
+  "h": 0.6353,
+  "size": 20,
+  "color": "0D161F",
+  "tex": "\\bar h = \\frac{\\overline{\\mathrm{Nu}}_L\\, k_f}{L}",
+  "hash": "0b53eba4a016"
+ },
+ "bi_num": {
+  "png": "bi_num.png",
+  "omml": "bi_num.omml.xml",
+  "w": 3.4505,
+  "h": 0.6659,
+  "size": 20,
+  "color": "0D161F",
+  "tex": "\\mathrm{Bi} = \\frac{\\bar h\\,L}{k} = \\frac{2398 \\times 0.1}{49} \\approx 4.89",
+  "hash": "3add34a62a7a"
+ },
+ "scales": {
+  "png": "scales.png",
+  "omml": "scales.omml.xml",
+  "w": 2.5086,
+  "h": 1.8577,
+  "size": 22,
+  "color": "0D161F",
+  "tex": "\\begin{aligned} \\theta &= \\frac{T - T_\\infty}{T_w - T_\\infty} \\\\[4pt] \\xi &= \\frac{x}{L}, \\qquad \\eta = \\frac{y}{L} \\\\[4pt] T &= 20 + 50\\,\\theta \\quad [^\\circ\\mathrm{C}] \\end{aligned}",
+  "hash": "55b76959bfe4"
+ },
+ "nd_problem": {
+  "png": "nd_problem.png",
+  "omml": "nd_problem.omml.xml",
+  "w": 4.5559,
+  "h": 2.0474,
+  "size": 22,
+  "color": "0D161F",
+  "tex": "\\begin{aligned} &\\frac{\\partial^2\\theta}{\\partial\\xi^2} + \\frac{\\partial^2\\theta}{\\partial\\eta^2} = 0, && (\\xi,\\eta) \\in [0,1]^2 \\\\[4pt] &\\theta = 1, && \\xi = 0,\\ \\xi = 1,\\ \\eta = 1 \\\\[4pt] &\\frac{\\partial\\theta}{\\partial\\eta} = \\mathrm{Bi}\\,\\theta, && \\eta = 0 \\end{aligned}",
+  "hash": "703259245e11"
+ },
+ "rob1": {
+  "png": "rob1.png",
+  "omml": "rob1.omml.xml",
+  "w": 2.5405,
+  "h": 0.7268,
+  "size": 22,
+  "color": "0D161F",
+  "tex": "k\\,\\frac{\\partial T}{\\partial y} = h\\,\\left(T - T_\\infty\\right)",
+  "hash": "73bfa46fc5b1"
+ },
+ "rob2": {
+  "png": "rob2.png",
+  "omml": "rob2.omml.xml",
+  "w": 2.4173,
+  "h": 0.7307,
+  "size": 22,
+  "color": "0D161F",
+  "tex": "\\frac{k\\,\\Delta T}{L}\\,\\frac{\\partial \\theta}{\\partial \\eta} = h\\,\\Delta T\\,\\theta",
+  "hash": "6e7c0147b0ee"
+ },
+ "rob3": {
+  "png": "rob3.png",
+  "omml": "rob3.omml.xml",
+  "w": 2.2617,
+  "h": 0.7268,
+  "size": 22,
+  "color": "0D161F",
+  "tex": "\\frac{\\partial \\theta}{\\partial \\eta} = \\frac{h L}{k}\\,\\theta = \\mathrm{Bi}\\,\\theta",
+  "hash": "831b5f110487"
+ },
+ "rob2_sub": {
+  "png": "rob2_sub.png",
+  "omml": "rob2_sub.omml.xml",
+  "w": 2.7112,
+  "h": 0.2411,
+  "size": 16,
+  "color": "0D161F",
+  "tex": "T - T_\\infty = \\Delta T\\,\\theta, \\qquad y = L\\,\\eta",
+  "hash": "9b181536e4a9"
+ },
+ "loss_w": {
+  "png": "loss_w.png",
+  "omml": "loss_w.omml.xml",
+  "w": 3.9972,
+  "h": 0.3121,
+  "size": 22,
+  "color": "0D161F",
+  "tex": "\\mathcal{L} = \\mathcal{L}_{\\mathrm{PDE}} + \\lambda\\,\\mathcal{L}_{\\mathrm{Robin}}, \\qquad \\lambda \\approx 1",
+  "hash": "eaa50d58c07d"
+ },
+ "domain": {
+  "png": "domain.png",
+  "omml": "domain.omml.xml",
+  "w": 1.11,
+  "h": 0.2625,
+  "size": 16,
+  "color": "0D161F",
+  "tex": "\\xi,\\ \\eta \\in [0, 1]",
+  "hash": "a59d1d34d7f2"
+ },
+ "st_in": {
+  "png": "st_in.png",
+  "omml": "st_in.omml.xml",
+  "w": 4.6749,
+  "h": 0.3129,
+  "size": 20,
+  "color": "0D161F",
+  "tex": "\\theta_{i+1,j} + \\theta_{i-1,j} + \\theta_{i,j+1} + \\theta_{i,j-1} - 4\\,\\theta_{i,j} = 0",
+  "hash": "7593ad6300d2"
+ },
+ "st_ghost": {
+  "png": "st_ghost.png",
+  "omml": "st_ghost.omml.xml",
+  "w": 2.6027,
+  "h": 0.3163,
+  "size": 20,
+  "color": "0D161F",
+  "tex": "\\theta_{i,-1} = \\theta_{i,1} - 2\\Delta\\,\\mathrm{Bi}\\,\\theta_{i,0}",
+  "hash": "e730f7c8fee3"
+ },
+ "st_bot": {
+  "png": "st_bot.png",
+  "omml": "st_bot.omml.xml",
+  "w": 4.8748,
+  "h": 0.328,
+  "size": 20,
+  "color": "0D161F",
+  "tex": "\\theta_{i-1,0} + \\theta_{i+1,0} + 2\\,\\theta_{i,1} - \\left(4 + 2\\Delta\\,\\mathrm{Bi}\\right)\\theta_{i,0} = 0",
+  "hash": "63f5c9d1a88f"
+ },
+ "series": {
+  "png": "series.png",
+  "omml": "series.omml.xml",
+  "w": 6.3607,
+  "h": 0.5555,
+  "size": 24,
+  "color": "0D161F",
+  "tex": "\\theta(\\xi,\\eta) = 1 - \\sum_{n\\ \\mathrm{tek}} A_n\\,\\sin(n\\pi\\xi)\\,\\sinh\\!\\big(n\\pi(1-\\eta)\\big)",
+  "hash": "744e08acf032"
+ },
+ "an": {
+  "png": "an.png",
+  "omml": "an.omml.xml",
+  "w": 4.4973,
+  "h": 0.8258,
+  "size": 24,
+  "color": "0D161F",
+  "tex": "A_n = \\frac{4\\,\\mathrm{Bi}/(n\\pi)}{n\\pi\\cosh(n\\pi) + \\mathrm{Bi}\\,\\sinh(n\\pi)}",
+  "hash": "4c2734834c71"
+ },
+ "phi": {
+  "png": "phi.png",
+  "omml": "phi.omml.xml",
+  "w": 1.1709,
+  "h": 0.2875,
+  "size": 20,
+  "color": "0D161F",
+  "tex": "\\theta = 1 - \\varphi",
+  "hash": "c325adf5138f"
+ },
+ "an_rob": {
+  "png": "an_rob.png",
+  "omml": "an_rob.omml.xml",
+  "w": 2.0139,
+  "h": 0.5787,
+  "size": 16,
+  "color": "0D161F",
+  "tex": "\\left.\\frac{\\partial\\theta}{\\partial\\eta}\\right|_{\\eta=0} = \\mathrm{Bi}\\,\\theta \\;\\Rightarrow\\; A_n",
+  "hash": "9c33923a0a9c"
+ },
+ "ratio": {
+  "png": "ratio.png",
+  "omml": "ratio.omml.xml",
+  "w": 4.0539,
+  "h": 0.6881,
+  "size": 18,
+  "color": "0D161F",
+  "tex": "\\frac{\\sinh\\!\\big(n\\pi(1-\\eta)\\big)}{\\cosh(n\\pi)} = e^{-n\\pi\\eta}\\,\\frac{1 - e^{-2n\\pi(1-\\eta)}}{1 + e^{-2n\\pi}}",
+  "hash": "5de89f3bb7e2"
+ },
+ "qprime": {
+  "png": "qprime.png",
+  "omml": "qprime.omml.xml",
+  "w": 2.9719,
+  "h": 0.3945,
+  "size": 16,
+  "color": "0D161F",
+  "tex": "Q' = \\bar h\\,L\\,(T_w - T_\\infty)\\int_0^1 \\theta(\\xi, 0)\\,d\\xi",
+  "hash": "6c55993f7c8d"
+ },
+ "order": {
+  "png": "order.png",
+  "omml": "order.omml.xml",
+  "w": 1.1286,
+  "h": 0.3183,
+  "size": 20,
+  "color": "0D161F",
+  "tex": "\\|e\\| \\propto \\Delta^{p}",
+  "hash": "2f23155f33ff"
+ },
+ "pv_in": {
+  "png": "pv_in.png",
+  "omml": "pv_in.omml.xml",
+  "w": 0.7178,
+  "h": 0.3178,
+  "size": 20,
+  "color": "0D161F",
+  "tex": "(\\xi,\\ \\eta)",
+  "hash": "f955d480dc96"
+ },
+ "pv_hard": {
+  "png": "pv_hard.png",
+  "omml": "pv_hard.omml.xml",
+  "w": 3.6135,
+  "h": 0.3726,
+  "size": 20,
+  "color": "0D161F",
+  "tex": "\\hat\\theta = 1 + \\xi(1-\\xi)(1-\\eta)\\,\\mathcal{N}(\\xi,\\eta)",
+  "hash": "8848c39eb2d3"
+ },
+ "pv_loss": {
+  "png": "pv_loss.png",
+  "omml": "pv_loss.omml.xml",
+  "w": 3.2361,
+  "h": 0.7345,
+  "size": 20,
+  "color": "0D161F",
+  "tex": "\\mathcal{L} = \\big\\|\\nabla^2\\hat\\theta\\big\\|^2 + \\Big\\|\\frac{\\partial\\hat\\theta}{\\partial\\eta} - \\mathrm{Bi}\\,\\hat\\theta\\Big\\|^2_{\\eta=0}",
+  "hash": "d0447676fd31"
+ },
+ "v_th1": {
+  "png": "v_th1.png",
+  "omml": "v_th1.omml.xml",
+  "w": 1.1461,
+  "h": 0.3874,
+  "size": 36,
+  "color": "39659B",
+  "tex": "\\theta = 1",
+  "hash": "a09a56df251d"
+ },
+ "v_th0": {
+  "png": "v_th0.png",
+  "omml": "v_th0.omml.xml",
+  "w": 1.1461,
+  "h": 0.3874,
+  "size": 36,
+  "color": "39659B",
+  "tex": "\\theta = 0",
+  "hash": "28dbf9c01ccd"
+ },
+ "v_thm": {
+  "png": "v_thm.png",
+  "omml": "v_thm.omml.xml",
+  "w": 3.2137,
+  "h": 0.5388,
+  "size": 36,
+  "color": "15A5B4",
+  "tex": "\\theta(0.5,\\,0) = 0.33",
+  "hash": "37f95d0444ff"
+ }
+}

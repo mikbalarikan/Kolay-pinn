@@ -113,3 +113,15 @@ def save_figure(fig, stem, png_dpi=300):
     fig.savefig(stem.with_suffix(".pdf"))
     fig.savefig(stem.with_suffix(".svg"))
     fig.savefig(stem.with_suffix(".png"), dpi=png_dpi)
+
+
+def use_slide_style():
+    """Ders slaytları için: aynı palet ve kurallar, projeksiyonda okunur boyutlar (14-16 pt)."""
+    use_style()
+    mpl.rcParams.update({
+        "font.size": 15, "axes.titlesize": 15, "axes.labelsize": 15,
+        "xtick.labelsize": 13, "ytick.labelsize": 13, "legend.fontsize": 13,
+        "axes.linewidth": 1.0, "xtick.major.width": 1.0, "ytick.major.width": 1.0,
+        "xtick.major.size": 5, "ytick.major.size": 5, "lines.linewidth": 2.2,
+        "lines.markersize": 7,
+    })
