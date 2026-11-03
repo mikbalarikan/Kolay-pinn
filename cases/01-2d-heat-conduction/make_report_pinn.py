@@ -1,6 +1,6 @@
 """
 Case 01 raporu (Adım 4–5) — forward PINN ve doğrulama, Türkişi kimlikli PDF.
-Önce: üç pinn_forward.py koşusu ve python plot_pinn.py
+Önce: üç pinn_forward.py koşusu, python plot_pinn.py, python study_runs.py, python study_summary.py
 Sonra: python make_report_pinn.py   ->  report/case01_adim4-5_forward_pinn.pdf
 """
 
@@ -20,8 +20,13 @@ from kolay_pinn.report import CONTENT_W, Report  # noqa: E402
 S = json.loads((HERE / "data" / "summary_pinn.json").read_text())
 S1 = json.loads((HERE / "data" / "summary.json").read_text())
 U, K, X3, REF = S["uniform"], S["corner"], S["skip"], S["reference"]
+ST = json.loads((HERE / "data" / "summary_study.json").read_text())
+SV, SG, CAP = ST["verdict"], ST["seeds"], ST["capacity"]
 share = json.loads((HERE / "lecture" / "ders02" / "assets" / "robin_share.json").read_text())["uniform"]
-sci = lambda v: f"{v:.1e}".replace("e-0", "×10<super>−").replace("e-", "×10<super>−") + "</super>"  # noqa: E731
+def sci(v):
+    m, e = f"{v:.1e}".split("e")
+    e = int(e)
+    return m if e == 0 else f"{m}×10<super>{'−' if e < 0 else ''}{abs(e)}</super>"
 pct = lambda v: f"%{100 * v:.2f}"  # noqa: E731
 fmt = lambda v: f"{v:,.0f}".replace(",", " ")  # noqa: E731
 
@@ -82,18 +87,34 @@ R.story += [R.section("Bulgu 1 · Kayıp tabanını köşe çelişkisi belirler"
             P("Hiçbir düzgün fonksiyon iki koşulu birden sağlayamaz; bu, Ders 01'deki köşe tekilliğinin kayıptaki yansımasıdır. "
               "Sonuç: PINN'de kaybın mutlak değeri doğruluk ölçüsü değildir; problem sıfır olmayan bir taban koyabilir.")),
             R.section("Bulgu 2 · FDM sezgisi PINN'e doğrudan taşınmaz",
-            P(f"Köşe sıklaştırma bağıl L<sub>2</sub> hatayı {K['rel_L2'] / U['rel_L2']:.1f} kat <b>artırdı</b> ve bozulma iç bölgeye yayıldı "
+            P(f"Köşe sıklaştırma bağıl L<sub>2</sub> hatayı tohum 0'da {K['rel_L2'] / U['rel_L2']:.1f} kat, üç tohum ortalamasında {SV['corner_vs_uniform_ratio_of_means']:.1f} kat <b>artırdı</b>; her tohumda düzgünden kötüdür ve bozulma iç bölgeye yayıldı "
               f"(iç bölge L<sub>2</sub> {K['rel_L2_interior'] / U['rel_L2_interior']:.1f} kat). FDM'de her düğüm kendi denklemini sağlar; "
               "PINN'de tek bir düzgün fonksiyon tüm artıkların ortalamasını küçültür. Sağlanamaz noktaları çoğaltmak kaybın ağırlığını "
               "imkânsız bir hedefe kaydırır.")),
             R.section("Bulgu 3 · Kaybın küçülmesi çözümün iyileştiği anlamına gelmez",
             P(f"Köşe dışlama son kaybı <b>{U['final_loss'] / X3['final_loss']:.0f} kat</b> düşürdü ({sci(U['final_loss'])} → {sci(X3['final_loss'])}), "
-              f"ama bağıl L<sub>2</sub> hata neredeyse değişmedi ({sci(U['rel_L2'])} → {sci(X3['rel_L2'])}). Kayıp tabanı köşe çelişkisinden "
+              f"ama bağıl L<sub>2</sub> hata neredeyse değişmedi ({sci(U['rel_L2'])} → {sci(X3['rel_L2'])}); üç tohumda iki stratejinin hata aralıkları örtüşür, kayıp ortalamada {SV['loss_ratio_uniform_over_skip']:.0f} kat düşüktür. Kayıp tabanı köşe çelişkisinden "
               "geliyordu ve çözümün geri kalanına zarar vermiyordu. PINN'in başarısı kayıpla değil, bağımsız bir referansla ölçülmelidir.")),
             R.section("Bulgu 4 · Bu problemde FDM üstündür",
             P(f"FDM aynı ağda {sci(REF['rel_L2_fdm_N201'])} bağıl hataya bir saniyenin altında ulaşır; PINN birkaç dakikada "
               f"{sci(min(U['rel_L2'], X3['rel_L2']))} seviyesindedir. PINN'in değeri ölçüm verisi (Adım 6), bilinmeyen parametre (Adım 7) "
               "ve parametrik çözüm (Adım 8) devreye girdiğinde ortaya çıkar.", "box")),
+            R.section("Bulgu 5 · Tohum, kapasiteden daha büyük etkendir",
+            P(f"Her strateji üç tohumla (0, 1, 2) tekrarlandı; tohum hem ağırlık başlatmayı hem Sobol kolokasyonunu değiştirir. "
+              f"Düzgün kolokasyonda bağıl L<sub>2</sub> {sci(SG['düzgün']['rel_L2']['min'])} ile {sci(SG['düzgün']['rel_L2']['max'])} arasında değişir "
+              f"(değişim katsayısı %{100 * SV['uniform_cv_rel_L2']:.0f}); tohum 0 üçünün en kötüsüdür. Temel ayara göre tek değişiklikle yapılan "
+              f"uzun L-BFGS, geniş ve derin ağ koşuları bu aralığın dışına iyileşme getirmedi (Fig. 3c); derin ağ daha kötüdür. "
+              "Bu problemde hatayı kapasite ya da eğitim süresi değil, köşe tekilliği ve optimizasyonun rastgeleliği sınırlar.")),
+            Spacer(1, 4), R.figure(HERE / "figures" / "fig03_robustness.png", 0.95,
+              "<b>Fig. 3 | Köşe sıklaştırmanın zararı ve kayıp–hata ayrışması üç tohumda da korunur; kapasite artışı tohum aralığını aşmaz.</b> "
+              "<b>a</b>, üç kolokasyon stratejisinde bağıl L<sub>2</sub> hata, üç tohum; çizgi geometrik ortalama. <b>b</b>, aynı koşuların son toplam kaybı. "
+              "<b>c</b>, tohum 0'da temel ayara göre tek değişiklik; dolu: tüm alan, boş: iç bölge; gri bant düzgün 4×50'nin üç tohum aralığı; etiketler eğitim süresi (2 CPU)."),
+            R.table([["", "Bağıl L<sub>2</sub>", "İç bölge L<sub>2</sub>", "Q′ hata", "Son kayıp"]] +
+                    [[g, *(f"{sci(SG[g][k]['mean'])} ± {sci(SG[g][k]['std'])}" for k in ("rel_L2", "rel_L2_interior")),
+                      f"{pct(SG[g]['Q_rel_err']['mean'])} ± {pct(SG[g]['Q_rel_err']['std'])}", sci(SG[g]["final_loss"]["mean"])] for g in SG] +
+                    [[f"{n} (tohum 0)", sci(c["rel_L2"]), sci(c["rel_L2_interior"]), pct(c["Q_rel_err"]), sci(c["final_loss"])] for n, c in CAP.items()],
+                    [44 * mm, 36 * mm, 36 * mm, 30 * mm, CONTENT_W - 146 * mm]),
+            Spacer(1, 3), P("Üst üç satır: üç tohumun ortalaması ± örneklem standart sapması.", "sub"),
             P("Sıradaki: Adım 6 — FDM çözümünden seyrek, gürültülü ölçümlerle hibrit PINN.", "sub")]
 
 out = R.build(HERE / "report" / "case01_adim4-5_forward_pinn.pdf", "Kolay PINN · Case 01 · Adım 4–5")

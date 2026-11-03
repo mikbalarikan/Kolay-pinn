@@ -372,6 +372,31 @@ geri kalanına zarar vermiyordu. Kaybın küçülmesi çözümün iyileştiği a
 code(r"""goster("08_robin_residual.png", 680)""")
 
 md(r"""
+### Sağlamlık: tek koşu yeter mi?
+
+Yukarıdaki sayılar tek bir tohumdan (0). Tohum hem ağırlık başlatmayı hem Sobol kolokasyon noktalarını değiştirir.
+Aynı üç stratejiyi tohum 1 ve 2 ile, temel ayarı da daha uzun L-BFGS, daha geniş ve daha derin ağla tekrarladık
+(`study_runs.py`, 2 CPU'da ~100 dk). Aşağıdaki hücre kaydedilmiş sonuçları okur.
+""")
+code(r"""
+import json
+ST = json.loads((CASE / "data" / "summary_study.json").read_text())
+print(f"{'strateji':18s} {'bağıl L2 (ort ± std)':>24s} {'aralık':>22s} {'son kayıp':>10s}")
+for g, v in ST["seeds"].items():
+    r = v["rel_L2"]
+    print(f"{g:18s} {r['mean']:.2e} ± {r['std']:.1e}   [{r['min']:.1e}, {r['max']:.1e}]   {v['final_loss']['mean']:.1e}")
+print()
+for n, c in ST["capacity"].items():
+    print(f"{n:22s} L2 = {c['rel_L2']:.2e}   {c['n_params']:6d} parametre   {c['t_total_s'] / 60:4.0f} dk")
+""")
+code(r"""goster("09_robustness.png", 760)""")
+md(r"""
+- Yalnız tohum değiştirmek düzgün kolokasyonda hatayı yaklaşık 4 kat oynatır; tohum 0 üçünün en kötüsü.
+- Köşe sıklaştırma **her tohumda** kötü (ortalama ~7 kat); köşe dışlamanın hata aralığı düzgünle örtüşür, kaybı ise ~95 kat düşüktür.
+- Uzun eğitim ve geniş ağ tohum aralığının içinde kalır, süre 1.5–2 kat artar; derin ağ daha kötü.
+  Bu problemde hatayı kapasite değil köşe tekilliği ve optimizasyonun rastgeleliği sınırlar.
+- Kural: PINN sonucunu en az üç tohumun ortalaması ve aralığıyla raporlayın.
+
 ### PINN ve FDM
 
 | | FDM ($N = 101$) | PINN (4 × 50, tanh) |
@@ -391,7 +416,8 @@ Bu problemde FDM hem daha doğru hem daha hızlı. PINN'in değeri veri ve bilin
 - Fizik kayıp olur: Laplace ve Robin artıkları; katı kısıt Dirichlet'i yapıya gömer, $\tanh$ ikinci türevi taşır.
 - Başarıyı kayıp değil referans ölçer; kayıp tabanını köşe çelişkisi belirler.
 - FDM sezgisi PINN'e doğrudan taşınmaz: köşeye nokta eklemek hatayı artırır.
-- Köşeyi dışlamak kaybı iki yüz kattan fazla düşürür ama hatayı değiştirmez: **kayıp ≠ doğruluk**.
+- Köşeyi dışlamak kaybı yaklaşık yüz kat düşürür ama hatayı değiştirmez: **kayıp ≠ doğruluk**.
+- Tek koşu yetmez: tohum hatayı ~4 kat oynatır; daha büyük ağ ya da uzun eğitim bu aralığı aşmadı.
 - Sıradaki ders: seyrek ve gürültülü ölçümleri kayba eklemek (hibrit PINN):
 
 $$\mathcal{L} = \mathcal{L}_{\mathrm{PDE}} + \lambda\,\mathcal{L}_{\mathrm{Robin}} + \mu\,\frac{1}{N_d}\sum_{i=1}^{N_d}\big(\hat\theta(\mathbf{x}_i) - \theta_i^{\text{ölçüm}}\big)^2$$

@@ -181,14 +181,39 @@ kayıp yalnız PDE ve Robin artıkları, eğitim Adam (6000) → L-BFGS (≤ 200
 **a**, toplam kayıp (gri: L-BFGS). **b**, alt yüzey boyunca seri çözüme göre hata; kesikli çizgi FDM. **c–e**, log₁₀ hata haritaları.
 Vektör: [`fig02_pinn_forward.pdf`](figures/fig02_pinn_forward.pdf) · [`.svg`](figures/fig02_pinn_forward.svg)
 
+#### Sağlamlık: üç tohum, kapasite ve eğitim süresi
+
+Tohum (0, 1, 2) hem ağırlık başlatmayı hem Sobol kolokasyonunu değiştirir. `python study_runs.py` (2 CPU'da ~100 dk) → `python study_summary.py`.
+
+| Strateji (3 tohum) | Bağıl L₂ ort. ± std | Aralık | İç bölge L₂ | Q′ hatası | Son kayıp |
+|---|---|---|---|---|---|
+| düzgün | 5.1e-04 ± 3.9e-04 | 2.4e-04 – 9.5e-04 | 3.2e-04 | %0.12 | 8.2e-02 |
+| köşe dışlama | 8.2e-04 ± 2.7e-04 | 5.3e-04 – 1.1e-03 | 4.0e-04 | %0.42 | 8.7e-04 |
+| köşe sıklaştırma | 3.6e-03 ± 1.3e-03 | 2.2e-03 – 4.6e-03 | 3.5e-03 | %0.71 | 1.5e+00 |
+
+| Tek değişiklik (tohum 0) | Parametre | Bağıl L₂ | İç bölge L₂ | Süre |
+|---|---|---|---|---|
+| 4×50, temel | 7 851 | 9.5e-04 | 4.9e-04 | 8 dk |
+| uzun L-BFGS (6000) | 7 851 | 6.8e-04 | 3.3e-04 | 12 dk |
+| geniş 4×100 | 30 701 | 8.6e-04 | 4.2e-04 | 18 dk |
+| derin 8×50 | 18 051 | 2.0e-03 | 1.3e-03 | 17 dk |
+
+![Fig. 3](figures/fig03_robustness.png)
+
+**Fig. 3 | Köşe sıklaştırmanın zararı ve kayıp–hata ayrışması üç tohumda da korunur; kapasite artışı tohum aralığını aşmaz.**
+**a**, bağıl L₂ hata, üç tohum; çizgi geometrik ortalama. **b**, son toplam kayıp. **c**, temel ayara göre tek değişiklik; gri bant 4×50'nin tohum aralığı.
+Vektör: [`fig03_robustness.pdf`](figures/fig03_robustness.pdf) · [`.svg`](figures/fig03_robustness.svg)
+
 **Bulgular**
 1. **Kayıp tabanını köşe çelişkisi belirler.** Alt köşede yan duvar $\partial\theta/\partial\eta = 0$ ister, Robin
    $\partial\theta/\partial\eta = \mathrm{Bi}$ ister; hiçbir düzgün fonksiyon ikisini sağlayamaz. Kenarın %2'lik köşe şeridi
    Robin kaybında ~%97 paya sahip, köşede artık $|r| = \mathrm{Bi}$.
-2. **FDM sezgisi PINN'e taşınmaz.** Köşeye nokta eklemek bağıl L₂'yi 4.8 kat artırdı; sağlanamaz
-   artıklar kaybı domine edip iç bölgeyi bozdu.
-3. **Kayıp ≠ doğruluk.** Köşe dışlama kaybı 228 kat düşürdü, hata değişmedi.
-4. **Bu problemde FDM üstün.** PINN'in değeri ölçüm verisi (Adım 6), bilinmeyen parametre (Adım 7) ve parametrik çözümde (Adım 8).
+2. **FDM sezgisi PINN'e taşınmaz.** Köşeye nokta eklemek bağıl L₂'yi tohum 0'da 4.8 kat, üç tohum ortalamasında
+   7.2 kat artırdı (her tohumda daha kötü); sağlanamaz artıklar kaybı domine edip iç bölgeyi bozdu.
+3. **Kayıp ≠ doğruluk.** Köşe dışlama kaybı ortalamada 95 kat düşürdü; hata aralığı düzgün kolokasyonla örtüşüyor.
+4. **Tohum, kapasiteden büyük etken.** Yalnız tohum hatayı 4 kat oynatıyor (tohum 0 en kötüsü);
+   uzun L-BFGS ve 4×100 bu aralıkta kaldı, 8×50 daha kötü. Sonuçlar en az üç tohumla raporlanmalı.
+5. **Bu problemde FDM üstün.** PINN'in değeri ölçüm verisi (Adım 6), bilinmeyen parametre (Adım 7) ve parametrik çözümde (Adım 8).
 
 ### Çalıştırma
 
@@ -206,6 +231,7 @@ python pinn_forward.py --tag uniform
 python pinn_forward.py --corner --tag corner
 python pinn_forward.py --skip 0.02 --tag skip
 python plot_pinn.py                 # figures/fig02_pinn_forward.* + data/summary_pinn.json
+python study_runs.py && python study_summary.py   # sağlamlık: fig03_robustness.* + data/summary_study.json
 python make_report_pinn.py          # report/case01_adim4-5_forward_pinn.pdf
 python lecture/ders02/equations.py && python lecture/ders02/make_slide_figures.py && node lecture/ders02/build_lecture.js
 python notebook/build_notebook_ders02.py

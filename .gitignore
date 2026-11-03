@@ -3,3 +3,5 @@ __pycache__/
 node_modules/
 .ipynb_checkpoints/
 cases/*/runs_*.log
+cases/*/study_runs.log
+cases/*/hybrid_runs.log

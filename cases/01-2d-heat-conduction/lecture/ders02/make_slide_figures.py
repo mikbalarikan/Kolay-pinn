@@ -193,4 +193,30 @@ fig.tight_layout(pad=0.5)
 save(fig, "08_robin_residual")
 (OUT / "robin_share.json").write_text(json.dumps(shares, indent=1))
 print("Robin kaybındaki köşe payı (kenarın %2'si):", shares)
+# 9 — robustness: seed spread + capacity (requires python study_summary.py) --------------
+ST = json.loads((CASE / "data" / "summary_study.json").read_text())
+fig, axs = plt.subplots(1, 2, figsize=(11.6, 4.3), gridspec_kw={"width_ratios": [1, 1.15]})
+cols = {"düzgün": UNI, "köşe dışlama": C["lila"], "köşe sıklaştırma": COR}
+ax = axs[0]
+for i, (g, col) in enumerate(cols.items()):
+    v = np.array(ST["seeds"][g]["rel_L2"]["values"])
+    ax.scatter([i] * v.size, v, s=70, color=col, zorder=3, linewidths=0)
+    ax.plot([i - 0.25, i + 0.25], [np.exp(np.log(v).mean())] * 2, color=INK, lw=2, zorder=4)
+ax.set_yscale("log"); ax.set_xticks(range(3), [g.replace("köşe ", "köşe\n") for g in cols]); ax.set_xlim(-0.5, 2.5)
+ax.set_ylabel("bağıl L$_2$ hata"); ax.set_title("3 tohum · çizgi: geometrik ort.", fontsize=13, color=MUTED)
+ax = axs[1]
+ub = ST["seeds"]["düzgün"]["rel_L2"]
+ax.axhspan(ub["min"], ub["max"], color=C["krom"], zorder=0)
+ax.text(0.98, ub["min"] * 1.08, "4×50 · 3 tohum aralığı", ha="right", fontsize=12, color=MUTED, transform=ax.get_yaxis_transform())
+names = list(ST["capacity"])
+for i, n in enumerate(names):
+    c = ST["capacity"][n]
+    ax.scatter(i, c["rel_L2"], s=80, color=UNI, zorder=3, linewidths=0)
+    ax.text(i, c["rel_L2"] * 1.18, f"{c['t_total_s'] / 60:.0f} dk", ha="center", fontsize=12, color=INK)
+ax.set_yscale("log"); ax.set_xlim(-0.5, len(names) - 0.5)
+ax.set_xticks(range(len(names)), ["4×50\ntemel", "uzun\nL-BFGS", "geniş\n4×100", "derin\n8×50"])
+ax.set_title("tek değişiklik · tohum 0", fontsize=13, color=MUTED)
+fig.tight_layout()
+save(fig, "09_robustness")
+
 print(sorted(p.name for p in OUT.glob("*.png")))
