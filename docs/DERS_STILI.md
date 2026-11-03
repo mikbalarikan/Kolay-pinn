@@ -55,7 +55,7 @@ node   cases/NN-<ad>/lecture/build_lecture.js
 ```
 
 `turkisi_deck.js` bileşenleri: `content` (iddia-kanıt slaytı, `step` çipi, `level` rozeti, `notes`), `section`
-(ara sayfa + yol haritası), `question` (kontrol sorusu), `card`, `eq`, `stat`, `image` (oranı koruyarak sığdırır),
+(ara sayfa + yol haritası), `question` (kontrol sorusu), `card`, `stat`, `image` (oranı koruyarak sığdırır),
 `roadmap`, `caption`, `sci` (1.1×10⁻⁴ biçimi), `math` (tek denklem), `mathBox` (denklem bloğu); `card({ math })` başlığın
 altına denklem koyar. Tema renkleri palet v5'ten gelir ve dosyaya yazılır; PowerPoint'te
 tema renkleri değiştirilerek bütün deste yeniden renklendirilebilir.
