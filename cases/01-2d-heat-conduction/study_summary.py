@@ -76,7 +76,7 @@ axs[1].set_title("kayıp ile hata ayrışıyor", fontsize=6, color=MUTED, pad=3)
 ax = axs[2]
 ub = S["seeds"]["düzgün"]["rel_L2"]
 ax.axhspan(ub["min"], ub["max"], color=C["krom"], zorder=0)
-ax.text(0.02, ub["max"] * 1.06, "4×50 tohum aralığı", fontsize=5.5, color=MUTED, transform=ax.get_yaxis_transform())
+ax.text(0.98, ub["min"] * 1.06, "4×50 · 3 tohum aralığı", ha="right", fontsize=5.5, color=MUTED, transform=ax.get_yaxis_transform())
 names = list(CAP)
 for i, n in enumerate(names):
     c = S["capacity"][n]
@@ -89,7 +89,7 @@ ax.set_xlim(-0.5, len(names) - 0.5)
 ax.set_ylabel("bağıl L$_2$ hata")
 ax.scatter([], [], s=16, color=C["plan"], label="tüm alan")
 ax.scatter([], [], s=16, facecolor="white", edgecolor=C["plan"], lw=0.8, label="iç bölge")
-ax.legend(loc="lower left", fontsize=5.5, handletextpad=0.2)
+ax.legend(loc="upper left", fontsize=5.5, handletextpad=0.2)
 panel_letter(ax, "c", dx=-0.3, dy=1.02)
 fig.tight_layout(pad=0.4, w_pad=1.2)
 save_figure(fig, HERE / "figures" / "fig03_robustness")

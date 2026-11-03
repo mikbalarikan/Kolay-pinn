@@ -24,6 +24,8 @@ const ALL = [["düzgün", U], ["köşe sıklaştırma", K], ["köşe dışlama",
 const best = ALL.map((a) => a[1]).reduce((a, b) => (b.rel_L2 < a.rel_L2 ? b : a));
 const bestName = ALL.find((a) => a[1] === best)[0];
 const skipGain = U.rel_L2 / X3.rel_L2, cornerLoss = K.rel_L2 / U.rel_L2, lossDrop = U.final_loss / X3.final_loss;
+const ST = JSON.parse(fs.readFileSync(path.join(CASE, "data", "summary_study.json"), "utf8"));
+const SU = ST.seeds["düzgün"], SK = ST.seeds["köşe sıklaştırma"], SX = ST.seeds["köşe dışlama"], CAPS = ST.capacity, V = ST.verdict;
 const SHARE = JSON.parse(fs.readFileSync(path.join(ASSETS, "robin_share.json"), "utf8"));
 
 const STEPS = [
@@ -248,12 +250,13 @@ deck.section(SEC3, "03", "Doğrula", "Seri çözüme ve FDM'ye karşı: alan, k�
 }
 {
   const title = `Köşeye nokta eklemek hatayı ${cornerLoss.toFixed(1)} kat artırır; köşeyi dışlamak kaybı ${Math.round(lossDrop)} kat düşürür ama hatayı değiştirmez`;
-  const s = deck.content(SEC3, title, { step: "ADIM 5 · KÖŞELER",
+  const s = deck.content(SEC3, title, { step: "ADIM 5 · KÖŞELER · TOHUM 0",
     notes: `Üç koşunun hata haritası. Solda düzgün kolokasyon: bağıl L2 ${deck.sci(U.rel_L2)}, en büyük hata yine alt köşede, ${deck.sci(U.max_err)}. ` +
       `Ortada köşe sıklaştırma. FDM sezgisiyle beklentimiz iyileşmeydi; tersi oldu: bağıl L2 ${deck.sci(K.rel_L2)}, yani ${cornerLoss.toFixed(1)} kat daha kötü ve bozulma tüm alana yayılıyor. ` +
       "Sebep kayıp tabanı slaytında gördüğümüz çelişki: köşeye eklenen her nokta, hiçbir düzgün fonksiyonun sağlayamayacağı bir artık taşıyor. Bu noktalar kaybı domine ediyor ve optimizer, onları biraz azaltmak için alanın geri kalanını feda ediyor. " +
       `Sağda tersini yaptık: köşe şeridindeki Robin noktalarını kayıptan çıkardık. Toplam kayıp ${Math.round(lossDrop)} kat düştü, ${deck.sci(U.final_loss)}'den ${deck.sci(X3.final_loss)}'e. Ama bağıl L2 ${deck.sci(X3.rel_L2)}: düzgün koşuyla neredeyse aynı. ` +
       "İki ders var. Bir: FDM'de çözünürlüğü zor yere yığmak işe yarar; PINN'de çözümü olmayan noktaları çoğaltmak tüm çözümü bozar. " +
+      "Bu sayılar tohum sıfırdan; birkaç slayt sonra üç tohumla tekrarlayıp bulguların sağlam olduğunu göreceğiz. " +
       "İki: kayıp iki yüz kat düştü ama çözüm iyileşmedi. Kayıp tabanı köşeden geliyordu ve çözümün geri kalanına zarar vermiyordu. Kaybın küçülmesi çözümün iyileştiği anlamına gelmez; bu kursun ana cümlesi." });
   deck.image(s, "06_error_maps.png", { x: M, y: BODY_TOP - 0.15, w: W - 2 * M, h: 4.25 });
   const cw = (W - 2 * M - 0.6) / 3;
@@ -272,6 +275,25 @@ deck.section(SEC3, "03", "Doğrula", "Seri çözüme ve FDM'ye karşı: alan, k�
    [K.Q_W_m, `köşe sıklaştırma · ${pct(K.Q_rel_err)}`, hex("parca_mandalina")], [X3.Q_W_m, `köşe dışlama · ${pct(X3.Q_rel_err)}`, hex("lila")]]
     .forEach(([v, l, col], i) => deck.stat(s, { x: x0, y: BODY_TOP + i * 1.12, w: sw, value: fmt(v), unit: "W/m", label: l, color: col }));
 }
+{
+  const cap = (n) => CAPS[n].rel_L2;
+  const s = deck.content(SEC3, `Tohum değiştirmek hatayı ${(SU.rel_L2.max / SU.rel_L2.min).toFixed(0)} kat oynatır; daha büyük ağ ya da uzun eğitim bu aralığın dışına çıkmaz`, { step: "ADIM 5 · SAĞLAMLIK", level: YL,
+    notes: "Buraya kadar her koşu tek bir tohumla yapıldı. Bilimsel olarak bu yetmez; aynı ayarı farklı rastgele başlatma ve farklı kolokasyon noktalarıyla tekrarladık. " +
+      `Solda üç strateji, üçer tohum. Düzgün kolokasyonda bağıl L2 ${deck.sci(SU.rel_L2.min)} ile ${deck.sci(SU.rel_L2.max)} arasında; yani yalnız tohum değiştirerek ${(SU.rel_L2.max / SU.rel_L2.min).toFixed(0)} kat fark görüyoruz. Bizim ilk koşumuz, tohum sıfır, şanssız tohummuş: üçünün en kötüsü. ` +
+      `Köşe sıklaştırma her tohumda düzgünden kötü; ortalamada ${V.corner_vs_uniform_ratio_of_means.toFixed(1)} kat. Bu bulgu sağlam. Köşe dışlamanın aralığı ise düzgünle örtüşüyor: hatayı değiştirmiyor, ama kaybı ortalamada ${Math.round(V.loss_ratio_uniform_over_skip)} kat düşürüyor. Kayıp doğruluk değildir cümlesi de sağlam. ` +
+      `Sağda sizin sorunuz: daha uzun eğitim, daha geniş ya da daha derin ağ. Uzun L-BFGS ${deck.sci(cap("uzun L-BFGS (6000)"))}, geniş ağ ${deck.sci(cap("geniş 4×100"))}; ikisi de tohum aralığının içinde, süre ise bir buçuk ila iki kat. Derin ağ ${deck.sci(cap("derin 8×50"))}, daha kötü. ` +
+      "Sonuç: bu problemde hatayı kapasite ya da eğitim süresi sınırlamıyor; köşe tekilliği ve optimizasyonun rastgeleliği sınırlıyor. Bir PINN sonucunu raporlarken en az üç tohumun ortalamasını ve aralığını verin." });
+  deck.image(s, "09_robustness.png", { x: M, y: BODY_TOP - 0.1, w: W - 2 * M, h: 4.3 });
+  const cw = (W - 2 * M - 0.6) / 3;
+  [[`düzgün: ${deck.sci(SU.rel_L2.mean)} ± ${deck.sci(SU.rel_L2.std)}`, hex("plan")],
+   [`köşe sıklaştırma: her tohumda kötü · ${V.corner_vs_uniform_ratio_of_means.toFixed(1)}×`, hex("parca_mandalina")],
+   [`köşe dışlama: hata aynı aralıkta · kayıp ${Math.round(V.loss_ratio_uniform_over_skip)}× düşük`, hex("lila")]]
+    .forEach(([h], i) => deck.card(s, { x: M + i * (cw + 0.3), y: 6.05, w: cw, h: 0.68, head: h, headSize: 12 }));
+}
+deck.question(SEC3, "Tek bir eğitim koşusunun sonucunu rapora yazmak neden yeterli değil? Hangi iki şeyi birlikte vermelisiniz?", {
+  hint: "İpucu: tohum hem ağırlık başlatmayı hem kolokasyon noktalarını değiştirir.",
+  notes: `Tohum değiştirmek bu problemde hatayı ${(SU.rel_L2.max / SU.rel_L2.min).toFixed(0)} kat oynattı; tek koşu bu dağılımdan rastgele bir örnek. İki stratejiyi karşılaştırırken farkın tohum aralığından büyük olup olmadığına bakmalıyız. ` +
+    "Raporlanacak iki şey: en az üç tohumun ortalaması ve yayılımı, ve bağımsız bir referansa karşı hata. Kapasite ya da eğitim süresini artırmak ancak bu aralığın dışına çıkarsa anlamlı bir iyileşmedir." });
 {
   const s = deck.content(SEC3, "Bu problemde FDM daha doğru ve hızlı; PINN'in kazancı başka yerde", { step: "ADIM 5 · ÖDÜNLEŞİM", level: YL,
     notes: "Dürüst karşılaştırma. Bu basit, iki boyutlu, doğrusal problemde FDM hem daha doğru hem binlerce kat daha hızlı. PINN'i burada FDM'nin yerine önermiyoruz. " +
@@ -304,10 +326,10 @@ pres.addSection({ title: SEC4 });
 {
   const s = deck.content(SEC4, "Bu dersin üç çıkarımı", { dark: true,
     notes: "Özetleyelim. Bir: PINN, denklemi kayıp olarak yazarak veri olmadan çözüm üretir; katı kısıt ve doğru aktivasyon işi kolaylaştırır. " +
-      "İki: başarıyı kayıp eğrisi değil referans ölçer; hata yine köşelerde ve kolokasyonla yönetilir. Üç: bu problemde FDM daha iyi; PINN'in değeri veri ve bilinmeyenler devreye girince ortaya çıkıyor." });
+      "İki: başarıyı kayıp eğrisi değil referans ölçer, ve tek koşu değil birkaç tohum; daha büyük ağ ya da uzun eğitim burada hatayı tohum aralığının dışına taşımadı. Üç: bu problemde FDM daha iyi; PINN'in değeri veri ve bilinmeyenler devreye girince ortaya çıkıyor." });
   const cw = (W - 2 * M - 0.6) / 3;
   [["Fizik kayıp olur", "Laplace ve Robin artıkları kayba girer; katı kısıt Dirichlet'i yapıya gömer, tanh ikinci türevi taşır."],
-   ["Kayıp ≠ doğruluk", `Köşeyi dışlamak kaybı ${Math.round(lossDrop)} kat düşürdü, hata değişmedi; köşeye nokta eklemek hatayı ${cornerLoss.toFixed(1)} kat artırdı. Referansla ölçün.`],
+   ["Kayıp ≠ doğruluk", `Köşeyi dışlamak kaybı ${Math.round(V.loss_ratio_uniform_over_skip)} kat düşürdü, hata tohum aralığında kaldı; köşeye nokta eklemek hatayı ${V.corner_vs_uniform_ratio_of_means.toFixed(1)} kat artırdı. Üç tohum, bir referans.`],
    ["Doğru araç seçimi", "Bu problemde FDM üstün. PINN'in gücü veri, bilinmeyen parametre ve parametrik çözümde."]]
     .forEach(([h, b], i) => deck.card(s, { x: M + i * (cw + 0.3), y: BODY_TOP + 0.2, w: cw, h: 2.7, head: h, body: b, num: i + 1, dark: true, headSize: 19, bodySize: 16 }));
   s.addText("Sıradaki adım: seyrek ve gürültülü ölçümleri aynı kayba eklemek (hibrit PINN).", { x: M, y: 5.4, w: W - 2 * M, h: 0.5,
@@ -329,7 +351,7 @@ pres.addSection({ title: SEC4 });
     valign: "top", margin: 0, paraSpaceAfter: 8, isTextBox: true, objectName: "code2" });
   const cx = M + 4.8, cw = (W - M - cx - 0.3) / 2;
   deck.card(s, { x: cx, y: BODY_TOP, w: cw, h: 4.35, head: "Lisans",
-    body: "1. Ağ genişliği 20, 50, 100: L₂ hata ve süreyi tablolayın.\n2. λ = 0.1, 1, 10 ile Robin teriminin etkisini ölçün.\n3. Q′'yü PINN'den hesaplayıp seri çözümle karşılaştırın.", headSize: 18, bodySize: 14 });
+    body: "1. Ağ genişliği 20, 50, 100 · her biri 3 tohum: ortalama ± sapma ve süreyi tablolayın.\n2. λ = 0.1, 1, 10 ile Robin teriminin etkisini ölçün.\n3. Q′'yü PINN'den hesaplayıp seri çözümle karşılaştırın.", headSize: 18, bodySize: 14 });
   deck.card(s, { x: cx + cw + 0.3, y: BODY_TOP, w: cw, h: 4.35, head: "Yüksek lisans",
     body: "1. Yumuşak kısıt (Dirichlet kaybı) ile katı kısıtı karşılaştırın.\n2. ReLU ile eğitip kaybın neden sıfıra gittiğini gösterin.\n3. Tekilliği çözüme analitik olarak ekleyin; L₂ ve Q′ değişir mi?", headSize: 18, bodySize: 14 });
 }
