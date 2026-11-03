@@ -1,0 +1,222 @@
+{
+ "g_mlp": {
+  "png": "g_mlp.png",
+  "omml": "g_mlp.omml.xml",
+  "w": 4.0197,
+  "h": 0.2906,
+  "size": 15,
+  "color": "0D161F",
+  "tex": "\\mathcal{N}(\\mathbf{x}) = W_4\\,\\sigma\\big(W_3\\,\\sigma(\\cdots\\sigma(W_1\\mathbf{x} + b_1)\\cdots)\\big) + b_4",
+  "hash": "805db8e573c9"
+ },
+ "g_tanh": {
+  "png": "g_tanh.png",
+  "omml": "g_tanh.omml.xml",
+  "w": 1.3532,
+  "h": 0.2763,
+  "size": 17,
+  "color": "0D161F",
+  "tex": "\\sigma(z) = \\tanh z",
+  "hash": "155d9f5e631d"
+ },
+ "g_ad": {
+  "png": "g_ad.png",
+  "omml": "g_ad.omml.xml",
+  "w": 2.1405,
+  "h": 0.5612,
+  "size": 15,
+  "color": "0D161F",
+  "tex": "\\frac{\\partial \\hat\\theta}{\\partial \\xi},\\ \\frac{\\partial^2 \\hat\\theta}{\\partial \\xi^2} \\quad \\text{(kesin, ağdan)}",
+  "hash": "db0d61b9209e"
+ },
+ "g_col": {
+  "png": "g_col.png",
+  "omml": "g_col.omml.xml",
+  "w": 1.2557,
+  "h": 0.3186,
+  "size": 17,
+  "color": "0D161F",
+  "tex": "\\{(\\xi_k, \\eta_k)\\}_{k=1}^{N_r}",
+  "hash": "37de1890b19f"
+ },
+ "g_hard": {
+  "png": "g_hard.png",
+  "omml": "g_hard.omml.xml",
+  "w": 1.2344,
+  "h": 0.3101,
+  "size": 17,
+  "color": "0D161F",
+  "tex": "\\hat\\theta = g + d\\,\\mathcal{N}",
+  "hash": "1434dc5bdc20"
+ },
+ "g_lbfgs": {
+  "png": "g_lbfgs.png",
+  "omml": "g_lbfgs.omml.xml",
+  "w": 2.167,
+  "h": 0.2379,
+  "size": 16,
+  "color": "0D161F",
+  "tex": "\\mathbf{w}_{k+1} = \\mathbf{w}_k - \\alpha_k H_k \\nabla\\mathcal{L}",
+  "hash": "7ae289cc6360"
+ },
+ "residual": {
+  "png": "residual.png",
+  "omml": "residual.omml.xml",
+  "w": 3.2898,
+  "h": 0.8038,
+  "size": 22,
+  "color": "0D161F",
+  "tex": "r(\\xi,\\eta) = \\frac{\\partial^2\\hat\\theta}{\\partial\\xi^2} + \\frac{\\partial^2\\hat\\theta}{\\partial\\eta^2} \\;\\to\\; 0",
+  "hash": "234c95fd817b"
+ },
+ "hard": {
+  "png": "hard.png",
+  "omml": "hard.omml.xml",
+  "w": 5.2421,
+  "h": 0.8074,
+  "size": 24,
+  "color": "0D161F",
+  "tex": "\\hat\\theta(\\xi,\\eta) = 1 + \\underbrace{\\xi\\,(1-\\xi)\\,(1-\\eta)}_{d(\\xi,\\eta)}\\;\\mathcal{N}(\\xi,\\eta)",
+  "hash": "d27b5055c54c"
+ },
+ "hard_check": {
+  "png": "hard_check.png",
+  "omml": "hard_check.omml.xml",
+  "w": 3.683,
+  "h": 0.2943,
+  "size": 16,
+  "color": "0D161F",
+  "tex": "\\xi = 0,\\ \\xi = 1,\\ \\eta = 1:\\quad d = 0 \\;\\Rightarrow\\; \\hat\\theta = 1",
+  "hash": "3c4f4467f6dc"
+ },
+ "relu_dd": {
+  "png": "relu_dd.png",
+  "omml": "relu_dd.omml.xml",
+  "w": 4.7874,
+  "h": 0.3162,
+  "size": 18,
+  "color": "0D161F",
+  "tex": "\\sigma(z) = \\max(0, z) \\;\\Rightarrow\\; \\sigma''(z) = 0 \\;\\Rightarrow\\; \\nabla^2 \\mathcal{N} \\equiv 0",
+  "hash": "10c1661a2705"
+ },
+ "lap_ad": {
+  "png": "lap_ad.png",
+  "omml": "lap_ad.omml.xml",
+  "w": 2.9852,
+  "h": 0.7953,
+  "size": 20,
+  "color": "0D161F",
+  "tex": "\\nabla^2\\hat\\theta = \\frac{\\partial}{\\partial\\xi}\\!\\left(\\frac{\\partial\\hat\\theta}{\\partial\\xi}\\right) + \\frac{\\partial}{\\partial\\eta}\\!\\left(\\frac{\\partial\\hat\\theta}{\\partial\\eta}\\right)",
+  "hash": "9c624384da78"
+ },
+ "loss": {
+  "png": "loss.png",
+  "omml": "loss.omml.xml",
+  "w": 6.0579,
+  "h": 0.7345,
+  "size": 20,
+  "color": "0D161F",
+  "tex": "\\mathcal{L}(\\mathbf{w}) = \\frac{1}{N_r}\\sum_{k=1}^{N_r} \\big(\\nabla^2\\hat\\theta(\\mathbf{x}_k)\\big)^2 + \\frac{\\lambda}{N_b}\\sum_{m=1}^{N_b} \\Big(\\frac{\\partial\\hat\\theta}{\\partial\\eta} - \\mathrm{Bi}\\,\\hat\\theta\\Big)^2_{(\\xi_m, 0)}",
+  "hash": "2f7cfea33a3d"
+ },
+ "loss_short": {
+  "png": "loss_short.png",
+  "omml": "loss_short.omml.xml",
+  "w": 3.314,
+  "h": 0.2629,
+  "size": 18,
+  "color": "0D161F",
+  "tex": "\\mathcal{L} = \\mathcal{L}_{\\mathrm{PDE}} + \\lambda\\,\\mathcal{L}_{\\mathrm{Robin}}, \\qquad \\lambda = 1",
+  "hash": "af6929fd4189"
+ },
+ "adam_lr": {
+  "png": "adam_lr.png",
+  "omml": "adam_lr.omml.xml",
+  "w": 2.1399,
+  "h": 0.3125,
+  "size": 18,
+  "color": "0D161F",
+  "tex": "\\alpha_t = 10^{-3} \\cdot 0.1^{\\,t / T_{\\mathrm{Adam}}}",
+  "hash": "8fdcc388267e"
+ },
+ "conflict": {
+  "png": "conflict.png",
+  "omml": "conflict.omml.xml",
+  "w": 4.4128,
+  "h": 0.9785,
+  "size": 19,
+  "color": "0D161F",
+  "tex": "\\underbrace{\\left.\\frac{\\partial\\theta}{\\partial\\eta}\\right|_{\\xi=0} = 0}_{\\text{yan duvar: } \\theta \\equiv 1} \\qquad\\text{ama}\\qquad \\underbrace{\\frac{\\partial\\theta}{\\partial\\eta} = \\mathrm{Bi}\\,\\theta = \\mathrm{Bi}}_{\\text{Robin, köşede}}",
+  "hash": "048df6695481"
+ },
+ "nr": {
+  "png": "nr.png",
+  "omml": "nr.omml.xml",
+  "w": 1.5673,
+  "h": 0.3413,
+  "size": 26,
+  "color": "0D161F",
+  "tex": "N_r = 4096",
+  "hash": "d1b9c981aed3"
+ },
+ "nb": {
+  "png": "nb.png",
+  "omml": "nb.omml.xml",
+  "w": 1.3892,
+  "h": 0.3413,
+  "size": 26,
+  "color": "0D161F",
+  "tex": "N_b = 256",
+  "hash": "6272dc292ef9"
+ },
+ "lam1": {
+  "png": "lam1.png",
+  "omml": "lam1.omml.xml",
+  "w": 0.8708,
+  "h": 0.2913,
+  "size": 26,
+  "color": "0D161F",
+  "tex": "\\lambda = 1",
+  "hash": "0c2e034a5fb9"
+ },
+ "relL2": {
+  "png": "relL2.png",
+  "omml": "relL2.omml.xml",
+  "w": 1.8442,
+  "h": 0.679,
+  "size": 18,
+  "color": "0D161F",
+  "tex": "\\varepsilon_{L_2} = \\frac{\\|\\hat\\theta - \\theta_{\\mathrm{seri}}\\|_2}{\\|\\theta_{\\mathrm{seri}}\\|_2}",
+  "hash": "6093349b8db6"
+ },
+ "qprime": {
+  "png": "qprime.png",
+  "omml": "qprime.omml.xml",
+  "w": 3.3174,
+  "h": 0.4002,
+  "size": 18,
+  "color": "0D161F",
+  "tex": "Q' = \\bar h\\,L\\,(T_w - T_\\infty)\\int_0^1 \\hat\\theta(\\xi, 0)\\,d\\xi",
+  "hash": "30e9e88c28bd"
+ },
+ "corner": {
+  "png": "corner.png",
+  "omml": "corner.omml.xml",
+  "w": 3.4578,
+  "h": 0.3034,
+  "size": 16,
+  "color": "0D161F",
+  "tex": "r = \\sqrt{\\xi^2 + \\eta^2} \\sim \\text{log-düzgün}\\,[10^{-3},\\ 0.2]",
+  "hash": "f0438afbec73"
+ },
+ "pv_hybrid": {
+  "png": "pv_hybrid.png",
+  "omml": "pv_hybrid.omml.xml",
+  "w": 5.5419,
+  "h": 0.6437,
+  "size": 20,
+  "color": "0D161F",
+  "tex": "\\mathcal{L} = \\mathcal{L}_{\\mathrm{PDE}} + \\lambda\\,\\mathcal{L}_{\\mathrm{Robin}} + \\mu\\,\\frac{1}{N_d}\\sum_{i=1}^{N_d} \\big(\\hat\\theta(\\mathbf{x}_i) - \\theta_i^{\\mathrm{ölçüm}}\\big)^2",
+  "hash": "fa3cd22a6793"
+ }
+}

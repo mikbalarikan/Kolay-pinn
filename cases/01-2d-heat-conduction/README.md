@@ -10,6 +10,11 @@ adım adım PINN'e geçmek.
 📓 **Defter (adım adım, çalıştırılmış):** [`notebook/ders01_adim_adim_fdm.ipynb`](notebook/ders01_adim_adim_fdm.ipynb) — kodu satır satır kurup FDM sonucuna ve analitik doğrulamaya kadar götürür
 📄 **Rapor (Adım 1–3):** [`report/case01_adim1-3_fdm_referans.pdf`](report/case01_adim1-3_fdm_referans.pdf)
 
+**Ders 02 · Forward PINN (Adım 4–5)**
+🎓 [`lecture/ders02/ders02_forward_pinn.pptx`](lecture/ders02/ders02_forward_pinn.pptx) ·
+📓 [`notebook/ders02_forward_pinn.ipynb`](notebook/ders02_forward_pinn.ipynb) ·
+📄 [`report/case01_adim4-5_forward_pinn.pdf`](report/case01_adim4-5_forward_pinn.pdf)
+
 ## Yol haritası
 
 | # | Adım | Durum |
@@ -17,8 +22,8 @@ adım adım PINN'e geçmek.
 | 1 | Problemi tanımla (L, k, h, Bi) | ✅ |
 | 2 | Boyutsuzlaştır | ✅ |
 | 3 | Referans FDM çözücü + analitik doğrulama | ✅ |
-| 4 | Forward PINN (sadece fizik, veri yok) | ⏳ |
-| 5 | Doğrulama: L2 hata, hata haritası, alt yüzey ısı akısı | ⏳ |
+| 4 | Forward PINN (sadece fizik, veri yok) | ✅ |
+| 5 | Doğrulama: L2 hata, hata haritası, alt yüzey ısı akısı | ✅ |
 | 6 | Hibrit PINN: seyrek + gürültülü referans verisi | ⏳ |
 | 7 | Ters problem: Bi'yi iç sıcaklıklardan geri bul | ⏳ |
 | 8 | Parametrik vekil model: girdi (x, y, Bi) | ⏳ |
@@ -146,6 +151,45 @@ terimli seri çözüm (her 5. düğüm). **c**, mutlak hatanın log₁₀ harita
 yer. **d**, N = 26–201 için bağıl L₂ ve maksimum hata; p en küçük kareler eğimi (L₂: 1.77, maks.: 0.88).
 Vektör sürümler: [`fig01_fdm_reference.pdf`](figures/fig01_fdm_reference.pdf) · [`.svg`](figures/fig01_fdm_reference.svg)
 
+## 4–5. Forward PINN ve doğrulama
+
+`pinn_forward.py`: MLP (4 × 50, tanh, float64), Dirichlet kenarları katı kısıtla ağın yapısına gömülü,
+kayıp yalnız PDE ve Robin artıkları, eğitim Adam (6000) → L-BFGS (≤ 2000).
+
+```math
+\hat\theta(\xi,\eta) = 1 + \xi\,(1-\xi)\,(1-\eta)\,\mathcal{N}(\xi,\eta)
+```
+
+```math
+\mathcal{L} = \frac{1}{N_r}\sum_{k=1}^{N_r} \big(\nabla^2\hat\theta(\mathbf{x}_k)\big)^2
++ \frac{\lambda}{N_b}\sum_{m=1}^{N_b} \Big(\frac{\partial\hat\theta}{\partial\eta} - \mathrm{Bi}\,\hat\theta\Big)^2_{(\xi_m,\,0)},
+\qquad \lambda = 1
+```
+
+Üç kolokasyon stratejisi, seri çözüme karşı (201 × 201 ağ):
+
+| | Son kayıp | Bağıl L₂ | İç bölge L₂ | Maks. hata | Q′ hatası | Süre (2 CPU) |
+|---|---|---|---|---|---|---|
+| FDM, N = 201 | — | 3.0e-05 | — | — | — | < 1 s |
+| PINN, düzgün | 9.9e-02 | **9.5e-04** | 4.9e-04 | 2.8e-02 | **%0.24** | 492 s |
+| PINN, köşe sıklaştırma | 1.6e+00 | 4.6e-03 | 4.5e-03 | 2.0e-02 | %1.20 | 607 s |
+| PINN, köşe dışlama (δ = 0.02) | **4.3e-04** | 1.1e-03 | 5.2e-04 | 3.2e-02 | %0.49 | 467 s |
+
+![Fig. 2](figures/fig02_pinn_forward.png)
+
+**Fig. 2 | Köşeye nokta eklemek hatayı artırır; köşeyi dışlamak kaybı düşürür ama hatayı değiştirmez.**
+**a**, toplam kayıp (gri: L-BFGS). **b**, alt yüzey boyunca seri çözüme göre hata; kesikli çizgi FDM. **c–e**, log₁₀ hata haritaları.
+Vektör: [`fig02_pinn_forward.pdf`](figures/fig02_pinn_forward.pdf) · [`.svg`](figures/fig02_pinn_forward.svg)
+
+**Bulgular**
+1. **Kayıp tabanını köşe çelişkisi belirler.** Alt köşede yan duvar $\partial\theta/\partial\eta = 0$ ister, Robin
+   $\partial\theta/\partial\eta = \mathrm{Bi}$ ister; hiçbir düzgün fonksiyon ikisini sağlayamaz. Kenarın %2'lik köşe şeridi
+   Robin kaybında ~%97 paya sahip, köşede artık $|r| = \mathrm{Bi}$.
+2. **FDM sezgisi PINN'e taşınmaz.** Köşeye nokta eklemek bağıl L₂'yi 4.8 kat artırdı; sağlanamaz
+   artıklar kaybı domine edip iç bölgeyi bozdu.
+3. **Kayıp ≠ doğruluk.** Köşe dışlama kaybı 228 kat düşürdü, hata değişmedi.
+4. **Bu problemde FDM üstün.** PINN'in değeri ölçüm verisi (Adım 6), bilinmeyen parametre (Adım 7) ve parametrik çözümde (Adım 8).
+
 ### Çalıştırma
 
 ```bash
@@ -156,7 +200,17 @@ python plot_reference.py        # figures/fig01_fdm_reference.{pdf,svg,png} + da
 python make_report.py           # report/case01_adim1-3_fdm_referans.pdf
 python notebook/build_notebook.py   # defteri üretir ve çalıştırır (jupyter: nbformat, nbclient, ipykernel)
 python lecture/equations.py && python lecture/make_slide_figures.py && node lecture/build_lecture.js   # ders destesi (önce kökte: npm install; ayrıca pdflatex + pandoc)
+
+# Adım 4–5 (her koşu 2 CPU çekirdeğinde ~8–10 dk)
+python pinn_forward.py --tag uniform
+python pinn_forward.py --corner --tag corner
+python pinn_forward.py --skip 0.02 --tag skip
+python plot_pinn.py                 # figures/fig02_pinn_forward.* + data/summary_pinn.json
+python make_report_pinn.py          # report/case01_adim4-5_forward_pinn.pdf
+python lecture/ders02/equations.py && python lecture/ders02/make_slide_figures.py && node lecture/ders02/build_lecture.js
+python notebook/build_notebook_ders02.py
 ```
 
 `data/fdm_N101.npz` alanları: `x, y, theta, theta_exact, Bi, L, k, T_wall, T_inf`.
 PINN adımlarında referans ve (6–7. adımlarda) seyrek "ölçüm" verisi buradan çekilecek.
+`runs/<tag>/`: `model.pt`, `history.npz`, `prediction.npz` (201 × 201: PINN, seri, FDM), `metrics.json`.
