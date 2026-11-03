@@ -6,14 +6,14 @@ Fizik bilgili sinir ağlarını (PINN) sıfırdan, adım adım öğrenme reposu;
 kursa dönüşecek şekilde kuruluyor. Her case aynı sırayı izler: problemi tanımla → boyutsuzlaştır → klasik sayısal
 referans (FDM/CFD) kur ve analitik çözümle doğrula → PINN'i referansa karşı eğit ve sına.
 
-Her case üç çıktı üretir: **ders destesi** (.pptx, konuşmacı notları = seslendirme metni), **teknik rapor** (PDF) ve
-**çalışan kod**. Ders tekniği: [docs/DERS_STILI.md](docs/DERS_STILI.md).
+Her case dört çıktı üretir: **ders destesi** (.pptx, konuşmacı notları = seslendirme metni), **adım adım defter**
+(.ipynb, çalıştırılmış), **teknik rapor** (PDF) ve **çalışan kod**. Ders tekniği: [docs/DERS_STILI.md](docs/DERS_STILI.md).
 
 ## Case'ler
 
 | Case | Problem | Durum | Ders | Rapor |
 |---|---|---|---|---|
-| [01 · 2D ısı iletimi](cases/01-2d-heat-conduction/) | Kare çelik plaka, üç kenar 70 °C, alt kenar su ile konvektif soğutma (Bi ≈ 4.9) | Adım 1–3 ✅ · PINN ⏳ | [Ders 01 .pptx](cases/01-2d-heat-conduction/lecture/ders01_2d_isi_iletimi_referans.pptx) | [PDF](cases/01-2d-heat-conduction/report/case01_adim1-3_fdm_referans.pdf) |
+| [01 · 2D ısı iletimi](cases/01-2d-heat-conduction/) | Kare çelik plaka, üç kenar 70 °C, alt kenar su ile konvektif soğutma (Bi ≈ 4.9) | Adım 1–3 ✅ · PINN ⏳ | [Ders 01 .pptx](cases/01-2d-heat-conduction/lecture/ders01_2d_isi_iletimi_referans.pptx) · [defter](cases/01-2d-heat-conduction/notebook/ders01_adim_adim_fdm.ipynb) | [PDF](cases/01-2d-heat-conduction/report/case01_adim1-3_fdm_referans.pdf) |
 
 Ek okuma: [PINN × CFD atlası](docs/pinn-cfd-atlas.html) — en çok yıldız alan 10 projenin görsel rehberi.
 
