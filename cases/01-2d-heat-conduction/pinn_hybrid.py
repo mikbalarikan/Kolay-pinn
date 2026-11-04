@@ -32,7 +32,7 @@ torch.set_default_dtype(torch.float64)
 
 
 def sensors(n, where="uniform", noise=0.0, seed=0, Bi=BI_DEFAULT, N=201):
-    """FDM ağ düğümlerinden n sensör seç, gürültü ekle. where: uniform | corner | bottom."""
+    """FDM ağ düğümlerinden n sensör seç, gürültü ekle. where: uniform | corner | bottom | top."""
     rng = np.random.default_rng(1000 + seed)
     x, _, th = solve_fdm(N, Bi)
     i_all, j_all = np.meshgrid(np.arange(1, N - 1), np.arange(1, N - 1))   # Dirichlet kenarları hariç
@@ -45,6 +45,8 @@ def sensors(n, where="uniform", noise=0.0, seed=0, Bi=BI_DEFAULT, N=201):
         w = (r < 0.2).astype(float)
     elif where == "bottom":                       # alt yüzeye yakın şerit (η < 0.1)
         w = (eta < 0.1).astype(float)
+    elif where == "top":                          # soğutulan yüzeyden uzak üst yarı (η > 0.5) — Adım 7
+        w = (eta > 0.5).astype(float)
     else:
         raise ValueError(where)
     pick = rng.choice(len(xi), size=n, replace=False, p=w / w.sum())
