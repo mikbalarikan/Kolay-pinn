@@ -1,0 +1,142 @@
+{
+ "g_beta": {
+  "png": "g_beta.png",
+  "omml": "g_beta.omml.xml",
+  "w": 0.768,
+  "h": 0.253,
+  "size": 17,
+  "color": "0D161F",
+  "tex": "\\mathrm{Bi} = e^{\\beta}",
+  "hash": "9e466970dff1"
+ },
+ "g_sens": {
+  "png": "g_sens.png",
+  "omml": "g_sens.omml.xml",
+  "w": 1.1857,
+  "h": 0.5253,
+  "size": 17,
+  "color": "0D161F",
+  "tex": "S(\\mathbf{x}) = \\frac{\\partial\\theta}{\\partial\\mathrm{Bi}}",
+  "hash": "a7ef989d5bf4"
+ },
+ "g_crlb": {
+  "png": "g_crlb.png",
+  "omml": "g_crlb.omml.xml",
+  "w": 1.3136,
+  "h": 0.5171,
+  "size": 17,
+  "color": "0D161F",
+  "tex": "\\sigma_{\\mathrm{Bi}} \\geq \\frac{\\sigma}{\\sqrt{\\sum_i S_i^2}}",
+  "hash": "eee1416d3792"
+ },
+ "g_floor": {
+  "png": "g_floor.png",
+  "omml": "g_floor.omml.xml",
+  "w": 1.2593,
+  "h": 0.3096,
+  "size": 17,
+  "color": "0D161F",
+  "tex": "\\mathcal{L}_{\\mathrm{köşe}} \\approx c\\,\\mathrm{Bi}^2",
+  "hash": "7e9bd13cd089"
+ },
+ "g_skip": {
+  "png": "g_skip.png",
+  "omml": "g_skip.omml.xml",
+  "w": 0.84,
+  "h": 0.2049,
+  "size": 17,
+  "color": "0D161F",
+  "tex": "\\delta = 0.02",
+  "hash": "557f75089743"
+ },
+ "g_ls": {
+  "png": "g_ls.png",
+  "omml": "g_ls.omml.xml",
+  "w": 3.1978,
+  "h": 0.5032,
+  "size": 17,
+  "color": "0D161F",
+  "tex": "\\mathrm{Bi}^{*} = \\arg\\min_{\\mathrm{Bi}} \\sum_i \\big(\\theta(\\mathbf{x}_i;\\mathrm{Bi}) - \\theta_i^{\\mathrm{ö}}\\big)^2",
+  "hash": "a4d1a6d0e079"
+ },
+ "inverse": {
+  "png": "inverse.png",
+  "omml": "inverse.omml.xml",
+  "w": 5.3419,
+  "h": 0.5204,
+  "size": 21,
+  "color": "0D161F",
+  "tex": "\\min_{\\mathbf{w},\\,\\beta}\\ \\mathcal{L}_{\\mathrm{PDE}}(\\mathbf{w}) + \\lambda\\,\\mathcal{L}_{\\mathrm{Robin}}(\\mathbf{w}, e^{\\beta}) + \\mu\\,\\mathcal{L}_{\\mathrm{veri}}(\\mathbf{w})",
+  "hash": "884b1fac5c49"
+ },
+ "robin_bi": {
+  "png": "robin_bi.png",
+  "omml": "robin_bi.omml.xml",
+  "w": 5.0002,
+  "h": 0.7069,
+  "size": 19,
+  "color": "0D161F",
+  "tex": "\\mathcal{L}_{\\mathrm{Robin}} = \\frac{1}{N_b}\\sum_{m}\\Big(\\frac{\\partial\\hat\\theta}{\\partial\\eta} - e^{\\beta}\\,\\hat\\theta\\Big)^2_{(\\xi_m,\\,0)}, \\qquad \\beta_0 = \\ln 2",
+  "hash": "ce0973f09489"
+ },
+ "h_from_bi": {
+  "png": "h_from_bi.png",
+  "omml": "h_from_bi.omml.xml",
+  "w": 4.7767,
+  "h": 0.5538,
+  "size": 18,
+  "color": "0D161F",
+  "tex": "h = \\frac{k\\,\\mathrm{Bi}}{L}, \\qquad Q' = h\\,L\\,(T_w - T_\\infty)\\int_0^1\\hat\\theta(\\xi, 0)\\,d\\xi",
+  "hash": "ef06802f8bd5"
+ },
+ "classical": {
+  "png": "classical.png",
+  "omml": "classical.omml.xml",
+  "w": 4.1543,
+  "h": 0.6178,
+  "size": 20,
+  "color": "0D161F",
+  "tex": "\\mathrm{Bi}^{*} = \\arg\\min_{\\mathrm{Bi}}\\ \\sum_{i=1}^{N_d}\\big(\\theta_{\\mathrm{seri}}(\\mathbf{x}_i;\\mathrm{Bi}) - \\theta_i^{\\mathrm{ö}}\\big)^2",
+  "hash": "a5fc0d658e00"
+ },
+ "crlb": {
+  "png": "crlb.png",
+  "omml": "crlb.omml.xml",
+  "w": 5.2569,
+  "h": 0.6921,
+  "size": 19,
+  "color": "0D161F",
+  "tex": "I(\\mathrm{Bi}) = \\frac{1}{\\sigma^2}\\sum_{i=1}^{N_d} S(\\mathbf{x}_i)^2 \\quad\\Longrightarrow\\quad \\sigma_{\\mathrm{Bi}} \\;\\geq\\; \\frac{\\sigma}{\\sqrt{\\sum_i S(\\mathbf{x}_i)^2}}",
+  "hash": "0e9b66958c0e"
+ },
+ "corner": {
+  "png": "corner.png",
+  "omml": "corner.omml.xml",
+  "w": 5.7042,
+  "h": 0.4162,
+  "size": 18,
+  "color": "0D161F",
+  "tex": "\\mathcal{L}_{\\mathrm{Robin}}\\big|_{\\text{köşe}} \\approx c\\,\\mathrm{Bi}^2, \\qquad \\mu\\,\\mathcal{L}_{\\mathrm{veri}} \\approx \\mu\\,m\\,(\\mathrm{Bi} - \\mathrm{Bi}^{*})^2 + \\mathrm{sabit}",
+  "hash": "739c5bebfe4d"
+ },
+ "bias": {
+  "png": "bias.png",
+  "omml": "bias.omml.xml",
+  "w": 5.4844,
+  "h": 0.7072,
+  "size": 22,
+  "color": "0D161F",
+  "tex": "\\mathrm{Bi}_{\\mathrm{PINN}} \\approx \\frac{\\mu\\,m}{c + \\mu\\,m}\\,\\mathrm{Bi}^{*}, \\qquad m = \\frac{1}{N_d}\\sum_i S(\\mathbf{x}_i)^2",
+  "hash": "fa1f6372cc92"
+ },
+ "pv_param": {
+  "png": "pv_param.png",
+  "omml": "pv_param.omml.xml",
+  "w": 4.1644,
+  "h": 0.4057,
+  "size": 22,
+  "color": "0D161F",
+  "tex": "\\hat\\theta(\\xi, \\eta, \\mathrm{Bi}) \\approx \\theta, \\qquad \\mathrm{Bi} \\in [0.5,\\ 20]",
+  "hash": "47199d8a0b4f"
+ }
+}
