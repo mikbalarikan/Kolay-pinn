@@ -271,6 +271,26 @@ Vektör: [`fig04_hybrid.pdf`](figures/fig04_hybrid.pdf) · [`.svg`](figures/fig0
    (Q′ hatası %44 → %26). Yanlış Robin ile ölçümler çekişiyor;
    çözüm Bi'yi öğrenmek (Adım 7).
 
+---
+## Hata atlası: tüm PINN koşuları, seri çözüme karşı
+
+`python plot_error_atlas.py` → `figures/fig05_error_atlas.*`, `figures/fig06_error_ranking.*`, `data/summary_atlas.json`.
+
+![Fig. 5](figures/fig05_error_atlas.png)
+
+**Fig. 5 | Doğru fizikteki her PINN'in hatası alt köşelerde toplanır; yöntemler arasındaki fark alanın geri kalanındadır.**
+|T<sub>seri</sub> − T| (°C), ortak log ölçek, tohum 0, 201 × 201 ağ. Turuncu çizgi 0.1 °C eş-hata, × en büyük hata. Çerçeve rengi grup.
+
+![Fig. 6](figures/fig06_error_ranking.png)
+
+**Fig. 6 | Sıralama.** **a**, bağıl L₂ (nokta tohum 0, çizgi 3 tohum aralığı; gri bant forward düzgünün aralığı). **b**, köşe bölgesi (r < 0.1, dolu) ve alanın geri kalanı (boş) RMS hatası.
+
+- **En büyük hata her zaman alt köşede** (ξ ≈ 0.015, η = 0), yaklaşık 1.1–1.7 °C; FDM'de aynı yerde 0.13 °C. Köşe tekilliğinin izi.
+- **Alanın geri kalanında** doğru fizikli koşuların çoğu 0.015–0.025 °C RMS; fark tohum aralığında. En iyi tek koşu uzun L-BFGS (L₂ 6.8e-04), ama düzgünün tohum aralığı içinde.
+- **Köşe sıklaştırma** köşeyi en iyi çözen yöntem (köşe RMS 0.10 °C) ama alanın geri kalanını 10 kat bozuyor (0.20 °C): hata köşeden tüm plakaya taşınıyor.
+- **Derin 8×50 ve μ = 100** alan hatasını 2–3 kat artırıyor (0.05–0.06 °C).
+- **Yanlış fizik** (Bi = 2) hatayı her yerde 2–4 °C'ye çıkarıyor, en çok alt yüzeyin ortasında (12 °C); veri bunu 8 °C'ye indiriyor.
+
 ### Çalıştırma
 
 ```bash
@@ -295,6 +315,7 @@ python notebook/build_notebook_ders02.py
 # Adım 6
 python hybrid_runs.py && python hybrid_summary.py   # fig04_hybrid.* + data/summary_hybrid.json
 python make_report_hybrid.py        # report/case01_adim6_hibrit_pinn.pdf
+python plot_error_atlas.py          # hata atlası: fig05_error_atlas.*, fig06_error_ranking.*
 python lecture/ders03/equations.py && python lecture/ders03/make_slide_figures.py && node lecture/ders03/build_lecture.js
 python notebook/build_notebook_ders03.py
 ```
