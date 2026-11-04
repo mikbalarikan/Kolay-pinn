@@ -20,6 +20,11 @@ adım adım PINN'e geçmek.
 📓 [`notebook/ders03_hibrit_pinn.ipynb`](notebook/ders03_hibrit_pinn.ipynb) ·
 📄 [`report/case01_adim6_hibrit_pinn.pdf`](report/case01_adim6_hibrit_pinn.pdf)
 
+**Ders 04 · Ters problem (Adım 7)**
+🎓 [`lecture/ders04/ders04_ters_problem.pptx`](lecture/ders04/ders04_ters_problem.pptx) ·
+📓 [`notebook/ders04_ters_problem.ipynb`](notebook/ders04_ters_problem.ipynb) ·
+📄 [`report/case01_adim7_ters_problem.pdf`](report/case01_adim7_ters_problem.pdf)
+
 ## Yol haritası
 
 | # | Adım | Durum |
@@ -30,7 +35,7 @@ adım adım PINN'e geçmek.
 | 4 | Forward PINN (sadece fizik, veri yok) | ✅ |
 | 5 | Doğrulama: L2 hata, hata haritası, alt yüzey ısı akısı | ✅ |
 | 6 | Hibrit PINN: seyrek + gürültülü referans verisi | ✅ |
-| 7 | Ters problem: Bi'yi iç sıcaklıklardan geri bul | ⏳ |
+| 7 | Ters problem: Bi'yi iç sıcaklıklardan geri bul | ✅ |
 | 8 | Parametrik vekil model: girdi (x, y, Bi) | ⏳ |
 | 9 | Framework karşılaştırması (DeepXDE / PhysicsNeMo) | ⏳ |
 
@@ -271,6 +276,63 @@ Vektör: [`fig04_hybrid.pdf`](figures/fig04_hybrid.pdf) · [`.svg`](figures/fig0
    (Q′ hatası %44 → %26). Yanlış Robin ile ölçümler çekişiyor;
    çözüm Bi'yi öğrenmek (Adım 7).
 
+---
+## 7. Ters problem: Bi'yi iç sıcaklıklardan geri bulmak
+
+`pinn_inverse.py`: Adım 6'nın kaybı aynen; Robin koşulundaki Bi artık ağla birlikte öğrenilen bir parametre (Bi = e^β, Bi₀ = 2).
+Klasik referans `inverse_classical.py`: aynı sensörler, seri çözüm + en küçük kareler, duyarlılık S = ∂θ/∂Bi ve Cramér–Rao sınırı.
+`python inverse_classical.py && python inverse_runs.py` (26 koşu, 4 CPU'da ~2 saat) → `python inverse_summary.py`.
+
+```math
+\min_{\mathbf{w},\,\beta}\ \mathcal{L}_{\mathrm{PDE}} + \lambda\,\mathcal{L}_{\mathrm{Robin}}(e^{\beta}) + \mu\,\mathcal{L}_{\mathrm{veri}},
+\qquad
+\sigma_{\mathrm{Bi}} \geq \frac{\sigma}{\sqrt{\sum_i S(\mathbf{x}_i)^2}},
+\qquad
+\mathrm{Bi}_{\mathrm{PINN}} \approx \frac{\mu\,m}{c + \mu\,m}\,\mathrm{Bi}^{*}
+```
+
+Son ifade köşe yanlılığı modeli: köşe tabanı ≈ c·Bi² (c = 3.3e-03, Adım 5'in forward koşularından), m = sensörlerde ortalama S², Bi* klasik tahmin.
+
+Veri ağırlığı ve köşe dışlama (N_d = 20, σ = 0.01, tohum 0; klasik Bi* = 4.675):
+
+| Ayar | Öğrenilen Bi | Öngörü | Bağıl L₂ |
+|---|---|---|---|
+| δ = 0, μ = 1 | 0.737 | 0.248 | 1.7e-01 |
+| δ = 0, μ = 10 | 2.494 | 1.677 | 6.6e-02 |
+| δ = 0, μ = 100 | 3.820 | 3.966 | 2.0e-02 |
+| δ = 0, μ = 1000 | 4.319 | 4.593 | 7.6e-03 |
+| δ = 0.02, μ = 1 | 2.729 | 4.241 | 6.0e-02 |
+| δ = 0.02, μ = 100 | 4.693 | 4.671 | 4.9e-03 |
+| δ = 0.02, μ = 1000 | 4.727 | 4.675 | 4.6e-03 |
+
+Önerilen ayar (δ = 0.02, μ = 100), 3 tohum, aynı veriyle klasik tahmin:
+
+| Sensörler | PINN Bi | Klasik Bi* | σ_CR | \|PINN − klasik\| / σ_CR | Bağıl L₂ |
+|---|---|---|---|---|---|
+| 5 düzgün | 5.151 · 4.931 · 4.275 | 5.109 · 4.883 · 4.362 | 0.297 | 0.20 | 4.3e-03 |
+| 20 düzgün | 4.693 · 4.971 · 4.968 | 4.675 · 4.934 · 4.993 | 0.122 | 0.22 | 2.3e-03 |
+| 80 düzgün | 4.980 · 4.886 · 4.873 | 4.975 · 4.871 · 4.938 | 0.058 | 0.49 | 1.5e-03 |
+| 20 üst yarı | 3.555 · 5.244 · 4.972 | 3.720 · 5.287 · 5.312 | 0.495 | 0.37 | 7.3e-03 |
+| 20 alt şerit | 4.841 · 4.889 · 4.993 | 4.795 · 4.880 · 4.968 | 0.055 | 0.49 | 1.6e-03 |
+
+![Fig. 5](figures/fig05_inverse.png)
+
+**Fig. 5 | Köşe çelişkisi Bi'yi öngörülebilir biçimde aşağı çeker; köşe dışlanınca PINN klasik tahminin gürültü sınırına ulaşır.**
+**a**, öğrenilen Bi'nin eğitim boyunca yolu. **b**, veri ağırlığı μ; çizgi köşe yanlılığı öngörüsü, gri bant klasik Bi* ± σ_CR. **c**, duyarlılık −∂θ/∂Bi ve üç yerleşim. **d**, PINN (dolu) ve klasik ± σ_CR (boş).
+Vektör: [`fig05_inverse.pdf`](figures/fig05_inverse.pdf) · [`.svg`](figures/fig05_inverse.svg)
+
+**Bulgular**
+1. **Saf kayıpla Bi çöker.** δ = 0, μ = 1: Bi 2 → 0.74. Köşe tabanı ≈ c·Bi² (0.08 doğru Bi'de), Bi → 0'da veri bedeli ≈ 0.02:
+   yanlış çözüm kaybın gerçek minimumu. Optimizer değil, kayıp yanlış.
+2. **Köşe yanlılığı önceden hesaplanabilir.** μ = 100'de öngörü 3.97, PINN 3.82; μ = 1000'de 4.59 ve 4.32.
+   Yanlılık μ ile azalır ama sıfırlanmaz.
+3. **Köşe dışlama gerekli, yeterli değil.** δ = 0.02 köşe tabanını ~175 kat düşürür; μ = 1'de yine de Bi = 2.73
+   (tuzak: Bi ilk Adam adımlarında küçülüp geri dönemiyor). Isınma + en küçük kareler başlatma da önlemedi (2.17). μσ² Robin tabanıyla aynı mertebede olmalı.
+4. **Önerilen ayarda PINN gürültü sınırında.** δ = 0.02, μ = 100: PINN ile aynı verinin klasik tahmini arasındaki fark σ_CR'nin 0.2–0.5 katı;
+   gürültüsüz veride 4.897, Bi₀ = 0.5 ve 8'den 4.682 / 4.681. Alan hatası 2.3e-03 (Adım 6, yanlış Bi: 9.2e-02).
+5. **Sensör yeri, sayısından önemli.** Cramér–Rao (20 sensör): üst yarı %10.1, düzgün %2.5, alt şerit %1.1;
+   alt şeritteki 20 sensör düzgün 80 sensör (%1.2) kadar bilgi taşır. Deney tasarımı PINN'den önce klasik modelle yapılabilir.
+
 ### Çalıştırma
 
 ```bash
@@ -297,6 +359,13 @@ python hybrid_runs.py && python hybrid_summary.py   # fig04_hybrid.* + data/summ
 python make_report_hybrid.py        # report/case01_adim6_hibrit_pinn.pdf
 python lecture/ders03/equations.py && python lecture/ders03/make_slide_figures.py && node lecture/ders03/build_lecture.js
 python notebook/build_notebook_ders03.py
+
+# Adım 7
+python inverse_classical.py         # klasik ters çözüm + Cramér–Rao: data/inverse_classical.json
+python inverse_runs.py && python inverse_summary.py   # fig05_inverse.* + data/summary_inverse.json
+python make_report_inverse.py       # report/case01_adim7_ters_problem.pdf
+python lecture/ders04/equations.py && python lecture/ders04/make_slide_figures.py && node lecture/ders04/build_lecture.js
+python notebook/build_notebook_ders04.py
 ```
 
 `data/fdm_N101.npz` alanları: `x, y, theta, theta_exact, Bi, L, k, T_wall, T_inf`.

@@ -114,7 +114,7 @@ ax.set_xlim(0, None)
 ax.set_xlabel("iterasyon")
 ax.set_ylabel("öğrenilen Bi")
 ax.legend(loc="lower left", fontsize=5.5, handlelength=2.2)
-ax.set_title("köşe dışlanmadan Bi çöker; dışlanınca her başlangıç aynı değere gider", fontsize=6, color=MUTED, pad=3)
+ax.set_title("saf ayarda Bi çöker; δ = 0.02 ve μ = 100 ile her başlangıç aynı değere gider", fontsize=6, color=MUTED, pad=3)
 panel_letter(ax, "a", dx=-0.17, dy=1.02)
 
 # b — μ taraması ve köşe yanlılığı öngörüsü

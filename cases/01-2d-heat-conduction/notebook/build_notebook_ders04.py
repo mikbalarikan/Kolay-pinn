@@ -209,6 +209,15 @@ plt.tight_layout(); plt.show()
 print(f"klasik, aynı veri: Bi* = {klasik_bi(X_d, y_d):.3f} ± {sinir:.3f}")
 """)
 
+md(r"""
+**Okuma.** Kısa eğitimde Bi doğru yöne gidiyor ama henüz yakınsamadı: köşe dışlanınca Bi yavaş yükselir ve son adımı
+L-BFGS atar. Tam koşu (6000 Adam + 2000 L-BFGS) aynı veriyle aşağıdaki değere ulaşıyor:
+""")
+code(r"""
+m_tam = json.loads((CASE / "runs" / "inv_n20_s0" / "metrics.json").read_text())
+print(f"tam koşu: Bi = {m_tam['Bi_est']:.3f} · bağıl L2 = {m_tam['rel_L2']:.2e} · klasik {klasik_bi(X_d, y_d):.3f} ± {sinir:.3f}")
+""")
+
 # =====================================================================================
 md(r"""
 ---

@@ -1,0 +1,32 @@
+{
+ "inverse": {
+  "png": "inverse.png",
+  "omml": null,
+  "w": 4.6897,
+  "h": 0.4812,
+  "size": 10.5,
+  "color": "0D161F",
+  "tex": "\\min_{\\mathbf{w},\\,\\beta}\\ \\mathcal{L}_{\\mathrm{PDE}}(\\mathbf{w}) + \\lambda\\,\\mathcal{L}_{\\mathrm{Robin}}(\\mathbf{w}, e^{\\beta}) + \\mu\\,\\frac{1}{N_d}\\sum_{i=1}^{N_d}\\big(\\hat\\theta(\\mathbf{x}_i;\\mathbf{w}) - \\theta_i^{\\mathrm{ö}}\\big)^2, \\qquad \\mathrm{Bi} = e^{\\beta}",
+  "hash": "8f139ef26d17"
+ },
+ "classical": {
+  "png": "classical.png",
+  "omml": null,
+  "w": 4.6962,
+  "h": 0.4812,
+  "size": 10.5,
+  "color": "0D161F",
+  "tex": "\\mathrm{Bi}^{*} = \\arg\\min_{\\mathrm{Bi}} \\sum_{i=1}^{N_d}\\big(\\theta_{\\mathrm{seri}}(\\mathbf{x}_i;\\mathrm{Bi}) - \\theta_i^{\\mathrm{ö}}\\big)^2, \\qquad \\sigma_{\\mathrm{Bi}} \\geq \\frac{\\sigma}{\\sqrt{\\sum_i S(\\mathbf{x}_i)^2}}, \\quad S = \\frac{\\partial\\theta}{\\partial\\mathrm{Bi}}",
+  "hash": "ebe721ebbd10"
+ },
+ "bias": {
+  "png": "bias.png",
+  "omml": null,
+  "w": 4.6602,
+  "h": 0.4099,
+  "size": 10.5,
+  "color": "0D161F",
+  "tex": "\\mathcal{L}_{\\mathrm{Robin}}\\big|_{\\text{köşe}} \\approx c\\,\\mathrm{Bi}^2 \\quad\\Rightarrow\\quad \\mathrm{Bi}_{\\mathrm{PINN}} \\approx \\frac{\\mu\\,m}{c + \\mu\\,m}\\,\\mathrm{Bi}^{*}, \\qquad m = \\frac{1}{N_d}\\sum_i S(\\mathbf{x}_i)^2",
+  "hash": "bf5e747f0e17"
+ }
+}

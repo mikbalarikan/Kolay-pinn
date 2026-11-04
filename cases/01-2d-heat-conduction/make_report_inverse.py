@@ -55,7 +55,7 @@ R.story += [P("Adım 7: ters problem — Biot sayısını iç sıcaklıklardan g
 R.story += [P("8 · Yöntem", "h2"),
             P("Ağ, katı kısıt, kolokasyon ve eğitim Adım 6 ile aynıdır (4 × 50, tanh; 4096 iç + 256 Robin Sobol noktası; Adam 6000 + L-BFGS ≤ 2000). "
               "Robin koşulundaki Bi, pozitif kalması için ln Bi = β üzerinden öğrenilir; β Adam'da 10<super>−2</super>, ağırlıklar 10<super>−3</super> öğrenme oranıyla, "
-              "L-BFGS'te birlikte güncellenir. Başlangıç Bi<sub>0</sub> = 2 (Adım 6'nın yanlış değeri). Ölçümler Adım 6 ile aynıdır: FDM (N = 201) iç düğümleri, σ = 0.01 (≙ 0.5 °C)."),
+              "L-BFGS'te birlikte güncellenir. Başlangıç Bi<sub>0</sub> = 2 (Adım 6'nın yanlış değeri). Ölçümler Adım 6 ile aynıdır: FDM (N = 201) iç düğümleri, σ = 0.01 (≈ 0.5 °C)."),
             R.E("inverse"),
             P("Klasik referans aynı sensör kümelerini kullanır; ileri model analitik seri çözümdür (veriyi üreten FDM'den farklı, ters suç yok). "
               "Duyarlılık S ile Fisher bilgisi ve Cramér–Rao sınırı hesaplandı; her küme için 100–400 gürültü gerçeklemesiyle Monte Carlo yapıldı:"),

@@ -67,7 +67,7 @@ h = H("inv_mu1")
 for k, lab, col in (("rob", "Robin", C["parca_mandalina"]), ("data", "veri (μ = 1)", C["lila"]), ("pde", "PDE", C["titanyum"])):
     ax.plot(h["it"] + 1, h[k], color=col, lw=2, label=lab)
 ax.axhline(1e-4, color=INK, lw=1, ls=":")
-ax.text(200, 1.2e-4, "σ² = 10⁻⁴", fontsize=12, color=INK)
+ax.text(200, 1.2e-4, "σ² = $10^{-4}$", fontsize=12, color=INK)
 ax.set_yscale("log"); ax.set_xlim(0, None)
 ax.set_xlabel("iterasyon"); ax.set_ylabel("kayıp terimi")
 ax.legend(loc="upper right", fontsize=12)

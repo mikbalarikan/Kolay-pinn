@@ -169,7 +169,7 @@ deck.section(SEC3, "03", "Köşe yanlılığı", "Kayıp tabanı Bi'yi ne kadar 
     label: "δ = 0.02 ile köşe tabanındaki düşüş", color: hex("plan") });
 }
 {
-  const s = deck.content(SEC3, `δ = 0.02 ve μ = 100 ile PINN, klasik tahminin gürültü sınırında: fark σ_CR'nin ${f2(REC.gap_over_crlb)} katı`, { step: "ADIM 7 · ÖNERİLEN AYAR",
+  const s = deck.content(SEC3, `δ = 0.02 ve μ = 100 ile PINN, klasik tahminin gürültü sınırında: fark Cramér–Rao sınırının ${f2(REC.gap_over_crlb)} katı`, { step: "ADIM 7 · ÖNERİLEN AYAR",
     notes: "Önerilen ayar: köşe şeridini Robin kaybından çıkar, veri ağırlığını yüz yap. Her sensör kümesi için üç tohum: mavi nokta PINN, beyaz daire aynı verinin klasik tahmini, çubuk Cramér–Rao sınırı. " +
       `Yirmi düzgün sensörde ortalama mutlak Bi hatası yüzde ${sp((100 * REC.mean_abs_rel_err).toFixed(1))}. Ama asıl ölçüt gerçek değer değil, aynı veriyle ulaşılabilecek değer: ` +
       `PINN ile klasik tahmin arasındaki fark sınırın ${sp(f2(REC.gap_over_crlb))} katı. Yani kalan hata gürültüden geliyor, yöntemden değil. ` +
@@ -208,7 +208,7 @@ pres.addSection({ title: SEC4 });
   const cw = (W - 2 * M - 0.6) / 3;
   [["Saf kayıp çöker", `δ = 0, μ = 1: Bi 2 → ${f2(MS["1"].Bi_est)}. Köşe tabanı c·Bi² yanlış çözümü ödüllendiriyor.`],
    ["Sınırı önce hesapla", `Cramér–Rao: alt şerit %${(100 * crlbPct("n20_bottom")).toFixed(1)}, üst yarı %${(100 * crlbPct("n20_top")).toFixed(1)}. Yer, sayıdan önemli.`],
-   ["Gürültü sınırında PINN", `δ = 0.02, μ = 100: |PINN − klasik| = ${f2(REC.gap_over_crlb)} σ_CR; başlangıca duyarsız.`]]
+   ["Gürültü sınırında PINN", `δ = 0.02, μ = 100: |PINN − klasik| = ${f2(REC.gap_over_crlb)} × Cramér–Rao sınırı; başlangıca duyarsız.`]]
     .forEach(([h, b], i) => deck.card(s, { x: M + i * (cw + 0.3), y: BODY_TOP + 0.2, w: cw, h: 2.7, head: h, body: b, num: i + 1, dark: true, headSize: 19, bodySize: 16 }));
   s.addText("Sıradaki adım: Bi'yi girdi yapıp tek eğitimle bütün Bi aralığını çözmek (parametrik vekil model).", { x: M, y: 5.4, w: W - 2 * M, h: 0.5,
     fontSize: 16, color: hex("gumus"), margin: 0, isTextBox: true, objectName: "sum_next" });
