@@ -6,3 +6,4 @@ cases/*/runs_*.log
 cases/*/study_runs.log
 cases/*/hybrid_runs.log
 cases/*/inverse_runs.log
+package-lock.json
