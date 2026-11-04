@@ -1,0 +1,42 @@
+{
+ "hybrid": {
+  "png": "hybrid.png",
+  "omml": null,
+  "w": 2.9661,
+  "h": 0.4812,
+  "size": 10.5,
+  "color": "0D161F",
+  "tex": "\\mathcal{L} = \\mathcal{L}_{\\mathrm{PDE}} + \\lambda\\,\\mathcal{L}_{\\mathrm{Robin}} + \\mu\\,\\frac{1}{N_d}\\sum_{i=1}^{N_d}\\big(\\hat\\theta(\\mathbf{x}_i) - \\theta_i^{\\mathrm{ö}}\\big)^2",
+  "hash": "a16c34f54bdd"
+ },
+ "meas": {
+  "png": "meas.png",
+  "omml": null,
+  "w": 4.0731,
+  "h": 0.2034,
+  "size": 10.5,
+  "color": "0D161F",
+  "tex": "\\theta_i^{\\mathrm{ö}} = \\theta_{\\mathrm{FDM}}(\\mathbf{x}_i) + \\varepsilon_i, \\qquad \\varepsilon_i \\sim \\mathcal{N}(0, \\sigma^2), \\qquad \\sigma = 0.01 \\;\\Leftrightarrow\\; 0.5\\ ^\\circ\\mathrm{C}",
+  "hash": "3e95b83110b2"
+ },
+ "criterion": {
+  "png": "criterion.png",
+  "omml": null,
+  "w": 2.3044,
+  "h": 0.3365,
+  "size": 10.5,
+  "color": "0D161F",
+  "tex": "\\frac{\\sigma}{\\sqrt{N_d}} \\;<\\; \\varepsilon_{\\mathrm{model}} = \\mathrm{RMS}\\big(\\hat\\theta - \\theta\\big)_{N_d = 0}",
+  "hash": "d57e9c4b97f3"
+ },
+ "wrong": {
+  "png": "wrong.png",
+  "omml": null,
+  "w": 4.1636,
+  "h": 0.4495,
+  "size": 10.5,
+  "color": "0D161F",
+  "tex": "\\mathcal{L}_{\\mathrm{Robin}} = \\frac{1}{N_b}\\sum_m\\Big(\\frac{\\partial\\hat\\theta}{\\partial\\eta} - \\mathrm{Bi}_{\\mathrm{model}}\\,\\hat\\theta\\Big)^2, \\qquad \\mathrm{Bi}_{\\mathrm{model}} = 2,\\ \\ \\mathrm{Bi} = 4.895",
+  "hash": "40ab9d631f9f"
+ }
+}

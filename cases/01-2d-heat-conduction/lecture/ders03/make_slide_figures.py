@@ -39,7 +39,7 @@ def save(fig, name):
 def band(ax, text=True):
     ax.axhspan(b["min"], b["max"], color=C["krom"], zorder=0)
     if text:
-        ax.text(0.98, b["max"] * 1.1, "veri yok · 3 tohum", ha="right", fontsize=12, color=MUTED,
+        ax.text(0.98, b["min"] * 1.04, "veri yok · 3 tohum aralığı", ha="right", va="bottom", fontsize=12, color=MUTED,
                 transform=ax.get_yaxis_transform())
 
 
@@ -81,7 +81,8 @@ for ax, (tag, mu) in zip(axs, [("hyb_n20_s0", 1), ("hyb_mu100_s0", 100)]):
     ax.set(xlabel="iterasyon", title=f"μ = {mu}")
     ax.legend(loc="upper right", fontsize=11)
 axs[0].set_ylabel("kayıp terimi")
-axs[0].text(6200, 3, "L-BFGS", fontsize=12, color=MUTED)
+for a in axs:
+    a.text(6150, 2e-5, "L-BFGS", fontsize=12, color=MUTED)
 fig.tight_layout()
 save(fig, "02_loss_terms")
 
@@ -137,7 +138,11 @@ names = ["veri\nyok", "20 · μ=1", "20 · μ=100", "80 · μ=100"]
 vals = [S["wrong_bi"][k]["rel_L2"] for k in S["wrong_bi"]]
 ax.bar(range(4), vals, width=0.6, color=[w[2] for w in WR], zorder=3)
 ax.axhspan(b["min"], b["max"], color=C["krom"], zorder=0)
-ax.text(3.45, b["max"] * 1.15, "doğru fizik · 3 tohum", ha="right", fontsize=11, color=MUTED)
+ax.text(3.4, b["min"] * 0.85, "doğru fizik · 3 tohum aralığı", ha="right", va="top", fontsize=11, color=INK,
+        zorder=5, bbox=dict(fc="white", ec="none", pad=1.5))
+ax.set_ylim(1e-4, 0.25)
+for i, k in enumerate(S["wrong_bi"]):
+    ax.text(i, vals[i] * 1.15, f"Q %{100 * S['wrong_bi'][k]['Q_rel_err']:.0f}", ha="center", fontsize=12, color=INK)
 ax.set_yscale("log")
 ax.set_xticks(range(4), names, fontsize=12)
 ax.set_ylabel("bağıl L$_2$ hata")
