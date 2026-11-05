@@ -291,6 +291,12 @@ Vektör: [`fig04_hybrid.pdf`](figures/fig04_hybrid.pdf) · [`.svg`](figures/fig0
 - **Derin 8×50 ve μ = 100** alan hatasını 2–3 kat artırıyor (0.05–0.06 °C).
 - **Yanlış fizik** (Bi = 2) hatayı her yerde 2–4 °C'ye çıkarıyor, en çok alt yüzeyin ortasında (12 °C); veri bunu 8 °C'ye indiriyor.
 
+![Fig. 7](figures/fig07_temperature_atlas.png)
+
+**Fig. 7 | Sıcaklık konturları: doğru fizikli tüm yöntemler seri çözümle üst üste biner; yalnız yanlış Bi ayrışır.**
+Ortak ölçek; siyah eş-sıcaklık çizgileri yöntemin, beyaz alt çizgiler seri çözümün (40–65 °C). Son iki panel tüm yöntemleri üst üste ve sol alt köşeyi yakın planda gösterir.
+`python plot_temperature_atlas.py`
+
 ### Çalıştırma
 
 ```bash
