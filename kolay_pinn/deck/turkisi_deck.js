@@ -198,9 +198,9 @@ function createDeck({ course, lecture, assets, title, eqDir }) {
       });
     },
 
-    stat(s, { x, y, w, value, unit, label, color, dark }) {
+    stat(s, { x, y, w, value, unit, label, color, dark, valueSize }) {
       s.addText([
-        { text: value, options: { fontSize: 40, bold: true, color: color || C.accent1 } },
+        { text: value, options: { fontSize: valueSize || 40, bold: true, color: color || C.accent1 } },
         { text: unit ? ` ${unit}` : "", options: { fontSize: 18, bold: true, color: color || C.accent1, breakLine: true } },
         { text: label, options: { fontSize: 13, color: dark ? hex("gumus") : hex("titanyum") } },
       ], { x, y, w, h: 1.25, valign: "top", margin: 0, isTextBox: true, objectName: id("stat") });

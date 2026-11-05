@@ -30,7 +30,7 @@ adım adım PINN'e geçmek.
 | 4 | Forward PINN (sadece fizik, veri yok) | ✅ |
 | 5 | Doğrulama: L2 hata, hata haritası, alt yüzey ısı akısı | ✅ |
 | 6 | Hibrit PINN: seyrek + gürültülü referans verisi | ✅ |
-| 7 | Ters problem: Bi'yi iç sıcaklıklardan geri bul | ⏳ |
+| 7 | Ters problem: Bi'yi iç sıcaklıklardan geri bul | ✅ |
 | 8 | Parametrik vekil model: girdi (x, y, Bi) | ⏳ |
 | 9 | Framework karşılaştırması (DeepXDE / PhysicsNeMo) | ⏳ |
 
@@ -297,6 +297,13 @@ python hybrid_runs.py && python hybrid_summary.py   # fig04_hybrid.* + data/summ
 python make_report_hybrid.py        # report/case01_adim6_hibrit_pinn.pdf
 python lecture/ders03/equations.py && python lecture/ders03/make_slide_figures.py && node lecture/ders03/build_lecture.js
 python notebook/build_notebook_ders03.py
+
+# Adım 7
+python inverse_classical.py         # ∂θ/∂Bi, Cramér–Rao, FDM + EKK -> data/inverse_classical.json
+python inverse_runs.py && python inverse_summary.py   # 24 koşu; fig08_inverse.* + data/summary_inverse.json
+python make_report_inverse.py       # report/case01_adim7_ters_problem.pdf
+python lecture/ders04/equations.py && python lecture/ders04/make_slide_figures.py && node lecture/ders04/build_lecture.js
+python notebook/build_notebook_ders04.py
 ```
 
 `data/fdm_N101.npz` alanları: `x, y, theta, theta_exact, Bi, L, k, T_wall, T_inf`.

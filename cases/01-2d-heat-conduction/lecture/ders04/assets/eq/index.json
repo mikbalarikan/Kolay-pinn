@@ -1,0 +1,122 @@
+{
+ "g_param": {
+  "png": "g_param.png",
+  "omml": "g_param.omml.xml",
+  "w": 1.5357,
+  "h": 0.2427,
+  "size": 16,
+  "color": "0D161F",
+  "tex": "\\mathrm{Bi} = e^{s}, \\quad s \\in \\mathbb{R}",
+  "hash": "d0f1f1e8371c"
+ },
+ "g_sens": {
+  "png": "g_sens.png",
+  "omml": "g_sens.omml.xml",
+  "w": 1.1573,
+  "h": 0.4969,
+  "size": 16,
+  "color": "0D161F",
+  "tex": "S(\\mathbf{x}) = \\frac{\\partial\\theta}{\\partial\\,\\mathrm{Bi}}",
+  "hash": "49797b62712c"
+ },
+ "g_crb": {
+  "png": "g_crb.png",
+  "omml": "g_crb.omml.xml",
+  "w": 1.6056,
+  "h": 0.5052,
+  "size": 16,
+  "color": "0D161F",
+  "tex": "\\sigma_{\\mathrm{Bi}} \\ge \\frac{\\sigma}{\\sqrt{\\sum_i S(\\mathbf{x}_i)^2}}",
+  "hash": "c74ea2bc064b"
+ },
+ "g_ls": {
+  "png": "g_ls.png",
+  "omml": "g_ls.omml.xml",
+  "w": 2.4641,
+  "h": 0.4611,
+  "size": 16,
+  "color": "0D161F",
+  "tex": "\\min_{\\mathrm{Bi}} \\sum_i \\big(\\theta_{\\mathrm{FDM}}(\\mathbf{x}_i;\\mathrm{Bi}) - \\theta_i^{\\mathrm{ö}}\\big)^2",
+  "hash": "64250281ac23"
+ },
+ "g_ident": {
+  "png": "g_ident.png",
+  "omml": "g_ident.omml.xml",
+  "w": 3.0571,
+  "h": 0.2625,
+  "size": 16,
+  "color": "0D161F",
+  "tex": "S(\\mathbf{x}) \\approx 0 \\;\\Rightarrow\\; \\text{ölçüm Bi'yi görmez}",
+  "hash": "cad1d9791bd0"
+ },
+ "g_corner": {
+  "png": "g_corner.png",
+  "omml": "g_corner.omml.xml",
+  "w": 1.6569,
+  "h": 0.2625,
+  "size": 16,
+  "color": "0D161F",
+  "tex": "r_{\\mathrm{Robin}}(0,0) = -\\mathrm{Bi}",
+  "hash": "16ad62158a86"
+ },
+ "inverse": {
+  "png": "inverse.png",
+  "omml": "inverse.omml.xml",
+  "w": 5.6305,
+  "h": 0.6305,
+  "size": 17,
+  "color": "0D161F",
+  "tex": "\\min_{\\mathbf{w},\\,s}\\ \\mathcal{L}_{\\mathrm{PDE}} + \\lambda\\,\\frac{1}{N_b}\\sum_m\\Big(\\frac{\\partial\\hat\\theta}{\\partial\\eta} - e^{s}\\,\\hat\\theta\\Big)^2 + \\mu\\,\\frac{1}{N_d}\\sum_{i=1}^{N_d}\\big(\\hat\\theta(\\mathbf{x}_i) - \\theta_i^{\\mathrm{ö}}\\big)^2",
+  "hash": "71b635992e8b"
+ },
+ "grad_s": {
+  "png": "grad_s.png",
+  "omml": "grad_s.omml.xml",
+  "w": 4.7292,
+  "h": 0.5538,
+  "size": 18,
+  "color": "0D161F",
+  "tex": "\\frac{\\partial\\mathcal{L}}{\\partial s} = \\mathrm{Bi}\\,\\frac{\\partial\\mathcal{L}}{\\partial\\,\\mathrm{Bi}} \\qquad \\text{(göreli adım: } \\Delta s \\approx \\Delta\\mathrm{Bi}/\\mathrm{Bi})",
+  "hash": "d4f23708b992"
+ },
+ "fisher": {
+  "png": "fisher.png",
+  "omml": "fisher.omml.xml",
+  "w": 5.8308,
+  "h": 0.7002,
+  "size": 20,
+  "color": "0D161F",
+  "tex": "I(\\mathrm{Bi}) = \\frac{1}{\\sigma^2}\\sum_{i=1}^{N_d} S(\\mathbf{x}_i)^2, \\qquad \\sigma_{\\mathrm{Bi}} \\ge I^{-1/2} = \\frac{\\sigma}{\\sqrt{\\sum_i S(\\mathbf{x}_i)^2}}",
+  "hash": "5a9ad258a72b"
+ },
+ "crb_scale": {
+  "png": "crb_scale.png",
+  "omml": "crb_scale.omml.xml",
+  "w": 2.0682,
+  "h": 0.652,
+  "size": 22,
+  "color": "0D161F",
+  "tex": "\\frac{\\sigma_{\\mathrm{Bi}}}{\\mathrm{Bi}} \\approx \\frac{\\sigma}{\\mathrm{Bi}\\,\\bar S\\,\\sqrt{N_d}}",
+  "hash": "3d040e23e130"
+ },
+ "corner": {
+  "png": "corner.png",
+  "omml": "corner.omml.xml",
+  "w": 6.7666,
+  "h": 0.5959,
+  "size": 16,
+  "color": "0D161F",
+  "tex": "\\eta = 0,\\ \\xi \\to 0: \\quad \\frac{\\partial\\hat\\theta}{\\partial\\eta} \\to 0,\\ \\ \\hat\\theta \\to 1 \\;\\Rightarrow\\; r_{\\mathrm{Robin}} \\to -\\mathrm{Bi}, \\quad \\frac{\\partial r^2}{\\partial\\,\\mathrm{Bi}} = 2\\,\\mathrm{Bi}\\,\\hat\\theta^2 > 0",
+  "hash": "4e472211af44"
+ },
+ "pv_param": {
+  "png": "pv_param.png",
+  "omml": "pv_param.omml.xml",
+  "w": 4.9396,
+  "h": 0.4057,
+  "size": 22,
+  "color": "0D161F",
+  "tex": "\\hat\\theta(\\xi, \\eta;\\ \\mathrm{Bi}) \\;\\;\\text{— tek ağ, her Bi için çözüm}",
+  "hash": "3fe7d6206711"
+ }
+}
