@@ -83,7 +83,7 @@ fig.tight_layout()
 save(fig, "02_trajectory")
 
 # 3 — hata ve Cramér–Rao sınırı -----------------------------------------------------------
-names = [g for g in LAB if g in G and g != "köşe dışlama yok"]
+names = [g for g in LAB if g in G and g not in ("köşe dışlama yok", "μ = 1")]
 fig, ax = plt.subplots(figsize=(11.8, 4.6))
 for i, g in enumerate(names):
     v = G[g]
@@ -95,9 +95,9 @@ for i, g in enumerate(names):
 ax.scatter([], [], s=80, color=INK, label="PINN")
 ax.scatter([], [], s=80, facecolor="white", edgecolor=INK, lw=1.8, label="FDM + en küçük kareler")
 ax.plot([], [], color=INK, lw=2.2, label="Cramér–Rao σ_Bi / Bi")
-ax.set(yscale="log", ylim=(0.02, 60), xlim=(-0.5, len(names) - 0.5), ylabel="|Bi tahmini − Bi| / Bi  (%)")
-ax.set_xticks(range(len(names)), [LAB[g] for g in names])
-ax.legend(loc="upper right", fontsize=11, ncol=3)
+ax.set(yscale="log", ylim=(0.02, 200), xlim=(-0.5, len(names) - 0.5), ylabel="|Bi tahmini − Bi| / Bi  (%)")
+ax.set_xticks(range(len(names)), [LAB[g].replace("\n", " ") for g in names])
+ax.legend(loc="upper left", fontsize=11, ncol=3, frameon=False)
 fig.tight_layout()
 save(fig, "03_error_crb")
 

@@ -169,13 +169,14 @@ deck.section(SEC2, "02", "Ne kadar bilgi var?", "Duyarlılık, Cramér–Rao sı
     body: "Sensörü duyarlılığın büyük olduğu yere koy: 20 sensörü alt şeride almak, düzgün dağılımı 4–5 kat sensörle eşleştirir. Üst yarıya koymak 4 kat kötüleştirir." });
 }
 {
-  const s = deck.content(SEC2, "PINN'in Bi hatası her yerleşim ve sayıda Cramér–Rao sınırı mertebesinde; aynı sensörlerle FDM + en küçük kareler de öyle", { step: "ADIM 7 · SONUÇLAR",
+  const s = deck.content(SEC2, "PINN'in Bi hatası her yerleşimde Cramér–Rao sınırı mertebesinde; klasik yöntem de aynı yerde", { step: "ADIM 7 · SONUÇLAR",
     notes: "Her sütun bir deney, üç tohum. Dolu daire PINN, boş daire aynı sensörler ve aynı gürültüyle klasik yöntem: FDM N 101'i bir en küçük kareler döngüsüne koyup log Bi'yi optimize ediyoruz. Çizgi Cramér–Rao sınırı. " +
       `Temel: PINN ${bis(base)}, klasik ${lss(base)}. ` +
       `Alt şerit en iyisi: PINN ortalama hata ${p1(bot.pinn_rel_err_mean)}. Üst yarı en kötüsü: ${p1(top.pinn_rel_err_mean)}; bir tohumda Bi ${top.runs[0].Bi_hat.toFixed(2)}, klasik yöntem de ${top.runs[0].fdm_ls_Bi.toFixed(2)} buluyor. ` +
       (n5 && n80 ? `Sayı: 5 sensörde ${p1(n5.pinn_rel_err_mean)}, 80 sensörde ${p1(n80.pinn_rel_err_mean)}. ` : "") +
+      (mu1 ? `mu = 1 bu grafikte yok: o bir sensör deneyi değil, kayıp ağırlığı hatası; Bi ${bis(mu1)} ile sınırın çok üstünde. ` : "") +
       "Üç tohumla standart sapmayı iyi tahmin edemeyiz; ama hata sınır mertebesinde dağılıyor, sistematik olarak üstünde değil. Yani PINN'in tahmini gürültü sınırlı: yöntemden değil, ölçümden gelen bir belirsizlik." });
-  deck.image(s, "03_error_crb.png", { x: M, y: BODY_TOP - 0.1, w: W - 2 * M, h: 4.55 });
+  deck.image(s, "03_error_crb.png", { x: M, y: BODY_TOP - 0.1, w: W - 2 * M, h: 4.3 });
   const cw = (W - 2 * M - 0.6) / 3;
   [[`alt şerit: PINN ${p1(bot.pinn_rel_err_mean)} · CRB ${p1(bot.crb_rel)}`], [`temel: PINN ${p1(base.pinn_rel_err_mean)} · CRB ${p1(base.crb_rel)}`],
    [`üst yarı: PINN ${p1(top.pinn_rel_err_mean)} · CRB ${p1(top.crb_rel)}`]]
