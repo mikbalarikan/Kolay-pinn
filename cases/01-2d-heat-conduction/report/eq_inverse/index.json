@@ -1,0 +1,52 @@
+{
+ "inverse": {
+  "png": "inverse.png",
+  "omml": null,
+  "w": 4.6603,
+  "h": 0.4812,
+  "size": 10.5,
+  "color": "0D161F",
+  "tex": "\\min_{\\mathbf{w},\\,s}\\ \\mathcal{L}_{\\mathrm{PDE}} + \\lambda\\,\\frac{1}{N_b}\\sum_m\\Big(\\frac{\\partial\\hat\\theta}{\\partial\\eta} - e^{s}\\hat\\theta\\Big)^2 + \\mu\\,\\frac{1}{N_d}\\sum_{i=1}^{N_d}\\big(\\hat\\theta(\\mathbf{x}_i) - \\theta_i^{\\mathrm{ö}}\\big)^2, \\qquad \\mathrm{Bi} = e^{s}",
+  "hash": "2437468db79b"
+ },
+ "sens": {
+  "png": "sens.png",
+  "omml": null,
+  "w": 3.8129,
+  "h": 0.3484,
+  "size": 10.5,
+  "color": "0D161F",
+  "tex": "S(\\mathbf{x}) = \\frac{\\partial\\theta}{\\partial\\,\\mathrm{Bi}} \\approx \\frac{\\theta(\\mathbf{x};\\mathrm{Bi}+h) - \\theta(\\mathbf{x};\\mathrm{Bi}-h)}{2h}, \\qquad h = 10^{-3}\\,\\mathrm{Bi}",
+  "hash": "0322118b7b2b"
+ },
+ "crb": {
+  "png": "crb.png",
+  "omml": null,
+  "w": 2.2668,
+  "h": 0.44,
+  "size": 10.5,
+  "color": "0D161F",
+  "tex": "\\sigma_{\\mathrm{Bi}} \\;\\ge\\; I(\\mathrm{Bi})^{-1/2} = \\frac{\\sigma}{\\sqrt{\\sum_{i=1}^{N_d} S(\\mathbf{x}_i)^2}}",
+  "hash": "24fe8ceb522f"
+ },
+ "ls": {
+  "png": "ls.png",
+  "omml": null,
+  "w": 3.1388,
+  "h": 0.3872,
+  "size": 10.5,
+  "color": "0D161F",
+  "tex": "\\widehat{\\mathrm{Bi}}_{\\mathrm{EKK}} = \\exp\\Big(\\arg\\min_{q}\\ \\sum_{i}\\big(\\theta_{\\mathrm{FDM}}(\\mathbf{x}_i; e^{q}) - \\theta_i^{\\mathrm{ö}}\\big)^2\\Big)",
+  "hash": "1d8c741100d4"
+ },
+ "corner": {
+  "png": "corner.png",
+  "omml": null,
+  "w": 4.3818,
+  "h": 0.4061,
+  "size": 10.5,
+  "color": "0D161F",
+  "tex": "\\eta = 0,\\ \\xi \\to 0:\\quad r_{\\mathrm{Robin}} = \\frac{\\partial\\hat\\theta}{\\partial\\eta} - \\mathrm{Bi}\\,\\hat\\theta \\;\\to\\; -\\mathrm{Bi}, \\qquad \\frac{\\partial r^2}{\\partial\\,\\mathrm{Bi}} = 2\\,\\mathrm{Bi}\\,\\hat\\theta^2 > 0",
+  "hash": "8ca37e8dee94"
+ }
+}

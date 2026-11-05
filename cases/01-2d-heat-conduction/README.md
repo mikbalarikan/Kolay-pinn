@@ -30,7 +30,7 @@ adım adım PINN'e geçmek.
 | 4 | Forward PINN (sadece fizik, veri yok) | ✅ |
 | 5 | Doğrulama: L2 hata, hata haritası, alt yüzey ısı akısı | ✅ |
 | 6 | Hibrit PINN: seyrek + gürültülü referans verisi | ✅ |
-| 7 | Ters problem: Bi'yi iç sıcaklıklardan geri bul | ⏳ |
+| 7 | Ters problem: Bi'yi iç sıcaklıklardan geri bul | ✅ |
 | 8 | Parametrik vekil model: girdi (x, y, Bi) | ⏳ |
 | 9 | Framework karşılaştırması (DeepXDE / PhysicsNeMo) | ⏳ |
 
@@ -271,6 +271,61 @@ Vektör: [`fig04_hybrid.pdf`](figures/fig04_hybrid.pdf) · [`.svg`](figures/fig0
    (Q′ hatası %44 → %26). Yanlış Robin ile ölçümler çekişiyor;
    çözüm Bi'yi öğrenmek (Adım 7).
 
+## 7. Ters problem: Bi'yi iç sıcaklıklardan geri bulmak
+
+`pinn_inverse.py`: Adım 6'nın hibrit kaybı, ama Bi bilinmiyor ve logaritmik bir parametreyle ağla birlikte öğreniliyor. `s` ayrı bir Adam grubunda, lr = 1e-2.
+Klasik taban `inverse_classical.py`: aynı sensör ve gürültüyle FDM (N = 101) + `least_squares`. Duyarlılık ve Cramér–Rao sınırı da burada hesaplanıyor.
+`python inverse_runs.py` (24 koşu, ~500 s/koşu) → `python inverse_summary.py`.
+
+```math
+\min_{\mathbf{w},\,s}\;\mathcal{L}_{\mathrm{PDE}} + \lambda\,\frac{1}{N_b}\sum\Big(\frac{\partial\hat\theta}{\partial\eta} - e^{s}\hat\theta\Big)^2
++ \mu\,\frac{1}{N_d}\sum_{i}\big(\hat\theta(\mathbf{x}_i) - \theta_i^{\mathrm{ö}}\big)^2,
+\qquad \mathrm{Bi} = e^{s}
+```
+
+```math
+S(\mathbf{x}) = \frac{\partial\theta}{\partial \mathrm{Bi}},\qquad
+\sigma_{\mathrm{Bi}} \;\ge\; \frac{\sigma}{\sqrt{\sum_i S(\mathbf{x}_i)^2}}\quad\text{(Cramér–Rao)}
+```
+
+Gerçek Bi = 4.895, Bi₀ = 1, σ = 0.01 (≙ 0.5 °C), μ = 100. Köşeden δ = 0.02 içindeki Robin noktaları kayba girmiyor. Her deney 3 tohum:
+
+| Deney | PINN Bi | FDM + EKK Bi | PINN hata | EKK hata | CRB σ/Bi |
+|---|---|---|---|---|---|
+| 20 düzgün (temel) | 4.682 · 4.972 · 4.988 | 4.676 · 4.937 · 4.993 | %2.6 | %2.4 | %2.5 |
+| 20 alt şerit (η < 0.1) | 4.832 · 4.892 · 4.987 | 4.796 · 4.882 · 4.970 | %1.1 | %1.3 | %1.1 |
+| 20 üst yarı (η > 0.5) | 3.568 · 5.145 · 4.975 | 3.719 · 5.288 · 5.311 | %11.3 | %13.5 | %10.1 |
+| 5 düzgün | 5.139 · 4.936 · 4.270 | 5.110 · 4.889 · 4.362 | %6.2 | %5.1 | %6.1 |
+| 80 düzgün | 4.989 · 4.901 · 4.913 | 4.976 · 4.873 · 4.939 | %0.8 | %1.0 | %1.2 |
+| 20 düzgün, δ = 0 (köşe dahil) | 3.861 · 4.532 · 4.277 | (temel ile aynı) | %13.7 | %2.4 | %2.5 |
+| 20 düzgün, μ = 1 | 1.818 · 4.270 · 3.034 | (temel ile aynı) | %37.9 | %2.4 | %2.5 |
+
+Tek tohumlu ek koşular:
+- Gürültüsüz ölçüm: Bi hatası %0.02.
+- σ = 0.05: hata %19.2, CRB %16.8.
+- Bi₀ = 10'dan başlama: 4.70. Aynı tohumla Bi₀ = 1'den 4.68.
+
+![Fig. 8](figures/fig08_inverse.png)
+
+**Fig. 8 | PINN, Bi'yi aynı veriden klasik yöntemle aynı doğrulukta bulur; belirsizliği ölçüm belirler, yöntem değil.**
+**a**, PINN Bi'ye karşı FDM + EKK Bi (aynı sensörler, aynı gürültü). **b**, deney başına hata: dolu PINN, boş EKK, çizgi Cramér–Rao sınırı. **c**, eğitim boyunca Bi tahmini. **d**, gürültü düzeyi.
+Vektör: [`fig08_inverse.pdf`](figures/fig08_inverse.pdf) · [`.svg`](figures/fig08_inverse.svg)
+
+**Bulgular**
+1. **Hata Cramér–Rao sınırında.** Köşe dışlamalı ve μ = 100 olan her deneyde PINN hatası sınır mertebesinde, sistematik olarak üstünde değil.
+   Aynı veride |PINN − EKK|/Bi ortanca %0.59, en çok %6.9; bu en büyük fark, en az bilgili yerleşim olan üst yarıda çıktı. Kalan belirsizlik ölçümden geliyor.
+2. **Bilgi soğutulan yüzeyde.** |∂θ/∂Bi| en çok 0.050 (alt yüzey ortası), merkezde 0.0122, üst yarıda ≤ 0.012.
+   Aynı 20 sensörle sınır alt şeritte %1.1, düzgün dağılımda %2.5, üst yarıda %10.1. Alt şeritteki 20 sensör, düzgün dağılmış 80 sensör (%1.2) kadar bilgi taşıyor.
+   Deneyi yapmadan önce sınır hesaplanabilir.
+3. **Köşe çelişkisi Bi'yi aşağı çeker.** Köşede Robin artığı −Bi ve ∂r²/∂Bi = 2Bi θ² > 0.
+   Köşe noktaları kayıptaysa (δ = 0) Bi ortalama 0.65 düşük çıkıyor; δ = 0.02 bu yanlılığı kaldırıyor.
+4. **Veri ağırlığı tanımlanabilirliği belirler.** μ = 1'de veri terimi PDE ve Robin terimlerinin yanında çok küçük kalıyor ve Bi 1.8–4.3 arasında dağılıyor.
+   Adım 6'da zarar veren μ = 100 burada gerekli. Tek parametreli bir modelde gürültüye bükülecek serbestlik yok.
+5. **Maliyet.** PINN koşusu ~505 s, FDM + EKK ~1.0 s (~500 kat). Bu problem kadar ucuz bir ileri çözücü varsa klasik yöntem daha iyi seçim.
+   PINN'in avantajı, ileri çözümün pahalı olduğu ya da bilinmeyenin bir alan (h(ξ)) olduğu durumlarda; bu da parametrik PINN'e yol açıyor (Adım 8).
+
+Ders: [`lecture/ders04/ders04_ters_problem.pptx`](lecture/ders04/ders04_ters_problem.pptx) · Defter: [`notebook/ders04_ters_problem.ipynb`](notebook/ders04_ters_problem.ipynb) · Rapor: [`report/case01_adim7_ters_problem.pdf`](report/case01_adim7_ters_problem.pdf)
+
 ### Çalıştırma
 
 ```bash
@@ -297,6 +352,13 @@ python hybrid_runs.py && python hybrid_summary.py   # fig04_hybrid.* + data/summ
 python make_report_hybrid.py        # report/case01_adim6_hibrit_pinn.pdf
 python lecture/ders03/equations.py && python lecture/ders03/make_slide_figures.py && node lecture/ders03/build_lecture.js
 python notebook/build_notebook_ders03.py
+
+# Adım 7
+python inverse_classical.py         # ∂θ/∂Bi, Cramér–Rao, FDM + EKK -> data/inverse_classical.json
+python inverse_runs.py && python inverse_summary.py   # 24 koşu; fig08_inverse.* + data/summary_inverse.json
+python make_report_inverse.py       # report/case01_adim7_ters_problem.pdf
+python lecture/ders04/equations.py && python lecture/ders04/make_slide_figures.py && node lecture/ders04/build_lecture.js
+python notebook/build_notebook_ders04.py
 ```
 
 `data/fdm_N101.npz` alanları: `x, y, theta, theta_exact, Bi, L, k, T_wall, T_inf`.
